@@ -41,6 +41,9 @@ void LoginServer::startAccept() {
             // Start reading data from the client
             startReadingFromClient(clientSocket);
         }
+
+        // Continue accepting new connections even if there's an error
+        startAccept();
     });
 }
 
