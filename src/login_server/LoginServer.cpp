@@ -2,29 +2,32 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-LoginServer::LoginServer(boost::asio::io_context& io_context, short port)
+LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort)
     : io_context_(io_context),
       acceptor_(io_context),
       clientData_(),
       authenticator_() {
-            boost::system::error_code ec;
-            acceptor_.open(boost::asio::ip::tcp::v4(), ec);
-            if (!ec) {
-                acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
-                acceptor_.bind(boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port), ec);
-                acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
-            }
+    boost::system::error_code ec;
+    
+    // Create an endpoint with the custom IP and port
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(customIP), customPort);
 
-            if (ec) {
-                std::cerr << "Error during server initialization: " << ec.message() << std::endl;
-                return;
-            }
+    acceptor_.open(endpoint.protocol(), ec);
+    if (!ec) {
+        acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
+        acceptor_.bind(endpoint, ec);
+        acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
+    }
 
-            startAccept();
+    if (ec) {
+        std::cerr << "Error during server initialization: " << ec.message() << std::endl;
+        return;
+    }
 
-            // Print IP address and port when the server starts
-            boost::asio::ip::tcp::endpoint endpoint = acceptor_.local_endpoint();
-            std::cout << "Server started on IP: " << endpoint.address() << ", Port: " << endpoint.port() << std::endl;
+    startAccept();
+
+    // Print IP address and port when the server starts
+    std::cout << "Server started on IP: " << customIP << ", Port: " << customPort << std::endl;
 }
 
 void LoginServer::startAccept() {

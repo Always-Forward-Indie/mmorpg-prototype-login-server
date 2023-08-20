@@ -1,4 +1,5 @@
 #include "login_server/Authenticator.hpp"
+#include "helpers/Database.hpp"
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -13,12 +14,10 @@ using namespace std;
 bool Authenticator::authenticate(const std::string& login, const std::string& password, const std::string& hash, ClientData& clientData) {
     try {
         // Create a PostgreSQL database connection
-        pqxx::connection connection("dbname=mmo_prototype user=postgres password=root hostaddr=127.0.0.1 port=5432");
-
-        connection.prepare("search_user", "SELECT * FROM users WHERE login = $1 AND password = $2 LIMIT 1;");
-
+        Database database;
         // Check if the provided login and password match a record in the database
-        pqxx::work transaction(connection);
+        pqxx::work transaction(database.getConnection());
+
         pqxx::result getUserDBData = transaction.exec_prepared("search_user", login, password);
 
         if (!getUserDBData.empty()) {
@@ -40,8 +39,6 @@ bool Authenticator::authenticate(const std::string& login, const std::string& pa
             clientDataStruct.clientId = userID;
             clientDataStruct.login = login;
             clientDataStruct.hash = uniqueHash;
-
-            connection.prepare("update_user", "UPDATE users SET session_key = $1 WHERE id = $2;");
 
             pqxx::result updateUserDBData = transaction.exec_prepared("update_user", uniqueHash, std::to_string(userID));
 

@@ -8,7 +8,7 @@
 
 class LoginServer {
 public:
-    LoginServer(boost::asio::io_context& io_context, short port);
+    LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort);
 
 private:
     static constexpr size_t max_length = 1024; // Define the appropriate value
@@ -22,8 +22,6 @@ private:
 
     boost::asio::io_context& io_context_;
     boost::asio::ip::tcp::acceptor acceptor_;
-
-    char data[max_length]; // Define the buffer to hold received data
 
     ClientData clientData_;
     Authenticator authenticator_;
