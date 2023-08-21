@@ -1,2 +1,11 @@
 https://youtu.be/JxXU2kgmef4 - how to install custom libraries in msys64\mingw64 in windows to working with it and build in visual code.
 https://ru.stackoverflow.com/questions/1452254/%D0%9F%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0-pqxxlibpqxx-%D0%BF%D1%80%D0%B8-%D1%81%D0%B1%D0%BE%D1%80%D0%BA%D0%B5-makecmake - how to build library using cmake in windows
+
+
+
+
+Build server project using cmake and terminal 
+
+cd build
+cmake ..
+make

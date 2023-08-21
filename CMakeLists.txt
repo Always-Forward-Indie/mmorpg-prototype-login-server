@@ -1,20 +1,36 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 
-project(CServer VERSION 1.0.0 LANGUAGES CXX)
+project(MMOServerPrototype)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
 
-set(PostgreSQL_DIR "C:/Program Files/PostgreSQL/15")
-find_package(PostgreSQL 15.0 REQUIRED)
+# Define your project's source files
+set(SOURCE_FILES
+    src/main.cpp
+    src/login_server/LoginServer.cpp
+    src/login_server/Authenticator.cpp
+    src/login_server/ClientData.cpp
+    src/helpers/Database.cpp
+    src/helpers/Config.cpp
+    # ... other source files
+)
 
-set(CMAKE_PREFIX_PATH "H:/Game Dev/Projects/c_libs/libpqxx")
-find_package(libpqxx 7.8.0 REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
+# Define your project's header files
+set(HEADER_FILES
+    include/login_server/LoginServer.hpp
+    include/login_server/Authenticator.hpp
+    include/login_server/ClientData.hpp
+    include/helpers/Database.hpp
+    include/helpers/Config.hpp
 
-include_directories("H:/Game Dev/Projects/c_libs/libpqxx/include")
-include_directories("H:/Game Dev/Projects/c_libs/nlohmann/json/include")
+    # ... other header files
+)
 
-add_executable(CServer main.cpp)
+# Include directories for your project's headers
+include_directories(include)
 
-target_link_libraries(CServer PRIVATE libpqxx::pqxx)
+# Create the executable
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+target_link_libraries(${PROJECT_NAME} pqxx)
+target_link_libraries(${PROJECT_NAME} pq)
