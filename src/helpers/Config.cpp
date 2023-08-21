@@ -25,6 +25,7 @@
         // Extract login server connection details
         LSConfig.host = root["login_server"]["host"].get<std::string>();
         LSConfig.port = root["login_server"]["port"].get<short>();
+        LSConfig.max_clients = root["login_server"]["max_clients"].get<short>();
 
     } catch (const std::exception& e) {
         // Handle any errors that occur during parsing or reading the configuration file

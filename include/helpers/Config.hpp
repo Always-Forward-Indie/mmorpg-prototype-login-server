@@ -15,6 +15,7 @@ struct DatabaseConfig {
 struct LoginServerConfig {
     std::string host;
     short port;
+    short max_clients;
 };
 
 class Config {

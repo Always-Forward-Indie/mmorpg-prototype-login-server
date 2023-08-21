@@ -4,16 +4,21 @@
 //#include "game_server/GameServer.hpp"
 
 int main() {
-    boost::asio::io_context io_context;
-    Config config;
-    auto configs = config.parseConfig("config.json");
-    short port = std::get<1>(configs).port;  // Get port number from config.json
-    std::string ip = std::get<1>(configs).host; // Get IP from config.json
+    try {
+        boost::asio::io_context io_context;
+        Config config;
+        auto configs = config.parseConfig("config.json");
+        short port = std::get<1>(configs).port;
+        std::string ip = std::get<1>(configs).host;
+        short maxClients = std::get<1>(configs).max_clients;
 
-    LoginServer loginServer(io_context, ip, port);
-    //LoginServer loginServer(io_context, port);
+        LoginServer loginServer(io_context, ip, port, maxClients);
 
-    io_context.run();  // Start the event loop
+        io_context.run();  // Start the event loop
 
-    return 0;
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;  // Indicate an error exit status
+    }
 }

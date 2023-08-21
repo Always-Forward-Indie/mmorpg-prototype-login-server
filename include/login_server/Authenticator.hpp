@@ -6,7 +6,7 @@
 
 class Authenticator {
 public:
-    bool authenticate(const std::string& login, const std::string& password, const std::string& hash, ClientData& clientData);
+    int authenticate(const std::string& login, const std::string& password, const std::string& hash, ClientData& clientData);
 
 private:
     // Define your authentication logic here

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort)
+LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort, short maxClients)
     : io_context_(io_context),
       acceptor_(io_context),
       clientData_(),
@@ -16,7 +16,7 @@ LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string&
     if (!ec) {
         acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
         acceptor_.bind(endpoint, ec);
-        acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
+        acceptor_.listen(maxClients, ec);
     }
 
     if (ec) {
@@ -31,7 +31,7 @@ LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string&
 }
 
 void LoginServer::startAccept() {
-    auto clientSocket = std::make_shared<boost::asio::ip::tcp::socket>(io_context_);
+    std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket = std::make_shared<boost::asio::ip::tcp::socket>(io_context_);
     acceptor_.async_accept(*clientSocket, [this, clientSocket](const boost::system::error_code& error) {
         if (!error) {
             // Get the client's remote endpoint (IP address and port)
@@ -61,20 +61,20 @@ void LoginServer::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket>
         std::string password = jsonData["password"];
 
         // Authenticate the client
-        bool isAuthenticate = authenticator_.authenticate(login, password, hash, clientData_);  
+        int clientID = authenticator_.authenticate(login, password, hash, clientData_);  
 
-        if (isAuthenticate) {
+        if (clientID != 0) {
             // Authentication successful, send a success response back to the client
             std::cerr << "Authentication success for user: " << login << std::endl;
             // Create a response message
-            std::string responseData = generateResponseMessage("success", "Authentication successful");
+            std::string responseData = generateResponseMessage("success", "Authentication successful", clientID);
             // Send the response to the client
             sendResponse(clientSocket, responseData);
         } else {
             // Authentication failed for the client
             std::cerr << "Authentication failed for user: " << login << std::endl;
             // Create a response message
-            std::string responseData = generateResponseMessage("error", "Authentication failed");
+            std::string responseData = generateResponseMessage("error", "Authentication failed", 0);
             // Send the response to the client
             sendResponse(clientSocket, responseData);
         }
@@ -133,11 +133,27 @@ void LoginServer::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::s
         });
 }
 
-std::string LoginServer::generateResponseMessage(const std::string& status, const std::string& message) {
+std::string LoginServer::generateResponseMessage(const std::string& status, const std::string& message, const int& id) {
     nlohmann::json response;
 
     response["status"] = status;
     response["message"] = message;
+
+    const ClientDataStruct* currentClientData = clientData_.getClientData(id);
+    if (currentClientData) {
+        // Access members only if the pointer is not null
+            std::cout << "Client ID: " << currentClientData->clientId << std::endl;
+            std::cout << "Client login: " << currentClientData->login << std::endl;
+            std::cout << "Client hash: " << currentClientData->hash << std::endl;
+
+            response["clientId"] = currentClientData->clientId;
+            response["login"] = currentClientData->login;
+            response["hash"] = currentClientData->hash;
+    } else {
+        // Handle the case where the pointer is null (e.g., log an error)
+        std::cerr << "Client data not found for id: " << id << std::endl;
+    }
+
     std::string responseString = response.dump();
 
     return responseString;

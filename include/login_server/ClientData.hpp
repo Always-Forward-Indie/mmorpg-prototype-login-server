@@ -15,8 +15,8 @@ struct ClientDataStruct
 class ClientData {
 public:
     void storeClientData(const ClientDataStruct& clientData);
-    const ClientDataStruct* getClientData(const std::string& hash) const;
+    const ClientDataStruct* getClientData(const int& id) const;
 
 private:
-    std::unordered_map<std::string, ClientDataStruct> clientDataMap_;
+    std::unordered_map<int, ClientDataStruct> clientDataMap_;
 };

@@ -8,7 +8,7 @@
 
 class LoginServer {
 public:
-    LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort);
+    LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort, short maxClients);
 
 private:
     static constexpr size_t max_length = 1024; // Define the appropriate value
@@ -18,7 +18,7 @@ private:
     void startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
     void authenticateClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string& login, const std::string& password);
     void sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string& responseString);
-    std::string generateResponseMessage(const std::string& status, const std::string& message);
+    std::string generateResponseMessage(const std::string& status, const std::string& message, const int& id);
 
     boost::asio::io_context& io_context_;
     boost::asio::ip::tcp::acceptor acceptor_;

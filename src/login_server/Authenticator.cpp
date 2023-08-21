@@ -11,7 +11,7 @@
 using namespace pqxx;
 using namespace std;
 
-bool Authenticator::authenticate(const std::string& login, const std::string& password, const std::string& hash, ClientData& clientData) {
+int Authenticator::authenticate(const std::string& login, const std::string& password, const std::string& hash, ClientData& clientData) {
     try {
         // Create a PostgreSQL database connection
         Database database;
@@ -28,7 +28,7 @@ bool Authenticator::authenticate(const std::string& login, const std::string& pa
                 userID = getUserDBData[i][0].as<int>(); // Access the second column (index 1)
             }
 
-           // transaction.commit(); // Commit the transaction
+            transaction.commit(); // Commit the transaction
 
             // Generate a unique hash for the client
             boost::uuids::uuid uuid = boost::uuids::random_generator()();
@@ -46,17 +46,16 @@ bool Authenticator::authenticate(const std::string& login, const std::string& pa
 
             clientData.storeClientData(clientDataStruct);  // Store clientData in the ClientData class
 
-
-            return true;
+            return userID;
         } else {
             // Authentication failed, return false
             transaction.abort(); // Rollback the transaction (optional)
-            return false;
+            return 0;
         }
     } catch (const std::exception& e) {
         // Handle database connection or query errors
         std::cerr << "Database error: " << e.what() << std::endl;
         // You might want to send an error response back to the client or log the error
-        return false;
+        return 0;
     }
 }
