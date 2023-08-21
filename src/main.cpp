@@ -1,7 +1,6 @@
 #include "helpers/Config.hpp"
 #include <iostream>
 #include "login_server/LoginServer.hpp"
-//#include "game_server/GameServer.hpp"
 
 int main() {
     try {

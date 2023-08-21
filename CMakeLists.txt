@@ -11,7 +11,6 @@ set(SOURCE_FILES
     src/login_server/LoginServer.cpp
     src/login_server/Authenticator.cpp
     src/login_server/ClientData.cpp
-    src/game_server/GameServer.cpp
     src/helpers/Database.cpp
     src/helpers/Config.cpp
     # ... other source files
@@ -22,7 +21,6 @@ set(HEADER_FILES
     include/login_server/LoginServer.hpp
     include/login_server/Authenticator.hpp
     include/login_server/ClientData.hpp
-    include/game_server/GameServer.hpp
     include/helpers/Database.hpp
     include/helpers/Config.hpp
 
