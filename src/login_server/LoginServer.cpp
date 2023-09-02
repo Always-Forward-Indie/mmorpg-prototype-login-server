@@ -27,7 +27,7 @@ LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string&
     startAccept();
 
     // Print IP address and port when the server starts
-    std::cout << "Server started on IP: " << customIP << ", Port: " << customPort << std::endl;
+    std::cout << "Login Server started on IP: " << customIP << ", Port: " << customPort << std::endl;
 }
 
 void LoginServer::startAccept() {
