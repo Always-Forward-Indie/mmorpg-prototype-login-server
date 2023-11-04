@@ -42,6 +42,20 @@ void Database::prepareDefaultQueries() {
     if (connection_->is_open()) {
         connection_->prepare("search_user", "SELECT * FROM users WHERE login = $1 AND password = $2 LIMIT 1;");
         connection_->prepare("update_user", "UPDATE users SET session_key = $1 WHERE id = $2;");
+
+        connection_->prepare("get_characters_list", "SELECT characters.id as character_id, characters.level as character_lvl, "
+        "characters.name as character_name, character_class.name as character_class, race.name as race_name "
+        "FROM characters "
+        "JOIN character_class ON characters.class_id = character_class.id " 
+        "JOIN race on characters.race_id = race.id "
+        "WHERE characters.owner_id = $1;");
+        connection_->prepare("select_character", "SELECT characters.id as character_id, characters.level as character_lvl, "
+        "characters.name as character_name, character_class.name as character_class, race.name as race_name "
+        "FROM characters "
+        "JOIN character_class ON characters.class_id = character_class.id "
+        "JOIN race on characters.race_id = race.id "
+        "WHERE characters.owner_id = $1 AND characters.id = $2 LIMIT 1;");
+        connection_->prepare("create_character", "INSERT INTO characters (owner_id, name, class_id, race_id) VALUES ($1, $2, $3, $4);");
     } else {
         std::cerr << "Cannot prepare queries: Database connection is not open." << std::endl;
         // Handle this situation (e.g., throw an exception or exit)

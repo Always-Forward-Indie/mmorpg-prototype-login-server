@@ -11,10 +11,10 @@
 using namespace pqxx;
 using namespace std;
 
-int Authenticator::authenticate(const std::string& login, const std::string& password, const std::string& hash, ClientData& clientData) {
+int Authenticator::authenticate(const std::string& login, const std::string& password, ClientData& clientData, Database& database) {
     try {
         // Create a PostgreSQL database connection
-        Database database;
+       // Database database;
         // Check if the provided login and password match a record in the database
         pqxx::work transaction(database.getConnection());
 

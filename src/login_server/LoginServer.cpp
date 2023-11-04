@@ -1,12 +1,13 @@
 #include "login_server/LoginServer.hpp"
 #include <iostream>
-#include <nlohmann/json.hpp>
 
 LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort, short maxClients)
     : io_context_(io_context),
       acceptor_(io_context),
       clientData_(),
-      authenticator_() {
+      authenticator_(),
+      characterManager_(),
+      database_() {
     boost::system::error_code ec;
     
     // Create an endpoint with the custom IP and port
@@ -53,34 +54,163 @@ void LoginServer::startAccept() {
 void LoginServer::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::array<char, max_length>& dataBuffer, size_t bytes_transferred) {
     try {
         nlohmann::json jsonData = nlohmann::json::parse(dataBuffer.data(), dataBuffer.data() + bytes_transferred);
+        // Initialize the client ID to 0
+        int clientID = 0;
+        // Initialize the character ID to 0
+        int characterID = 0;
+        // Create a JSON object for the response
+        nlohmann::json response;
+        // Extract hash, login fields from the jsonData
+        std::string type = jsonData["type"]!=nullptr ? jsonData["type"] : "";
+        std::string hash = jsonData["hash"]!=nullptr ? jsonData["hash"] : "";
 
-        // Extract hash, login, type and password fields from the jsonData
-        std::string type = jsonData["type"];
-        std::string hash = jsonData["hash"];
-        std::string login = jsonData["login"];
-        std::string password = jsonData["password"];
-
-        // Authenticate the client
-        int clientID = authenticator_.authenticate(login, password, hash, clientData_);  
-
-        if (clientID != 0) {
-            // Authentication successful, send a success response back to the client
-            std::cerr << "Authentication success for user: " << login << std::endl;
-            // Create a response message
-            std::string responseData = generateResponseMessage("success", "Authentication successful", clientID);
-            // Send the response to the client
-            sendResponse(clientSocket, responseData);
-        } else {
-            // Authentication failed for the client
-            std::cerr << "Authentication failed for user: " << login << std::endl;
-            // Create a response message
-            std::string responseData = generateResponseMessage("error", "Authentication failed", 0);
-            // Send the response to the client
-            sendResponse(clientSocket, responseData);
+        // Check if the type of request is authentification
+        if(type == "authentification") {
+            std::string login = jsonData["login"];
+            std::string password = jsonData["password"];
+            authenticateClient(clientSocket, login, password);
         }
+
+        // Check if the type of request is character_list
+        if(type == "character_list") {
+            // Get the client ID from the jsonData
+            if(jsonData["clientId"].is_number_integer()) {
+                clientID = jsonData["clientId"];
+            } else {
+                clientID = std::stoi(jsonData["clientId"].get<std::string>());
+            }
+            
+            getCharactersList(clientSocket, clientID, hash);
+        }
+
+        // Check if the type of request is character_list
+        if(type == "select_character") {
+            // Get the client ID from the jsonData
+            if(jsonData["clientId"].is_number_integer()) {
+                clientID = jsonData["clientId"];
+            } else {
+                clientID = std::stoi(jsonData["clientId"].get<std::string>());
+            }
+
+            // Get the character ID from the jsonData
+            if(jsonData["characterId"].is_number_integer()) {
+                characterID = jsonData["characterId"];
+            } else {
+                characterID = std::stoi(jsonData["characterId"].get<std::string>());
+            }
+            
+            selectCharacter(clientSocket, clientID, characterID, hash);
+        }
+
+        
     } catch (const nlohmann::json::parse_error& e) {
         std::cerr << "JSON parsing error: " << e.what() << std::endl;
         // Handle the error (e.g., close the socket)
+    }
+}
+
+void LoginServer::authenticateClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string& login, const std::string& password) {
+        // Authenticate the client
+        int clientID = authenticator_.authenticate(login, password, clientData_, database_);
+        // Get the client ID from the clientData_ object
+        const ClientDataStruct* currentClientData = clientData_.getClientData(clientID);
+        // Create a JSON object for the response
+        nlohmann::json response;
+
+        if (clientID != 0) {
+            // Add the message to the response
+            response["message"] = "Authentication success for user!";
+            response["hash"] = currentClientData->hash;
+            response["login"] = currentClientData->login;
+            response["clientId"] = currentClientData->clientId;
+            // Prepare a response message
+            std::string responseData = generateResponseMessage("success", response, clientID);
+            // Send the response to the client
+            sendResponse(clientSocket, responseData);
+        } else {
+            // Add the message to the response
+            response["message"] = "Authentication failed for user!";
+            // Prepare a response message
+            std::string responseData = generateResponseMessage("error", response, 0);
+            // Send the response to the client
+            sendResponse(clientSocket, responseData);
+        }
+}
+
+void LoginServer::getCharactersList(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const int& clientID, const std::string& hash) {
+    // Create a JSON object for the response
+    nlohmann::json response;
+    
+    // Get the client ID from the clientData_ object
+    const ClientDataStruct* currentClientData = clientData_.getClientData(clientID);
+    // Get the characters list from the characterManager_
+    std::vector<CharacterDataStruct> characters = characterManager_.getCharactersList(database_, clientData_, currentClientData->clientId);
+    //std::cerr << "Client ID: " << currentClientData->clientId << std::endl;
+    //std::cerr << "Client Character Name: " << characters.size() << std::endl;
+
+    if (currentClientData && !characters.empty()) {
+        
+        // Create an nlohmann::json array and populate it with the vector elements
+        nlohmann::json characterArray;
+        for (const auto& character : characters) {
+            nlohmann::json characterJson;
+            characterJson["characterId"] = character.characterId;
+            characterJson["characterLevel"] = character.characterLevel;
+            characterJson["characterName"] = character.characterName;
+            characterJson["characterClass"] = character.characterClass;
+            characterArray.push_back(characterJson);
+        }
+
+        // Add the characters list and message to the response
+        response["message"] = "Characters list retrieved successfully!";
+        response["hash"] = currentClientData->hash;
+        response["login"] = currentClientData->login;
+        response["clientId"] = currentClientData->clientId;
+        response["characters"] = characterArray.dump();
+        // Prepare a response message
+        std::string responseData = generateResponseMessage("success", response, clientID);
+        // Send the response to the client
+        sendResponse(clientSocket, responseData);
+    } else {
+        // Add the message to the response
+        response["message"] = "Characters list retrieved failder!";
+        // Prepare a response message
+        std::string responseData = generateResponseMessage("error", response, clientID);
+        // Send the response to the client
+        sendResponse(clientSocket, responseData);
+    }
+}
+
+void LoginServer::selectCharacter(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const int& clientID, const int& characterID, const std::string& hash) {
+    // Create a JSON object for the response
+    nlohmann::json response;
+
+    // Get the character
+    CharacterDataStruct character = characterManager_.selectCharacter(database_, clientData_, clientID, characterID);
+    
+    // Get the client ID from the clientData_ object
+    const ClientDataStruct* currentClientData = clientData_.getClientData(clientID);
+    if (currentClientData && character.characterId != 0) {
+        // Add the character data and message to the response
+        response["message"] = "Characters list retrieved successfully!";
+        response["hash"] = currentClientData->hash;
+        response["login"] = currentClientData->login;
+        response["clientId"] = currentClientData->clientId;
+        response["character_name"] = currentClientData->characterData.characterName;
+        response["character_class"] = currentClientData->characterData.characterClass;
+        response["character_id"] = currentClientData->characterData.characterId;
+        response["character_level"] = currentClientData->characterData.characterLevel;
+        // Prepare a response message
+        std::string responseData = generateResponseMessage("success", response, clientID);
+        // Send the response to the client
+        sendResponse(clientSocket, responseData);
+    } else {
+        // Add the message to the response
+        response["message"] = "Character data retrieved failder!";
+        // Prepare a response message
+        std::string responseData = generateResponseMessage("error", response, clientID);
+        // Send the response to the client
+        sendResponse(clientSocket, responseData);
     }
 }
 
@@ -133,28 +263,15 @@ void LoginServer::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::s
         });
 }
 
-std::string LoginServer::generateResponseMessage(const std::string& status, const std::string& message, const int& id) {
+std::string LoginServer::generateResponseMessage(const std::string& status, const nlohmann::json& message, const int& id) {
     nlohmann::json response;
 
     response["status"] = status;
-    response["message"] = message;
-
-    const ClientDataStruct* currentClientData = clientData_.getClientData(id);
-    if (currentClientData) {
-        // Access members only if the pointer is not null
-            std::cout << "Client ID: " << currentClientData->clientId << std::endl;
-            std::cout << "Client login: " << currentClientData->login << std::endl;
-            std::cout << "Client hash: " << currentClientData->hash << std::endl;
-
-            response["clientId"] = currentClientData->clientId;
-            response["login"] = currentClientData->login;
-            response["hash"] = currentClientData->hash;
-    } else {
-        // Handle the case where the pointer is null (e.g., log an error)
-        std::cerr << "Client data not found for id: " << id << std::endl;
-    }
+    response["body"] = message;
 
     std::string responseString = response.dump();
+
+    std::cerr << "Client data: " << responseString << std::endl;
 
     return responseString;
 }
