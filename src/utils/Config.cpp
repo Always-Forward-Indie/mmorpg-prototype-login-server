@@ -1,4 +1,4 @@
-#include "helpers/Config.hpp"
+#include "utils/Config.hpp"
 
     std::tuple<DatabaseConfig, LoginServerConfig> Config::parseConfig(const std::string& configFile) {
     DatabaseConfig DBConfig;

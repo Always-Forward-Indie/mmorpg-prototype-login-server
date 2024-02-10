@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
-#include <helpers/Database.hpp>
-#include <login_server/ClientData.hpp>
+#include <utils/Database.hpp>
+#include <data/ClientData.hpp>
 
 class CharacterManager {
 public:

@@ -1,5 +1,5 @@
-#include "login_server/CharacterManager.hpp"
-#include "helpers/Database.hpp"
+#include "services/CharacterManager.hpp"
+#include "utils/Database.hpp"
 #include <pqxx/pqxx>
 #include <iostream>
 #include <vector>

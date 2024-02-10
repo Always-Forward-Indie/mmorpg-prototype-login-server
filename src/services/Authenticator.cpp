@@ -1,5 +1,5 @@
-#include "login_server/Authenticator.hpp"
-#include "helpers/Database.hpp"
+#include "services/Authenticator.hpp"
+#include "utils/Database.hpp"
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>

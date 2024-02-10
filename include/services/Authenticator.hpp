@@ -2,8 +2,8 @@
 #pragma once
 
 #include <string>
-#include "login_server/ClientData.hpp" // Include the header file for ClientData
-#include "helpers/Database.hpp" // Include the header file for Database
+#include "data/ClientData.hpp" // Include the header file for ClientData
+#include "utils/Database.hpp" // Include the header file for Database
 
 class Authenticator {
 public:

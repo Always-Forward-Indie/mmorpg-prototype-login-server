@@ -4,27 +4,39 @@ project(MMOLoginServer)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
+# Set compiler flags for debug mode (need to remove when compiling for production)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -g")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
 
 # Define your project's source files
 set(SOURCE_FILES
     src/main.cpp
     src/login_server/LoginServer.cpp
-    src/login_server/Authenticator.cpp
-    src/login_server/ClientData.cpp
-    src/login_server/CharacterManager.cpp
-    src/helpers/Database.cpp
-    src/helpers/Config.cpp
+    src/services/Authenticator.cpp
+    src/services/CharacterManager.cpp
+    src/data/ClientData.cpp
+    src/utils/Database.cpp
+    src/utils/Config.cpp
+    src/utils/JSONParser.cpp
+    src/utils/Logger.cpp
     # ... other source files
 )
 
 # Define your project's header files
 set(HEADER_FILES
     include/login_server/LoginServer.hpp
-    include/login_server/Authenticator.hpp
-    include/login_server/ClientData.hpp
-    include/login_server/CharacterManager.hpp
-    include/helpers/Database.hpp
-    include/helpers/Config.hpp
+    include/services/Authenticator.hpp
+    include/services/CharacterManager.hpp
+    include/data/ClientData.hpp
+    include/data/DataStructs.hpp
+    include/data/SpecialStructs.hpp
+    include/utils/Database.hpp
+    include/utils/Config.hpp
+    include/utils/JSONParser.hpp
+    include/utils/TerminalColors.hpp
+    include/utils/Logger.hpp
+    include/utils/ResponseBuilder.hpp
 
     # ... other header files
 )

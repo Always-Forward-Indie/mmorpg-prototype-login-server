@@ -4,9 +4,9 @@
 #include <array>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "Authenticator.hpp"
-#include "CharacterManager.hpp"
-#include "helpers/Database.hpp"
+#include "services/Authenticator.hpp"
+#include "services/CharacterManager.hpp"
+#include "utils/Database.hpp"
 
 class LoginServer
 {

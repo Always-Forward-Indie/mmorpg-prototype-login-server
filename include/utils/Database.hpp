@@ -3,7 +3,7 @@
 
 #include <pqxx/pqxx>
 #include <memory>
-#include "Config.hpp"
+#include "utils/Config.hpp"
 
 class Database {
 public:
