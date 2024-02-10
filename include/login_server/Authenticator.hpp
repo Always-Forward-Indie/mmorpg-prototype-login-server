@@ -7,8 +7,5 @@
 
 class Authenticator {
 public:
-    int authenticate(const std::string& login, const std::string& password, ClientData& clientData, Database& database);
-
-private:
-    // Define your authentication logic here
+    int authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password);
 };

@@ -11,13 +11,11 @@
 using namespace pqxx;
 using namespace std;
 
-int Authenticator::authenticate(const std::string& login, const std::string& password, ClientData& clientData, Database& database) {
+int Authenticator::authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password) {
     try {
-        // Create a PostgreSQL database connection
-       // Database database;
-        // Check if the provided login and password match a record in the database
+        // Create a transactional object. It automatically starts a transaction.
         pqxx::work transaction(database.getConnection());
-
+        // Check if the provided login and password match a record in the database
         pqxx::result getUserDBData = transaction.exec_prepared("search_user", login, password);
 
         if (!getUserDBData.empty()) {

@@ -1,6 +1,7 @@
 #include "login_server/LoginServer.hpp"
 #include <iostream>
 
+//TODO - Global refactor server code according to the new architecture (implemented already in game server, chunk server)
 LoginServer::LoginServer(boost::asio::io_context& io_context, const std::string& customIP, short customPort, short maxClients)
     : io_context_(io_context),
       acceptor_(io_context),
@@ -61,8 +62,10 @@ void LoginServer::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket>
         // Create a JSON object for the response
         nlohmann::json response;
         // Extract hash, login fields from the jsonData
-        std::string type = jsonData["type"]!=nullptr ? jsonData["type"] : "";
+        std::string type = jsonData["eventType"]!=nullptr ? jsonData["eventType"] : "";
         std::string hash = jsonData["hash"]!=nullptr ? jsonData["hash"] : "";
+
+        std::cout << "Type: " << type << std::endl;
 
         // Check if the type of request is authentification
         if(type == "authentification") {
@@ -72,7 +75,9 @@ void LoginServer::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket>
         }
 
         // Check if the type of request is character_list
-        if(type == "character_list") {
+        if(type == "getCharactersList") {
+            std::cout << "Get characters list" << std::endl;
+
             // Get the client ID from the jsonData
             if(jsonData["clientId"].is_number_integer()) {
                 clientID = jsonData["clientId"];
@@ -84,7 +89,7 @@ void LoginServer::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket>
         }
 
         // Check if the type of request is character_list
-        if(type == "select_character") {
+        if(type == "selectCharacter") {
             // Get the client ID from the jsonData
             if(jsonData["clientId"].is_number_integer()) {
                 clientID = jsonData["clientId"];
@@ -111,7 +116,7 @@ void LoginServer::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket>
 
 void LoginServer::authenticateClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string& login, const std::string& password) {
         // Authenticate the client
-        int clientID = authenticator_.authenticate(login, password, clientData_, database_);
+        int clientID = authenticator_.authenticate(database_, clientData_, login, password);
         // Get the client ID from the clientData_ object
         const ClientDataStruct* currentClientData = clientData_.getClientData(clientID);
         // Create a JSON object for the response
@@ -190,6 +195,7 @@ void LoginServer::selectCharacter(std::shared_ptr<boost::asio::ip::tcp::socket> 
     
     // Get the client ID from the clientData_ object
     const ClientDataStruct* currentClientData = clientData_.getClientData(clientID);
+    
     if (currentClientData && character.characterId != 0) {
         // Add the character data and message to the response
         response["message"] = "Characters list retrieved successfully!";

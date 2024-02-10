@@ -17,8 +17,6 @@ struct ClientDataStruct
     int clientId;
     std::string login;
     std::string hash;
-    int characterId;
-    int characterLevel;
     CharacterDataStruct characterData;
 };
 
