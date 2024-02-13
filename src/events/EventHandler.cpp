@@ -167,6 +167,34 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
     }
 }
 
+// disconnect the client
+void EventHandler::handleDisconnectClientEvent(const Event &event, ClientData &clientData)
+{
+    // Here we will disconnect the client
+    const auto data = event.getData();
+
+    // Extract init data
+    try
+    {
+        // Try to extract the data
+        if (std::holds_alternative<ClientDataStruct>(data))
+        {
+            ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
+
+            // Remove the client data
+            clientData.removeClientData(passedClientData.clientId);
+        }
+        else
+        {
+            logger_.log("Error with extracting data!");
+        }
+    }
+    catch (const std::bad_variant_access &ex)
+    {
+        logger_.log("Error here:" + std::string(ex.what()));
+    }
+}
+
 
 void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
 {
@@ -178,6 +206,10 @@ void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
     case Event::GET_CHARACTERS_LIST:
         handleGetCharactersListEvent(event, clientData);
         break;
+    case Event::DISCONNECT_CLIENT:
+        handleDisconnectClientEvent(event, clientData);
+        break;
+    
         // Other cases...
     }
 }

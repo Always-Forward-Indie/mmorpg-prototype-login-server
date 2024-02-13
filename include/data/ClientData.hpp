@@ -11,6 +11,7 @@ public:
     void updateClientData(const int& id, const std::string& field, const std::string& value);
     void updateClientData(const int& id, const CharacterDataStruct& characterData);
     const ClientDataStruct* getClientData(const int& id) const;
+    void removeClientData(const int& id);
 
 private:
     std::unordered_map<int, ClientDataStruct> clientDataMap_;

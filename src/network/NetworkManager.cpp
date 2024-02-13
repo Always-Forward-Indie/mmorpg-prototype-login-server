@@ -138,6 +138,19 @@
                 Event getCharactersListEvent(Event::GET_CHARACTERS_LIST, clientData.clientId, clientData, clientSocket);
                 eventQueue_.push(getCharactersListEvent);
             }
+
+            // Check if the type of request is disconnectClient
+            if (eventType == "disconnectClient" && clientData.hash != "" && clientData.clientId != 0)
+            {
+                // Set the client data
+                characterData.characterPosition = positionData;
+                clientData.characterData = characterData;
+                clientData.socket = clientSocket;
+
+                // Create a new event where disconnect the client and push it to the queue
+                Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);
+                eventQueue_.push(disconnectClientEvent);
+            }
         }
         catch (const nlohmann::json::parse_error &e)
         {
@@ -211,11 +224,8 @@
                                         }
                                         else if (error == boost::asio::error::eof)
                                         {
-
                                             // The client has closed the connection
                                             logger_.logError("Client disconnected gracefully.");
-
-                                            // You can perform any cleanup or logging here if needed
 
                                             // Close the client socket
                                             clientSocket->close();

@@ -21,6 +21,7 @@ private:
     void handleAuthentificateClientEvent(const Event& event, ClientData& clientData);
     void handleCreateCharacterEvent(const Event& event, ClientData& clientData);
     void handleGetCharactersListEvent(const Event& event, ClientData& clientData);
+    void handleDisconnectClientEvent(const Event& event, ClientData& clientData);
 
     NetworkManager& networkManager_;
     Database& database_;
