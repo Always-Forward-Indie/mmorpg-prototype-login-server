@@ -125,6 +125,20 @@ ClientDataStruct JSONParser::parseClientData(const std::array<char, max_length> 
         clientData.hash = jsonData["header"]["hash"].get<std::string>();
     }
 
+    if (jsonData.contains("header") &&
+    jsonData["header"].is_object() &&
+    jsonData["header"].contains("login") &&
+    jsonData["header"]["login"].is_string()) {
+        clientData.login = jsonData["header"]["login"].get<std::string>();
+    }
+
+    if (jsonData.contains("header") &&
+    jsonData["header"].is_object() &&
+    jsonData["header"].contains("password") &&
+    jsonData["header"]["password"].is_string()) {
+        clientData.password = jsonData["header"]["password"].get<std::string>();
+    }
+
     return clientData;
 }
 

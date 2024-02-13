@@ -13,6 +13,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
 set(SOURCE_FILES
     src/main.cpp
     src/login_server/LoginServer.cpp
+    src/network/NetworkManager.cpp
     src/services/Authenticator.cpp
     src/services/CharacterManager.cpp
     src/data/ClientData.cpp
@@ -20,12 +21,16 @@ set(SOURCE_FILES
     src/utils/Config.cpp
     src/utils/JSONParser.cpp
     src/utils/Logger.cpp
+    src/events/Event.cpp
+    src/events/EventHandler.cpp
+    src/events/EventQueue.cpp
     # ... other source files
 )
 
 # Define your project's header files
 set(HEADER_FILES
     include/login_server/LoginServer.hpp
+    include/network/NetworkManager.hpp
     include/services/Authenticator.hpp
     include/services/CharacterManager.hpp
     include/data/ClientData.hpp
@@ -37,12 +42,17 @@ set(HEADER_FILES
     include/utils/TerminalColors.hpp
     include/utils/Logger.hpp
     include/utils/ResponseBuilder.hpp
+    include/events/Event.hpp
+    include/events/EventHandler.hpp
+    include/events/EventQueue.hpp
 
     # ... other header files
 )
 
 # Include directories for your project's headers
 include_directories(include)
+
+find_package(libpqxx REQUIRED)
 
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})

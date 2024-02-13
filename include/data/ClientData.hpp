@@ -3,22 +3,7 @@
 
 #include <string>
 #include <unordered_map>
-
-struct CharacterDataStruct
-{
-    int characterId;
-    int characterLevel;
-    std::string characterName;
-    std::string characterClass;
-};
-
-struct ClientDataStruct
-{
-    int clientId;
-    std::string login;
-    std::string hash;
-    CharacterDataStruct characterData;
-};
+#include "data/DataStructs.hpp"
 
 class ClientData {
 public:

@@ -27,6 +27,8 @@ struct CharacterDataStruct
 struct ClientDataStruct
 {
     int clientId = 0;
+    std::string login = "";
+    std::string password = "";
     std::string hash = "";
     std::shared_ptr<boost::asio::ip::tcp::socket> socket;
     CharacterDataStruct characterData;

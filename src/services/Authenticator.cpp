@@ -11,7 +11,7 @@
 using namespace pqxx;
 using namespace std;
 
-int Authenticator::authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password) {
+bool Authenticator::authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password) {
     try {
         // Create a transactional object. It automatically starts a transaction.
         pqxx::work transaction(database.getConnection());
@@ -44,16 +44,16 @@ int Authenticator::authenticate(Database& database, ClientData& clientData, cons
 
             clientData.storeClientData(clientDataStruct);  // Store clientData in the ClientData class
 
-            return userID;
+            return true;
         } else {
             // Authentication failed, return false
             transaction.abort(); // Rollback the transaction (optional)
-            return 0;
+            return false;
         }
     } catch (const std::exception& e) {
         // Handle database connection or query errors
         std::cerr << "Database error: " << e.what() << std::endl;
         // You might want to send an error response back to the client or log the error
-        return 0;
+        return false;
     }
 }

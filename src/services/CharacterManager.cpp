@@ -5,7 +5,8 @@
 #include <vector>
 
 // Constructor
-CharacterManager::CharacterManager()
+CharacterManager::CharacterManager(Logger& logger) 
+: logger_(logger)
 {
     // Initialize properties or perform any setup here
 }

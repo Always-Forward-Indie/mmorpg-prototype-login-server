@@ -2,39 +2,45 @@
 #include "utils/Config.hpp"
 #include <iostream>
 
-Database::Database() {
-    connect();
+Database::Database(std::tuple<DatabaseConfig, LoginServerConfig>& configs, Logger& logger) 
+: 
+logger_(logger)
+{
+    connect(configs);
     prepareDefaultQueries();
 }
 
-void Database::connect() {
-    try {
-        Config config;
-        auto configs = config.parseConfig("config.json");
+void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig>& configs)
+{
+    try
+    {
         short port = std::get<0>(configs).port;
         std::string host = std::get<0>(configs).host;
         std::string databaseName = std::get<0>(configs).dbname;
         std::string user = std::get<0>(configs).user;
         std::string password = std::get<0>(configs).password;
 
-        std::cout << "Connecting to database..." << std::endl;
-        std::cout << "Database name: " << databaseName << std::endl;
-        std::cout << "User: " << user << std::endl;
-        std::cout << "Host: " << host << std::endl;
-        std::cout << "Port: " << port << std::endl;
+        logger_.log("Connecting to database...", YELLOW);
+        logger_.log("Database name: " + databaseName, BLUE);
+        //logger_.log("User: " + user, BLUE);
+        logger_.log("Host: " + host, BLUE);
+        logger_.log("Port: " + std::to_string(port), BLUE);
 
         connection_ = std::make_unique<pqxx::connection>(
             "dbname=" + databaseName + " user=" + user + " password=" + password + " hostaddr=" + host + " port=" + std::to_string(port));
 
-        if (connection_->is_open()) {
-            std::cout << "Database connection established" << std::endl;
-        } else {
-            std::cout << "Database connection failed" << std::endl;
-            // Handle the connection failure (e.g., throw an exception or exit)
+        if (connection_->is_open())
+        {
+            logger_.log("Database connection established!", GREEN);
         }
-    } catch (const std::exception& e) {
-        std::cerr << "Error while connecting to the database: " << e.what() << std::endl;
-        // Handle the exception (e.g., throw it or exit the application)
+        else
+        {
+            logger_.logError("Database connection failed!");
+        }
+    }
+    catch (const std::exception &e)
+    {
+        handleDatabaseError(e);
     }
 }
 
@@ -57,15 +63,60 @@ void Database::prepareDefaultQueries() {
         "WHERE characters.owner_id = $1 AND characters.id = $2 LIMIT 1;");
         connection_->prepare("create_character", "INSERT INTO characters (owner_id, name, class_id, race_id) VALUES ($1, $2, $3, $4);");
     } else {
-        std::cerr << "Cannot prepare queries: Database connection is not open." << std::endl;
-        // Handle this situation (e.g., throw an exception or exit)
+        logger_.logError("Cannot prepare queries: Database connection is not open.");
     }
 }
 
-pqxx::connection& Database::getConnection() {
-    if (connection_->is_open()) {
+pqxx::connection &Database::getConnection()
+{
+    if (connection_->is_open())
+    {
         return *connection_;
-    } else {
+    }
+    else
+    {
         throw std::runtime_error("Database connection is not open.");
+    }
+}
+
+// Function to handle database errors
+void Database::handleDatabaseError(const std::exception &e)
+{
+    // Handle database connection or query errors
+    logger_.logError("Database error: " + std::string(e.what()));
+}
+
+// Function to execute a query with a transaction
+using ParamType = std::variant<int, float, double, std::string>; // Define a type of data alias for the parameter type
+pqxx::result Database::executeQueryWithTransaction(
+    pqxx::work &transaction,
+    const std::string &preparedQueryName,
+    const std::vector<ParamType> &parameters)
+{
+ try
+    {
+        // Create a params object to hold the parameters
+        pqxx::params pq_params;
+
+        //pqxx::internal::dynamic_params pq_params;
+
+        // Loop through the parameters and add them to the pqxx::params object
+        for (const auto &param : parameters)
+        {
+            std::visit([&](const auto &value) {
+                pq_params.append(value);
+            }, param);
+        }
+
+        // Execute the prepared query and assign the result to a pqxx::result object
+        pqxx::result result = transaction.exec_prepared(preparedQueryName, parameters);
+        // Return the result
+        return result;
+    }
+    catch (const std::exception &e)
+    {
+        transaction.abort(); // Rollback the transaction
+        handleDatabaseError(e); // Handle database connection or query errors
+        return pqxx::result(); // Return an empty result
     }
 }
