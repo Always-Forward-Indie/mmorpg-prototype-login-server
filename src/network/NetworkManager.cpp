@@ -130,8 +130,8 @@
             if (eventType == "getCharactersList" && clientData.hash != "" && clientData.clientId != 0)
             {
                 // Set the client data
-                characterData.characterPosition = positionData;
-                clientData.characterData = characterData;
+                //characterData.characterPosition = positionData;
+                //clientData.characterData = characterData;
                 clientData.socket = clientSocket;
 
                 // Create a new event where get characters list according client and push it to the queue
@@ -143,9 +143,9 @@
             if (eventType == "disconnectClient" && clientData.hash != "" && clientData.clientId != 0)
             {
                 // Set the client data
-                characterData.characterPosition = positionData;
-                clientData.characterData = characterData;
-                clientData.socket = clientSocket;
+                //characterData.characterPosition = positionData;
+                //clientData.characterData = characterData;
+                //clientData.socket = clientSocket;
 
                 // Create a new event where disconnect the client and push it to the queue
                 Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);

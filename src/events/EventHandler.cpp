@@ -183,6 +183,24 @@ void EventHandler::handleDisconnectClientEvent(const Event &event, ClientData &c
 
             // Remove the client data
             clientData.removeClientData(passedClientData.clientId);
+
+            //send the response to all clients
+            nlohmann::json response;
+            ResponseBuilder builder;
+            response = builder
+                           .setHeader("message", "Client disconnected!")
+                           .setHeader("hash", "")
+                           .setHeader("clientId", passedClientData.clientId)
+                           .setHeader("eventType", "disconnectClient")
+                           .setBody("", "")
+                           .build();
+            std::string responseData = networkManager_.generateResponseMessage("success", response);
+
+            // Send the response to the all existing clients in the clientDataMap
+            for (auto const &client : clientData.getClientsDataMap())
+            {
+                networkManager_.sendResponse(client.second.socket, responseData);
+            }
         }
         else
         {
