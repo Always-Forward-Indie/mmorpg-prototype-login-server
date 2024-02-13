@@ -35,7 +35,11 @@ int main() {
         // Initialize the server
         LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, database, characterManager, logger);
 
+        // Start the main event loop
         loginServer.startMainEventLoop();
+
+        //Start the IO Networking event loop
+        networkManager.startIOEventLoop();
 
         return 0;
     } catch (const std::exception& e) {

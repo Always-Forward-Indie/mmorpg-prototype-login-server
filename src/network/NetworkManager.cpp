@@ -114,11 +114,11 @@
             logger_.log("Character ID: " + std::to_string(characterData.characterId), YELLOW);
 
             // Check if the type of request is authentificationClient
-            if (eventType == "authentificationClient")
+            if (eventType == "authentificationClient" && clientData.login != "" && clientData.password != "")
             {
                 // Set the client data
-                characterData.characterPosition = positionData;
-                clientData.characterData = characterData;
+                //characterData.characterPosition = positionData;
+               // clientData.characterData = characterData;
                 clientData.socket = clientSocket;
 
                 // Create a new event where authentificate the client and push it to the queue

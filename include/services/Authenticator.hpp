@@ -7,5 +7,5 @@
 
 class Authenticator {
 public:
-    bool authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password);
+    int authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password);
 };

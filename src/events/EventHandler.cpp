@@ -30,18 +30,18 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
             ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
 
             // Authenticate the client
-            bool authStatus = authenticator.authenticate(database_, clientData, passedClientData.login, passedClientData.password);
+            int authClientID = authenticator.authenticate(database_, clientData, passedClientData.login, passedClientData.password);
 
             // Get the clientData object with the new init data
-            const ClientDataStruct *currentClientData = clientData.getClientData(clientID);
-            std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket = currentClientData->socket;
+            const ClientDataStruct *currentClientData = clientData.getClientData(authClientID);
+            std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket = passedClientData.socket;
 
             // Prepare the response message
             nlohmann::json response;
             ResponseBuilder builder;
 
             // Check if the authentication is not successful
-            if (currentClientData->clientId == 0 || currentClientData->hash == "" || !authStatus)
+            if (authClientID == 0)
             {
                 // Add response data
                 response = builder
@@ -85,8 +85,6 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
     }
 }
 
-
-//TODO rework this method
 void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &clientData)
 {
     // Here we will get the characters list from the database and send it to the client
