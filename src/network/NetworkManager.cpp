@@ -63,7 +63,20 @@
     void NetworkManager::startIOEventLoop()
     {
         logger_.log("Starting Login Server IO Context...", YELLOW);
-        io_context_.run(); // Start the event loop
+
+        // Start io_service in a separate thread
+        networkManagerThread_ = std::thread([this]()
+                                { io_context_.run(); });
+
+    }
+
+    NetworkManager::~NetworkManager()
+    {
+        logger_.log("Network Manager destructor is called...", RED);
+        // Close the acceptor and all client sockets
+        acceptor_.close();
+        io_context_.stop();
+        networkManagerThread_.join();
     }
 
     void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket,
@@ -150,6 +163,19 @@
                 // Create a new event where disconnect the client and push it to the queue
                 Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);
                 eventQueue_.push(disconnectClientEvent);
+            }
+
+            // Check if the type of request is pingClient
+            if (eventType == "pingClient")
+            {
+                // Set the client data
+                //characterData.characterPosition = positionData;
+                //clientData.characterData = characterData;
+                clientData.socket = clientSocket;
+
+                // Create a new event where ping the client and push it to the queue
+                Event pingClientEvent(Event::PING_CLIENT, clientData.clientId, clientData, clientSocket);
+                eventQueue_.push(pingClientEvent);
             }
         }
         catch (const nlohmann::json::parse_error &e)

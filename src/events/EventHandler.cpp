@@ -213,11 +213,52 @@ void EventHandler::handleDisconnectClientEvent(const Event &event, ClientData &c
     }
 }
 
+// ping the client
+void EventHandler::handlePingClientEvent(const Event &event, ClientData &clientData)
+{
+    // Here we will ping the client
+    const auto data = event.getData();
+
+    // Extract init data
+    try
+    {
+        // Try to extract the data
+        if (std::holds_alternative<ClientDataStruct>(data))
+        {
+            ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
+
+            //send the response to all clients
+            nlohmann::json response;
+            ResponseBuilder builder;
+            response = builder
+                           .setHeader("message", "Pong!")
+                           .setHeader("eventType", "pingClient")
+                           .setBody("", "")
+                           .build();
+            std::string responseData = networkManager_.generateResponseMessage("success", response);
+
+            // send the response to the client
+            networkManager_.sendResponse(passedClientData.socket, responseData);
+        }
+        else
+        {
+            logger_.log("Error with extracting data!");
+        }
+    }
+    catch (const std::bad_variant_access &ex)
+    {
+        logger_.log("Error here:" + std::string(ex.what()));
+    }
+}
+
 
 void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
 {
     switch (event.getType())
     {
+    case Event::PING_CLIENT:
+        handlePingClientEvent(event, clientData);
+        break;
     case Event::AUTH_CLIENT:
         handleAuthentificateClientEvent(event, clientData);
         break;
@@ -227,7 +268,5 @@ void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
     case Event::DISCONNECT_CLIENT:
         handleDisconnectClientEvent(event, clientData);
         break;
-    
-        // Other cases...
     }
 }

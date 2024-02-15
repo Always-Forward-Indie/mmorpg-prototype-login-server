@@ -13,7 +13,14 @@ using EventData = std::variant<int, float, std::string, nlohmann::json, Position
 
 class Event {
 public:
-    enum EventType { AUTH_CLIENT, DISCONNECT_CLIENT, GET_CHARACTERS_LIST, CREATE_CHARACTER, DELETE_CHARACTER}; // Define more event types as needed
+    enum EventType { 
+        PING_CLIENT,
+        AUTH_CLIENT, 
+        DISCONNECT_CLIENT, 
+        GET_CHARACTERS_LIST, 
+        CREATE_CHARACTER, 
+        DELETE_CHARACTER
+    }; // Define more event types as needed
     Event() = default; // Default constructor
     Event(EventType type, int clientID, const EventData data, std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
    // Event(EventType type, int clientID, const EventData data);

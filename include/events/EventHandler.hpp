@@ -22,10 +22,10 @@ private:
     void handleCreateCharacterEvent(const Event& event, ClientData& clientData);
     void handleGetCharactersListEvent(const Event& event, ClientData& clientData);
     void handleDisconnectClientEvent(const Event& event, ClientData& clientData);
+    void handlePingClientEvent(const Event& event, ClientData& clientData);
 
     NetworkManager& networkManager_;
     Database& database_;
     Logger& logger_;
     CharacterManager& characterManager_;
-    // Other private handler methods
 };

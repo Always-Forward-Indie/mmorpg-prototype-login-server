@@ -26,17 +26,16 @@ void LoginServer::mainEventLoop() {
     // Schedule tasks
     //scheduler_.scheduleTask({[&] { characterManager_.updateBasicCharactersData(database_, clientData_); }, 5, std::chrono::system_clock::now()}); // every 5 seconds
 
-    logger_.log("Starting Event Loops...", YELLOW);
+    logger_.log("Starting Login Server Event Loop...", YELLOW);
     while (true) {
-        Event eventChunk;
-        Event eventGame;
+        Event event;
 
-        if (eventQueueLoginServer_.pop(eventGame)) {
-            eventHandler_.dispatchEvent(eventGame, clientData_);
+        if (eventQueueLoginServer_.pop(event)) {
+            eventHandler_.dispatchEvent(event, clientData_);
         }
 
         // Optionally include a small delay or yield to prevent the loop from consuming too much CPU
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
@@ -44,4 +43,12 @@ void LoginServer::startMainEventLoop()
 {
     // Start the main event loop in a new thread
     event_thread_ = std::thread(&LoginServer::mainEventLoop, this);
+}
+
+// destructor
+LoginServer::~LoginServer()
+{
+    logger_.log("Shutting down Login server...", YELLOW);
+    // Stop the main event loop
+    event_thread_.join();
 }

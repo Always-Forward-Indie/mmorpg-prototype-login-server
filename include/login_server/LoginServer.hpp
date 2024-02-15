@@ -19,6 +19,7 @@ public:
     Database& database,
     CharacterManager& characterManager,
     Logger& logger);
+    ~LoginServer();
     void startMainEventLoop();
     
 private:

@@ -1,12 +1,19 @@
 #include <iostream>
+#include <csignal>
+#include <atomic>
 #include "utils/Config.hpp"
 #include "utils/Logger.hpp"
 #include "login_server/LoginServer.hpp"
 #include "utils/Database.hpp"
 #include "services/CharacterManager.hpp"
 
-//TODO complete basic refactoring
-//TODO implement events functionality to the server and move the logic to the events
+std::atomic<bool> running(true);
+
+void signalHandler(int signal) {
+    running = false;
+}
+
+
 int main() {
     try {
         // Initialize the config
@@ -35,11 +42,18 @@ int main() {
         // Initialize the server
         LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, database, characterManager, logger);
 
+        //Start the IO Networking event loop
+        networkManager.startIOEventLoop();
+
         // Start the main event loop
         loginServer.startMainEventLoop();
 
-        //Start the IO Networking event loop
-        networkManager.startIOEventLoop();
+        // Register signal handler for graceful shutdown
+        signal(SIGINT, signalHandler);
+
+        while (running) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
 
         return 0;
     } catch (const std::exception& e) {
