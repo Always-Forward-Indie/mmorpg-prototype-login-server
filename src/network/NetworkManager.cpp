@@ -67,7 +67,6 @@
         // Start io_service in a separate thread
         networkManagerThread_ = std::thread([this]()
                                 { io_context_.run(); });
-
     }
 
     NetworkManager::~NetworkManager()

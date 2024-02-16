@@ -18,8 +18,6 @@ public:
     void sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string& responseString);
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message);
 
-    // Other networking methods as needed...
-
 private:
     static constexpr size_t max_length = 1024; // Define the appropriate value
     void handleAccept(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const boost::system::error_code& error);
