@@ -1,0 +1,45 @@
+networks:
+  mmo_network:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:15.5
+    container_name: mmorpg_prototype_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: mmo_prototype
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./mmo_prototype_dump.sql:/docker-entrypoint-initdb.d/mmo_prototype_dump.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - mmo_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mmo_prototype"]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+
+  login-server:
+    build: .
+    ports:
+      - "27014:27014"
+    volumes:
+      - /usr/src/app/build
+    environment:
+      - ENV=development
+    restart: unless-stopped
+    security_opt:
+      - seccomp=unconfined
+    command: ["/usr/src/app/MMOLoginServer"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mmo_network
+
+volumes:
+  db_data:

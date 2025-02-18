@@ -4,8 +4,15 @@ https://ru.stackoverflow.com/questions/1452254/%D0%9F%D1%80%D0%BE%D0%B1%D0%BB%D0
 
 
 
-Build server project using cmake and terminal 
+#Build server project using cmake and terminal 
 
 cd build
 cmake ..
 make
+
+
+#Docker Commands:
+
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
