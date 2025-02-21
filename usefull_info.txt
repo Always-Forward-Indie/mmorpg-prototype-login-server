@@ -16,3 +16,6 @@ make
 docker-compose down
 docker-compose build --no-cache
 docker-compose up
+
+#Copy include lib files from container to local project
+bash copy_includes.sh

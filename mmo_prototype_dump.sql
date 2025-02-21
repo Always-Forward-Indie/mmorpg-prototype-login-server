@@ -548,6 +548,64 @@ ALTER TABLE public.race ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     CACHE 1
 );
 
+--
+-- Name: mob_race; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.mob_race (
+    id integer NOT NULL,
+    name character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.mob_race OWNER TO postgres;
+
+--
+-- Name: mob_race_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.mob_race ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_race_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+--
+-- Name: spawn_zones; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.spawn_zones (
+    zone_id integer NOT NULL,
+    zone_name character varying(50) NOT null,
+    min_spawn_x numeric(11, 2) NOT null,
+    min_spawn_y numeric(11, 2) NOT null,
+    min_spawn_z numeric(11, 2) NOT null,
+    max_spawn_x numeric(11, 2) NOT null,
+    max_spawn_y numeric(11, 2) NOT null,
+    max_spawn_z numeric(11, 2) NOT null,
+    mob_id integer NOT null,
+    spawn_count integer NOT null
+);
+
+
+ALTER TABLE public.spawn_zones OWNER TO postgres;
+
+--
+-- Name: spawn_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.spawn_zones ALTER COLUMN zone_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.spawn_zones_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
 
 --
 -- Name: skill_properties_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres

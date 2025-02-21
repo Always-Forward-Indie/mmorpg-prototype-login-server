@@ -1,5 +1,6 @@
 networks:
   mmo_network:
+    name: mmo_network
     driver: bridge
 
 services:
