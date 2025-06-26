@@ -40,8 +40,10 @@ FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y \
     libpqxx-dev \
     libpq5 \
-    libtsan0 \
-    libstdc++6
+    libasan6 \
+    libubsan1 \
+    libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /usr/src/app

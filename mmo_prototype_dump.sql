@@ -266,6 +266,9 @@ CREATE TABLE public.mob (
     id integer NOT NULL,
     name character varying(50) NOT NULL,
     race_id integer DEFAULT 1 NOT NULL,
+    current_health integer DEFAULT 1 NOT NULL,
+    current_mana integer DEFAULT 1 NOT NULL,
+    is_aggressive boolean DEFAULT false NOT NULL,
     level integer NOT NULL
 );
 
@@ -718,17 +721,6 @@ COPY public.character_class (id, name) FROM stdin;
 2	Warrior
 \.
 
-
---
--- Data for Name: character_position; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_position (id, character_id, x, y, z) FROM stdin;
-1	1	50.00	0.00	300.00
-2	2	250.00	0.00	300.00
-\.
-
-
 --
 -- Data for Name: character_skill_properties; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -1151,4 +1143,60 @@ ALTER TABLE ONLY public.users
 --
 -- PostgreSQL database dump complete
 --
+
+
+ALTER TABLE ONLY public.mob_attributes
+    ADD CONSTRAINT mob_attributes_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.mob_attributes_mapping
+    ADD CONSTRAINT mob_attributes_map_pkey PRIMARY KEY (id);
+
+
+ALTER TABLE public.mob_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_attributes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+
+ALTER TABLE public.mob_attributes_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_attributes_mapping_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+INSERT INTO public.character_position (character_id,x,y,z) VALUES
+	 (2,-1800.00,3500.00,300.00),
+	 (1,-2000.00,4000.00,300.00),
+	 (3,-2500.00,4500.00,300.00);
+
+
+
+INSERT INTO public.spawn_zones (zone_name,min_spawn_x,min_spawn_y,min_spawn_z,max_spawn_x,max_spawn_y,max_spawn_z,mob_id,spawn_count,respawn_time) VALUES
+	 ('Test Zone',-2900.00,4000.00,100.00,1000.00,1000.00,800.00,1,3,'00:01:00');
+
+
+INSERT INTO public.mob_race ("name") VALUES
+	 ('Goblin');
+
+
+INSERT INTO public.mob ("name",race_id,"level",current_health,current_mana,is_aggressive) VALUES
+	 ('SomeMob',1,1,90,20,false);
+
+
+
+INSERT INTO public.mob_attributes ("name",slug) VALUES
+	 ('Maximum Health','max_health'),
+	 ('Maximum Mana','max_mana');
+
+
+INSERT INTO public.mob_attributes_mapping (mob_id,attribute_id,value) VALUES
+	 (1,1,100),
+	 (1,2,50);
 
