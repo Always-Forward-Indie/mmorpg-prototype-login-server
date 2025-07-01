@@ -9,23 +9,24 @@
 #include "services/Authenticator.hpp"
 #include "services/CharacterManager.hpp"
 
-class EventHandler {
+class EventHandler
+{
 public:
-  EventHandler(NetworkManager& networkManager, 
-  Database& database, 
-  CharacterManager& characterManager,
-  Logger& logger);
-  void dispatchEvent(const Event& event, ClientData& clientData);
+  EventHandler(NetworkManager &networkManager,
+               Database &database,
+               CharacterManager &characterManager,
+               Logger &logger);
+  void dispatchEvent(const Event &event, ClientData &clientData);
 
 private:
-    void handleAuthentificateClientEvent(const Event& event, ClientData& clientData);
-    void handleCreateCharacterEvent(const Event& event, ClientData& clientData);
-    void handleGetCharactersListEvent(const Event& event, ClientData& clientData);
-    void handleDisconnectClientEvent(const Event& event, ClientData& clientData);
-    void handlePingClientEvent(const Event& event, ClientData& clientData);
+  void handleAuthentificateClientEvent(const Event &event, ClientData &clientData);
+  void handleCreateCharacterEvent(const Event &event, ClientData &clientData);
+  void handleGetCharactersListEvent(const Event &event, ClientData &clientData);
+  void handleDisconnectClientEvent(const Event &event, ClientData &clientData);
+  void handlePingClientEvent(const Event &event, ClientData &clientData);
 
-    NetworkManager& networkManager_;
-    Database& database_;
-    Logger& logger_;
-    CharacterManager& characterManager_;
+  NetworkManager &networkManager_;
+  Database &database_;
+  Logger &logger_;
+  CharacterManager &characterManager_;
 };

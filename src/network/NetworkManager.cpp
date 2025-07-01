@@ -1,48 +1,48 @@
-    #include "network/NetworkManager.hpp"
+#include "network/NetworkManager.hpp"
 
-    NetworkManager::NetworkManager(EventQueue& eventQueue, std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
-        : acceptor_(io_context_),
-        logger_(logger),
-        configs_(configs),
-        jsonParser_(),
-        eventQueue_(eventQueue)
+NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
+    : acceptor_(io_context_),
+      logger_(logger),
+      configs_(configs),
+      jsonParser_(),
+      eventQueue_(eventQueue)
+{
+    boost::system::error_code ec;
+
+    // Get the custom port and IP address from the configs
+    short customPort = std::get<1>(configs).port;
+    std::string customIP = std::get<1>(configs).host;
+    short maxClients = std::get<1>(configs).max_clients;
+
+    // Create an endpoint with the custom IP and port
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(customIP), customPort);
+
+    // Open the acceptor and bind it to the endpoint
+    acceptor_.open(endpoint.protocol(), ec);
+    if (!ec)
     {
-        boost::system::error_code ec;
-
-        // Get the custom port and IP address from the configs
-        short customPort = std::get<1>(configs).port;
-        std::string customIP = std::get<1>(configs).host;
-        short maxClients = std::get<1>(configs).max_clients;
-
-        // Create an endpoint with the custom IP and port
-        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(customIP), customPort);
-
-        // Open the acceptor and bind it to the endpoint
-        acceptor_.open(endpoint.protocol(), ec);
-        if (!ec)
-        {
-            logger_.log("Starting Login Server...", YELLOW);
-            acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
-            acceptor_.bind(endpoint, ec);
-            acceptor_.listen(maxClients, ec);
-        }
-
-        if (ec)
-        {
-            logger.logError("Error during server initialization: " + ec.message());
-            return;
-        }
-
-        // Print IP address and port when the server starts
-        logger_.log("Login Server started on IP: " + customIP + ", Port: " + std::to_string(customPort), GREEN);
+        logger_.log("Starting Login Server...", YELLOW);
+        acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
+        acceptor_.bind(endpoint, ec);
+        acceptor_.listen(maxClients, ec);
     }
 
-    void NetworkManager::startAccept()
+    if (ec)
     {
-        std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket = std::make_shared<boost::asio::ip::tcp::socket>(io_context_);
+        logger.logError("Error during server initialization: " + ec.message());
+        return;
+    }
 
-        acceptor_.async_accept(*clientSocket, [this, clientSocket](const boost::system::error_code &error)
-                            {
+    // Print IP address and port when the server starts
+    logger_.log("Login Server started on IP: " + customIP + ", Port: " + std::to_string(customPort), GREEN);
+}
+
+void NetworkManager::startAccept()
+{
+    auto clientSocket = std::make_shared<boost::asio::ip::tcp::socket>(io_context_);
+
+    acceptor_.async_accept(*clientSocket, [this, clientSocket](const boost::system::error_code &error)
+                           {
                 if (!error) {
                     // Get the Client remote endpoint (IP address and port)
                     boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint();
@@ -55,56 +55,70 @@
                     // Start reading data from the client
                     startReadingFromClient(clientSocket);
                 }
+                else{
+                    logger_.log("Accept client connection error: " + error.message(), RED);
+                }
 
                 // Continue accepting new connections even if there's an error
                 startAccept(); });
-    }
+}
 
-    void NetworkManager::startIOEventLoop()
+void NetworkManager::startIOEventLoop()
+{
+    logger_.log("Starting Login Server IO Context...", YELLOW);
+
+    startAccept();
+
+    auto numThreads = std::thread::hardware_concurrency();
+    for (size_t i = 0; i < numThreads; ++i)
     {
-        logger_.log("Starting Login Server IO Context...", YELLOW);
-
-        // Start io_service in a separate thread
-        networkManagerThread_ = std::thread([this]()
-                                { io_context_.run(); });
+        threadPool_.emplace_back([this]()
+                                 { io_context_.run(); });
     }
+}
 
-    NetworkManager::~NetworkManager()
+NetworkManager::~NetworkManager()
+{
+    logger_.log("Network Manager destructor is called...", RED);
+    acceptor_.close();
+    io_context_.stop();
+    for (auto &thread : threadPool_)
     {
-        logger_.log("Network Manager destructor is called...", RED);
-        // Close the acceptor and all client sockets
-        acceptor_.close();
-        io_context_.stop();
-        networkManagerThread_.join();
+        if (thread.joinable())
+            thread.join();
     }
+}
 
-    void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket,
-                                        const std::array<char, max_length> &dataBuffer,
-                                        size_t bytes_transferred) {
-        static std::string accumulatedData; // Buffer to accumulate data
+void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket,
+                                      const std::array<char, max_length> &dataBuffer,
+                                      size_t bytes_transferred)
+{
+    static std::string accumulatedData; // Buffer to accumulate data
 
-        // Append new data to the accumulated buffer
-        accumulatedData.append(dataBuffer.data(), bytes_transferred);
+    // Append new data to the accumulated buffer
+    accumulatedData.append(dataBuffer.data(), bytes_transferred);
 
-        // Check for the delimiter in the accumulated data
-        std::string delimiter = "\r\n\r\n"; // Your chosen delimiter
-        size_t delimiterPos;
-        while ((delimiterPos = accumulatedData.find(delimiter)) != std::string::npos) { // Assuming '\r\n\r\n' is the delimiter
-            // Extract one message up to the delimiter
-            std::string message = accumulatedData.substr(0, delimiterPos);
+    // Check for the delimiter in the accumulated data
+    std::string delimiter = "\n"; // Your chosen delimiter
+    size_t delimiterPos;
+    while ((delimiterPos = accumulatedData.find(delimiter)) != std::string::npos)
+    { // Assuming '\n' is the delimiter
+        // Extract one message up to the delimiter
+        std::string message = accumulatedData.substr(0, delimiterPos);
 
-            // Log the received message
-            logger_.log("Received data from Client: " + message, YELLOW);
+        // Log the received message
+        logger_.log("Received data from Client: " + message, YELLOW);
 
-            // Process the message
-            processMessage(clientSocket, message);
+        // Process the message
+        processMessage(clientSocket, message);
 
-            // Erase processed message and delimiter from the buffer
-            accumulatedData.erase(0, delimiterPos + 1); // +1 to remove the delimiter as well
-        }
+        // Erase processed message and delimiter from the buffer
+        accumulatedData.erase(0, delimiterPos + 1); // +1 to remove the delimiter as well
     }
+}
 
-    void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string& message) {
+void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message)
+{
     // Convert the message string to a buffer array for parsing
     std::array<char, max_length> messageBuffer;
     std::copy(message.begin(), message.end(), messageBuffer.begin());
@@ -112,185 +126,187 @@
 
     // Now we can use JSON parsing logic on the `messageBuffer` with `messageLength` bytes of data
     try
+    {
+        // Parse the data received from the client using JSONParser
+        std::string eventType = jsonParser_.parseEventType(messageBuffer, messageLength);
+        ClientDataStruct clientData = jsonParser_.parseClientData(messageBuffer, messageLength);
+        CharacterDataStruct characterData = jsonParser_.parseCharacterData(messageBuffer, messageLength);
+        PositionStruct positionData = jsonParser_.parsePositionData(messageBuffer, messageLength);
+        MessageStruct message = jsonParser_.parseMessage(messageBuffer, messageLength);
+
+        logger_.log("Event type: " + eventType, YELLOW);
+        logger_.log("Client ID: " + std::to_string(clientData.clientId), YELLOW);
+        logger_.log("Client hash: " + clientData.hash, YELLOW);
+        logger_.log("Character ID: " + std::to_string(characterData.characterId), YELLOW);
+
+        // Check if the type of request is authentificationClient
+        if (eventType == "authentificationClient" && clientData.login != "" && clientData.password != "")
         {
-            // Parse the data received from the client using JSONParser
-            std::string eventType = jsonParser_.parseEventType(messageBuffer, messageLength);
-            ClientDataStruct clientData = jsonParser_.parseClientData(messageBuffer, messageLength);
-            CharacterDataStruct characterData = jsonParser_.parseCharacterData(messageBuffer, messageLength);
-            PositionStruct positionData = jsonParser_.parsePositionData(messageBuffer, messageLength);
-            MessageStruct message = jsonParser_.parseMessage(messageBuffer, messageLength);
+            // Set the client data
+            // characterData.characterPosition = positionData;
+            // clientData.characterData = characterData;
+            clientData.socket = clientSocket;
 
-            logger_.log("Event type: " + eventType, YELLOW);
-            logger_.log("Client ID: " + std::to_string(clientData.clientId), YELLOW);
-            logger_.log("Client hash: " + clientData.hash, YELLOW);
-            logger_.log("Character ID: " + std::to_string(characterData.characterId), YELLOW);
-
-            // Check if the type of request is authentificationClient
-            if (eventType == "authentificationClient" && clientData.login != "" && clientData.password != "")
-            {
-                // Set the client data
-                //characterData.characterPosition = positionData;
-               // clientData.characterData = characterData;
-                clientData.socket = clientSocket;
-
-                // Create a new event where authentificate the client and push it to the queue
-                Event authentificationClientEvent(Event::AUTH_CLIENT, clientData.clientId, clientData, clientSocket);
-                eventQueue_.push(authentificationClientEvent);
-            }
-
-            // Check if the type of request is getCharactersList
-            if (eventType == "getCharactersList" && clientData.hash != "" && clientData.clientId != 0)
-            {
-                // Set the client data
-                //characterData.characterPosition = positionData;
-                //clientData.characterData = characterData;
-                clientData.socket = clientSocket;
-
-                // Create a new event where get characters list according client and push it to the queue
-                Event getCharactersListEvent(Event::GET_CHARACTERS_LIST, clientData.clientId, clientData, clientSocket);
-                eventQueue_.push(getCharactersListEvent);
-            }
-
-            // Check if the type of request is disconnectClient
-            if (eventType == "disconnectClient" && clientData.hash != "" && clientData.clientId != 0)
-            {
-                // Set the client data
-                //characterData.characterPosition = positionData;
-                //clientData.characterData = characterData;
-                //clientData.socket = clientSocket;
-
-                // Create a new event where disconnect the client and push it to the queue
-                Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);
-                eventQueue_.push(disconnectClientEvent);
-            }
-
-            // Check if the type of request is pingClient
-            if (eventType == "pingClient")
-            {
-                // Set the client data
-                //characterData.characterPosition = positionData;
-                //clientData.characterData = characterData;
-                clientData.socket = clientSocket;
-
-                // Create a new event where ping the client and push it to the queue
-                Event pingClientEvent(Event::PING_CLIENT, clientData.clientId, clientData, clientSocket);
-                eventQueue_.push(pingClientEvent);
-            }
+            // Create a new event where authentificate the client and push it to the queue
+            Event authentificationClientEvent(Event::AUTH_CLIENT, clientData.clientId, clientData, clientSocket);
+            eventQueue_.push(authentificationClientEvent);
         }
-        catch (const nlohmann::json::parse_error &e)
+
+        // Check if the type of request is getCharactersList
+        if (eventType == "getCharactersList" && clientData.hash != "" && clientData.clientId != 0)
         {
-            logger_.logError("JSON parsing error: " + std::string(e.what()), RED);
+            // Set the client data
+            // characterData.characterPosition = positionData;
+            // clientData.characterData = characterData;
+            clientData.socket = clientSocket;
+
+            // Create a new event where get characters list according client and push it to the queue
+            Event getCharactersListEvent(Event::GET_CHARACTERS_LIST, clientData.clientId, clientData, clientSocket);
+            eventQueue_.push(getCharactersListEvent);
+        }
+
+        // Check if the type of request is disconnectClient
+        if (eventType == "disconnectClient" && clientData.hash != "" && clientData.clientId != 0)
+        {
+            // Set the client data
+            // characterData.characterPosition = positionData;
+            // clientData.characterData = characterData;
+            // clientData.socket = clientSocket;
+
+            // Create a new event where disconnect the client and push it to the queue
+            Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);
+            eventQueue_.push(disconnectClientEvent);
+        }
+
+        // Check if the type of request is pingClient
+        if (eventType == "pingClient")
+        {
+            // Set the client data
+            // characterData.characterPosition = positionData;
+            // clientData.characterData = characterData;
+            clientData.socket = clientSocket;
+
+            // Create a new event where ping the client and push it to the queue
+            Event pingClientEvent(Event::PING_CLIENT, clientData.clientId, clientData, clientSocket);
+            eventQueue_.push(pingClientEvent);
         }
     }
-
-    void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString)
+    catch (const nlohmann::json::parse_error &e)
     {
-        boost::asio::async_write(*clientSocket, boost::asio::buffer(responseString),
-                                [this, clientSocket](const boost::system::error_code &error, size_t bytes_transferred)
-                                {
-                                        boost::system::error_code ec;
-                                        boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint(ec);
-                                            if (!ec) {
-                                                // Successfully retrieved the remote endpoint
-                                                std::string ipAddress = remoteEndpoint.address().to_string();
-                                                std::string portNumber = std::to_string(remoteEndpoint.port());
-
-                                                logger_.log("Bytes send: " + std::to_string(bytes_transferred), BLUE);
-                                                logger_.log("Data send successfully to the Client: " + ipAddress + ", Port: " + portNumber, BLUE);
-                                               
-                                                // Now you can use ipAddress and portNumber as needed
-                                            } else {
-                                                // Handle error
-                                            }
-
-                                    if (!error)
-                                    {
-                                        // Response sent successfully, now start listening for the client's next message
-                                        startReadingFromClient(clientSocket);
-                                    }
-                                    else
-                                    {
-                                        logger_.logError("Error during async_write: " + error.message(), RED);
-                                    }
-                                });
+        logger_.logError("JSON parsing error: " + std::string(e.what()), RED);
     }
+}
 
-    void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
-    {
-        auto dataBufferClient = std::make_shared<std::array<char, max_length>>();
-        std::fill(dataBufferClient->begin(), dataBufferClient->end(), 0); // Clear the buffer
+void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString)
+{
+    boost::asio::async_write(*clientSocket, boost::asio::buffer(responseString),
+                             [this, clientSocket](const boost::system::error_code &error, size_t bytes_transferred)
+                             {
+                                 boost::system::error_code ec;
+                                 boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint(ec);
+                                 if (!ec)
+                                 {
+                                     // Successfully retrieved the remote endpoint
+                                     std::string ipAddress = remoteEndpoint.address().to_string();
+                                     std::string portNumber = std::to_string(remoteEndpoint.port());
 
+                                     logger_.log("Bytes send: " + std::to_string(bytes_transferred), BLUE);
+                                     logger_.log("Data send successfully to the Client: " + ipAddress + ", Port: " + portNumber, BLUE);
 
-        clientSocket->async_read_some(boost::asio::buffer(*dataBufferClient),
-                                    [this, clientSocket, dataBufferClient](const boost::system::error_code &error, size_t bytes_transferred)
-                                    {
-                                        boost::system::error_code ec;
-                                        boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint(ec);
-                                            if (!ec) {
-                                                // Successfully retrieved the remote endpoint
-                                                std::string ipAddress = remoteEndpoint.address().to_string();
-                                                std::string portNumber = std::to_string(remoteEndpoint.port());
+                                     // Now you can use ipAddress and portNumber as needed
+                                 }
+                                 else
+                                 {
+                                     // Handle error
+                                 }
 
-                                                logger_.log("Bytes received: " + std::to_string(bytes_transferred), YELLOW);
-                                                logger_.log("Data received from Client IP address: " + ipAddress + ", Port: " + portNumber, YELLOW);
-                                            } else {
-                                                // Handle error
-                                            }
+                                 if (!error)
+                                 {
+                                     // Response sent successfully, now start listening for the client's next message
+                                     startReadingFromClient(clientSocket);
+                                 }
+                                 else
+                                 {
+                                     logger_.logError("Error during async_write: " + error.message(), RED);
+                                 }
+                             });
+}
 
-                                           
-                                            // start reading from the client
-                                        if (!error)
-                                        {
-                                            // Data has been read successfully, handle it
-                                            handleClientData(clientSocket, *dataBufferClient, bytes_transferred);
+void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
+{
+    auto dataBufferClient = std::make_shared<std::array<char, max_length>>();
+    std::fill(dataBufferClient->begin(), dataBufferClient->end(), 0); // Clear the buffer
 
-                                            // Continue reading from the client
-                                            startReadingFromClient(clientSocket);
-                                        }
-                                        else if (error == boost::asio::error::eof)
-                                        {
-                                            // The client has closed the connection
-                                            logger_.logError("Client disconnected gracefully.");
+    clientSocket->async_read_some(boost::asio::buffer(*dataBufferClient),
+                                  [this, clientSocket, dataBufferClient](const boost::system::error_code &error, size_t bytes_transferred)
+                                  {
+                                      boost::system::error_code ec;
+                                      boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint(ec);
+                                      if (!ec)
+                                      {
+                                          // Successfully retrieved the remote endpoint
+                                          std::string ipAddress = remoteEndpoint.address().to_string();
+                                          std::string portNumber = std::to_string(remoteEndpoint.port());
 
-                                            // Close the client socket
-                                            clientSocket->close();
-                                        }
-                                        else if (error == boost::asio::error::operation_aborted)
-                                        {
-                                            // The read operation was canceled, likely due to the client disconnecting
-                                            logger_.logError("Read operation canceled (client disconnected).");
+                                          logger_.log("Bytes received: " + std::to_string(bytes_transferred), YELLOW);
+                                          logger_.log("Data received from Client IP address: " + ipAddress + ", Port: " + portNumber, YELLOW);
+                                      }
+                                      else
+                                      {
+                                          // Handle error
+                                      }
 
-                                            // You can perform any cleanup or logging here if needed
+                                      // start reading from the client
+                                      if (!error)
+                                      {
+                                          // Data has been read successfully, handle it
+                                          handleClientData(clientSocket, *dataBufferClient, bytes_transferred);
 
-                                            // Close the client socket
-                                            clientSocket->close();
-                                        }
-                                        else
-                                        {
-                                            // Handle other errors
-                                            logger_.logError("Error during async_read_some: " + error.message());
+                                          // Continue reading from the client
+                                          startReadingFromClient(clientSocket);
+                                      }
+                                      else if (error == boost::asio::error::eof)
+                                      {
+                                          // The client has closed the connection
+                                          logger_.logError("Client disconnected gracefully.");
 
-                                            // You can also close the socket in case of other errors if needed
-                                            clientSocket->close();
-                                        }
-                                    });
-    }
+                                          // Close the client socket
+                                          clientSocket->close();
+                                      }
+                                      else if (error == boost::asio::error::operation_aborted)
+                                      {
+                                          // The read operation was canceled, likely due to the client disconnecting
+                                          logger_.logError("Read operation canceled (client disconnected).");
 
-    std::string NetworkManager::generateResponseMessage(const std::string &status, const nlohmann::json &message)
-    {
-        nlohmann::json response;
-        std::string currentTimestamp = logger_.getCurrentTimestamp();
-        response["header"] = message["header"];
-        response["header"]["status"] = status;
-        response["header"]["timestamp"] = currentTimestamp;
-        response["header"]["version"] = "1.0";
-        response["body"] = message["body"];
+                                          // You can perform any cleanup or logging here if needed
 
-        std::string responseString = response.dump();
+                                          // Close the client socket
+                                          clientSocket->close();
+                                      }
+                                      else
+                                      {
+                                          // Handle other errors
+                                          logger_.logError("Error during async_read_some: " + error.message());
 
-        logger_.log("Response generated: " + responseString, YELLOW);
+                                          // You can also close the socket in case of other errors if needed
+                                          clientSocket->close();
+                                      }
+                                  });
+}
 
-        return responseString+ "\n";
-    }
+std::string NetworkManager::generateResponseMessage(const std::string &status, const nlohmann::json &message)
+{
+    nlohmann::json response;
+    std::string currentTimestamp = logger_.getCurrentTimestamp();
+    response["header"] = message["header"];
+    response["header"]["status"] = status;
+    response["header"]["timestamp"] = currentTimestamp;
+    response["header"]["version"] = "1.0";
+    response["body"] = message["body"];
 
-    
+    std::string responseString = response.dump();
+
+    logger_.log("Response generated: " + responseString, YELLOW);
+
+    return responseString + "\n";
+}

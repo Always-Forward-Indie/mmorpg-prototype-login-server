@@ -9,13 +9,15 @@
 
 std::atomic<bool> running(true);
 
-void signalHandler(int signal) {
+void signalHandler(int signal)
+{
     running = false;
 }
 
-
-int main() {
-    try {
+int main()
+{
+    try
+    {
         // Initialize the config
         Config config;
         // Initialize Logger
@@ -42,24 +44,25 @@ int main() {
         // Initialize the server
         LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, database, characterManager, logger);
 
-        //Start the IO Networking event loop
+        // Start accepting connections
+        // networkManager.startAccept();
+
+        // Start the IO Networking event loop
         networkManager.startIOEventLoop();
 
         // Start the main event loop
         loginServer.startMainEventLoop();
 
-        //TODO fix issue where the server does not stop on Ctrl+C
-        // Temporary commented out the signal handler
-        // Register signal handler for graceful shutdown
-        //signal(SIGINT, signalHandler);
-
-        // while (running) {
-        //     std::this_thread::sleep_for(std::chrono::seconds(1));
-        // }
+        while (running)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
 
         return 0;
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Error: " << e.what() << std::endl;
-        return 1;  // Indicate an error exit status
+        return 1; // Indicate an error exit status
     }
 }

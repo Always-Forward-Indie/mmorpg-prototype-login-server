@@ -4,10 +4,15 @@
 #include <condition_variable>
 #include "Event.hpp"
 
-class EventQueue {
+class EventQueue
+{
 public:
-    void push(const Event& event);
-    bool pop(Event& event);
+    void push(const Event &event);
+    bool pop(Event &event);
+
+    void pushBatch(const std::vector<Event> &events);
+    bool popBatch(std::vector<Event> &events, int batchSize);
+    bool empty();
 
 private:
     std::queue<Event> queue;
