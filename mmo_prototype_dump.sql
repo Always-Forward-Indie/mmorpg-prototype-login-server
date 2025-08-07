@@ -208,10 +208,12 @@ CREATE TABLE public.characters (
     owner_id bigint NOT NULL,
     class_id integer DEFAULT 1 NOT NULL,
     race_id integer DEFAULT 1 NOT NULL,
+    radius integer DEFAULT 100 NOT NULL,
     experience_points bigint DEFAULT 0 NOT NULL,
     level integer DEFAULT 0 NOT NULL,
     current_health integer DEFAULT 1 NOT NULL,
-    current_mana integer DEFAULT 1 NOT NULL
+    current_mana integer DEFAULT 1 NOT NULL,
+    is_dead boolean DEFAULT false NOT NULL
 );
 
 
@@ -265,10 +267,13 @@ ALTER TABLE public.exp_for_level ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 CREATE TABLE public.mob (
     id integer NOT NULL,
     name character varying(50) NOT NULL,
+    slug character varying(50) NOT NULL,
     race_id integer DEFAULT 1 NOT NULL,
+    radius integer DEFAULT 100 NOT NULL,
     current_health integer DEFAULT 1 NOT NULL,
     current_mana integer DEFAULT 1 NOT NULL,
     is_aggressive boolean DEFAULT false NOT NULL,
+    is_dead boolean DEFAULT false NOT NULL,
     level integer NOT NULL
 );
 
@@ -393,10 +398,12 @@ CREATE TABLE public.npc (
     id integer NOT NULL,
     name character varying(50) NOT NULL,
     race_id integer DEFAULT 1 NOT NULL,
+    radius integer DEFAULT 100 NOT NULL,
     level integer NOT NULL,
     experience_points integer NOT NULL,
     current_health integer NOT NULL,
-    current_mana integer NOT NULL
+    current_mana integer NOT NULL,
+    is_dead boolean DEFAULT false NOT NULL
 );
 
 
@@ -679,6 +686,73 @@ ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     MAXVALUE 99999999
     CACHE 1
 );
+
+-- Name: items; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.items (
+    id bigint NOT NULL,
+    name character varying(50) NOT NULL,
+    slug character varying(50) NOT NULL,
+    description text,
+    is_quest_item boolean DEFAULT false NOT NULL,
+    item_type bigint NOT NULL
+);
+
+ALTER TABLE public.items OWNER TO postgres;
+
+-- Name: item_types; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.item_types (
+    id integer NOT NULL,
+    name character varying(50) NOT NULL,
+    slug character varying(50) NOT NULL
+);
+
+ALTER TABLE public.item_types OWNER TO postgres;
+
+-- Name: item_types_mapping; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.item_types_mapping (
+    id bigint NOT NULL,
+    item_id bigint NOT NULL,
+    type_id integer NOT NULL
+);
+
+ALTER TABLE public.item_types_mapping OWNER TO postgres;
+
+-- Name: item_attributes; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.item_attributes (
+    id integer NOT NULL,
+    name character varying(100) NOT NULL,
+    slug character varying(100) NOT NULL
+);
+
+ALTER TABLE public.item_attributes OWNER TO postgres;
+
+-- Name: item_attributes_mapping; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.item_attributes_mapping (
+    id bigint NOT NULL,
+    item_id bigint NOT NULL,
+    attribute_id integer NOT NULL,
+    value integer NOT NULL
+);
+
+-- Name: player_inventory; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.player_inventory (
+    id bigint NOT NULL,
+    character_id bigint NOT NULL,
+    item_id bigint NOT NULL,
+    quantity integer DEFAULT 1 NOT NULL
+);
+
+ALTER TABLE public.player_inventory OWNER TO postgres;
+
+-- Name: mob_loot_info; Type: TABLE; Schema: public; Owner: postgres
+CREATE TABLE public.mob_loot_info (
+    id bigint NOT NULL,
+    mob_id integer NOT NULL,
+    item_id bigint NOT NULL,
+    drop_chance numeric(5,2) DEFAULT 0.00 NOT NULL
+);
+
+ALTER TABLE public.mob_loot_info OWNER TO postgres;
 
 
 --
@@ -1140,17 +1214,78 @@ ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
---
--- PostgreSQL database dump complete
---
-
-
-ALTER TABLE ONLY public.mob_attributes
-    ADD CONSTRAINT mob_attributes_pkey PRIMARY KEY (id);
+-- Name: mob_attributes_mapping mob_attributes_map_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 
 ALTER TABLE ONLY public.mob_attributes_mapping
     ADD CONSTRAINT mob_attributes_map_pkey PRIMARY KEY (id);
 
+-- Name: mob_attributes mob_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_attributes
+    ADD CONSTRAINT mob_attributes_pkey PRIMARY KEY (id);
+
+-- Name: mob_position mob_position_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_position
+    ADD CONSTRAINT mob_position_pkey PRIMARY KEY (id);
+
+-- Name: mob_skill_properties mob_skill_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_skill_properties
+    ADD CONSTRAINT mob_skill_properties_pkey PRIMARY KEY (id);
+
+-- Name: mob_skill_properties_mapping mob_skill_properties_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_skill_properties_mapping
+    ADD CONSTRAINT mob_skill_properties_mapping_pkey PRIMARY KEY (id);
+
+-- Name: mob_skills mob_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_skills
+    ADD CONSTRAINT mob_skills_pkey PRIMARY KEY (id);
+
+-- Name: mob_skills_mapping mob_skills_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_skills_mapping
+    ADD CONSTRAINT mob_skills_mapping_pkey PRIMARY KEY (id);
+
+-- Name: npc_position npc_position_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.npc_position
+    ADD CONSTRAINT npc_position_pkey PRIMARY KEY (id);
+
+-- Name: npc_skill_properties npc_skill_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.npc_skill_properties
+    ADD CONSTRAINT npc_skill_properties_pkey PRIMARY KEY (id);  
+
+-- Name: npc_skill_properties_mapping npc_skill_properties_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.npc_skill_properties_mapping
+    ADD CONSTRAINT npc_skill_properties_mapping_pkey PRIMARY KEY (id);
+
+-- Name: npc_skills npc_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.npc_skills
+    ADD CONSTRAINT npc_skills_pkey PRIMARY KEY (id);
+
+-- Name: npc_skills_mapping npc_skills_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.npc_skills_mapping
+    ADD CONSTRAINT npc_skills_mapping_pkey PRIMARY KEY (id);    
+
+-- Name: item_types item_types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.item_types
+    ADD CONSTRAINT item_types_pkey PRIMARY KEY (id);
+
+-- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_pkey PRIMARY KEY (id);
+
+-- Name: player_inventory player_inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.player_inventory
+    ADD CONSTRAINT player_inventory_pkey PRIMARY KEY (id);
+
+-- Name: mob_loot_info mob_loot_info_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+ALTER TABLE ONLY public.mob_loot_info
+    ADD CONSTRAINT mob_loot_info_pkey PRIMARY KEY (id);
+
+
+ALTER TABLE ONLY public.item_attributes
+    ADD CONSTRAINT item_attributes_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.item_attributes_mapping
+    ADD CONSTRAINT item_attributes_mapping_pkey PRIMARY KEY (id);
+    
 
 ALTER TABLE public.mob_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.mob_attributes_id_seq
@@ -1171,32 +1306,235 @@ ALTER TABLE public.mob_attributes_mapping ALTER COLUMN id ADD GENERATED ALWAYS A
     CACHE 1
 );
 
+
+ALTER TABLE public.mob_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_position_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.mob_skill_properties ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_skill_properties_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.mob_skill_properties_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_skill_properties_mapping_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.mob_skills ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_skills_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.mob_skills_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_skills_mapping_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.npc_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.npc_position_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.npc_skill_properties ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.npc_skill_properties_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.npc_skill_properties_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.npc_skill_properties_mapping_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.npc_skills ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.npc_skills_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.npc_skills_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.npc_skills_mapping_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.item_types ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.item_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.items ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.player_inventory ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.player_inventory_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.mob_loot_info ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mob_loot_info_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.item_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.item_attributes_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+ALTER TABLE public.item_attributes_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.item_attributes_mapping_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    MAXVALUE 99999999
+    CACHE 1
+);
+
+-- Insert initial data into character_position
 INSERT INTO public.character_position (character_id,x,y,z) VALUES
 	 (2,-1800.00,3500.00,300.00),
 	 (1,-2000.00,4000.00,300.00),
 	 (3,-2500.00,4500.00,300.00);
 
 
-
+-- Insert initial data into spawn_zones
 INSERT INTO public.spawn_zones (zone_name,min_spawn_x,min_spawn_y,min_spawn_z,max_spawn_x,max_spawn_y,max_spawn_z,mob_id,spawn_count,respawn_time) VALUES
-	 ('Test Zone',-2900.00,4000.00,100.00,1000.00,1000.00,800.00,1,3,'00:01:00');
+	 ('Foxes Nest',-2900.00,4000.00,100.00,1000.00,1000.00,800.00,1,3,'00:01:00'),
+     ('Wolves Den',-2000.00,3000.00,100.00,500.00,500.00,800.00,2,5,'00:02:00');
 
 
+-- Insert initial data into mob race
 INSERT INTO public.mob_race ("name") VALUES
-	 ('Goblin');
+	 ('Animal');
 
 
-INSERT INTO public.mob ("name",race_id,"level",current_health,current_mana,is_aggressive) VALUES
-	 ('SomeMob',1,1,90,20,false);
+-- Insert initial data into mob
+INSERT INTO public.mob ("name",slug,race_id,"level",current_health,current_mana,is_aggressive,is_dead,radius) VALUES
+	 ('Small Fox','SmallFox'1,1,100,50,false,false,100),
+     ('Grey Wolf','GreyWolf',1,150,50,false,false,100);
 
 
-
+-- Insert initial data into mob_attributes
 INSERT INTO public.mob_attributes ("name",slug) VALUES
 	 ('Maximum Health','max_health'),
 	 ('Maximum Mana','max_mana');
 
-
+-- Insert initial data into mob_attributes_mapping
 INSERT INTO public.mob_attributes_mapping (mob_id,attribute_id,value) VALUES
 	 (1,1,100),
-	 (1,2,50);
+	 (1,2,50),
+     (2,1,150),
+     (2,2,50);
 
+
+-- Insert initial data into item_types
+INSERT INTO public.item_types ("name",slug) VALUES
+     ('Weapon','weapon'),
+     ('Armor','armor'),
+     ('Potion','potion'),
+     ('Food','food'),
+     ('Quest Item','quest_item'),
+    ('Resource','resource');
+
+-- Insert initial data into items
+INSERT INTO public.items (name,slug,description,is_qest_item,item_type) VALUES
+     ('Iron Sword','iron_sworld','A sturdy iron sword.',false,1),
+     ('Wooden Shield','wooden_shield','A basic wooden shield.',false,2),
+     ('Health Potion','health_potion','Restores 50 health points.',false,3),
+     ('Bread','bread','A loaf of bread to restore hunger.',false,4),
+     ('Ancient Artifact','ancient_artifact','A mysterious artifact for quests.',true,5),
+     ('Iron Ore','iron_ore','A piece of iron ore, useful for crafting.',false,6);
+
+-- Insert initial data into item_attributes
+INSERT INTO public.item_attributes (name,slug) VALUES
+     ('Damage','damage'),
+     ('Defense','defense'),
+     ('Healing','healing'),
+     ('Hunger Restoration','hunger_restoration'),
+     ('Quest Value','quest_value'),
+     ('Resource Value','resource_value');
+
+-- Insert initial data into item_attributes_mapping
+INSERT INTO public.item_attributes_mapping (item_id,attribute_id,value) VALUES
+     (1,1,10),  -- Iron Sword with 10 damage
+     (2,2,5),   -- Wooden Shield with 5 defense
+     (3,3,50),  -- Health Potion with 50 healing
+     (4,4,30),  -- Bread with 30 hunger restoration
+     (5,5,1),   -- Ancient Artifact with quest value 1
+     (6,6,100); -- Iron Ore with resource value 100
+
+-- Insert initial data into moob_loot_info
+INSERT INTO public.mob_loot_info (mob_id,item_id,drop_chance) VALUES
+        (1,1,0.20),  -- Small Fox drops Iron Sword with 20% chance
+        (1,3,0.10),  -- Small Fox drops Health Potion with 10% chance
+        (2,2,0.15),  -- Grey Wolf drops Wooden Shield with 15% chance
+        (2,4,0.05),  -- Grey Wolf drops Bread with 5% chance
+        (2,6,0.25);  -- Grey Wolf drops Iron Ore with 25% chance
+
+-- Insert initial data into skills
+INSERT INTO public.character_skills (name,level) VALUES
+        ('Fireball',1),
+        ('Frostbolt',1),
+        ('Heal',1),
+        ('Shield Bash',1);
