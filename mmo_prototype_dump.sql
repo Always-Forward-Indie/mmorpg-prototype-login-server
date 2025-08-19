@@ -689,12 +689,24 @@ ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 -- Name: items; Type: TABLE; Schema: public; Owner: postgres
 CREATE TABLE public.items (
-    id bigint NOT NULL,
-    name character varying(50) NOT NULL,
-    slug character varying(50) NOT NULL,
-    description text,
-    is_quest_item boolean DEFAULT false NOT NULL,
-    item_type bigint NOT NULL
+	id int8 GENERATED ALWAYS AS IDENTITY( INCREMENT BY 1 MINVALUE 1 MAXVALUE 99999999 START 1 CACHE 1 NO CYCLE) NOT NULL,
+	"name" varchar(50) NOT NULL,
+	slug varchar(50) NOT NULL,
+	description text NULL,
+	is_quest_item bool DEFAULT false NOT NULL,
+	item_type int8 NOT NULL,
+	weight float8 DEFAULT 0.0 NOT NULL,
+	rarity_id int8 DEFAULT 1 NOT NULL,
+	stack_max int8 DEFAULT 64 NOT NULL,
+	is_container bool DEFAULT false NOT NULL,
+	is_durable bool DEFAULT false NOT NULL,
+	is_tradable bool DEFAULT true NOT NULL,
+	durability_max int8 DEFAULT 100 NOT NULL,
+	vendor_price_buy int8 DEFAULT 1 NOT NULL,
+	vendor_price_sell int8 DEFAULT 1 NOT NULL,
+	equip_slot int8 DEFAULT 0 NULL,
+	level_requirement int8 DEFAULT 0 NOT NULL,
+	CONSTRAINT items_pkey PRIMARY KEY (id)
 );
 
 ALTER TABLE public.items OWNER TO postgres;
@@ -1538,3 +1550,39 @@ INSERT INTO public.character_skills (name,level) VALUES
         ('Frostbolt',1),
         ('Heal',1),
         ('Shield Bash',1);
+
+
+CREATE TABLE rarity (
+    id          SMALLINT PRIMARY KEY,
+    name        VARCHAR(30) NOT NULL,   -- Common, Rare, Epic...
+    slug        VARCHAR(30) NOT NULL,
+    color_hex   CHAR(7) NOT NULL       -- #RRGGBB для UI
+);
+
+-- Базовые данные
+INSERT INTO rarity (id, name, slug, color_hex) VALUES
+(1, 'Common', 'common', '#FFFFFF'),
+(2, 'Uncommon', 'uncommon', '#1EFF00'),
+(3, 'Rare', 'rare', '#0070DD'),
+(4, 'Epic', 'epic', '#A335EE'),
+(5, 'Legendary', 'legendary', '#FF8000');
+
+CREATE TABLE equip_slot (
+    id SMALLINT PRIMARY KEY,
+    slug VARCHAR(30) UNIQUE NOT NULL,   -- внутренний код, например "head"
+    name VARCHAR(50) NOT NULL           -- отображаемое имя
+);
+
+-- базовые слоты
+INSERT INTO equip_slot (id, slug, name) VALUES
+(1, 'head',        'Head'),
+(2, 'chest',       'Chest'),
+(3, 'legs',        'Legs'),
+(4, 'feet',        'Feet'),
+(5, 'hands',       'Hands'),
+(6, 'main_hand',   'Main Hand'),
+(7, 'off_hand',    'Off Hand'),
+(8, 'two_hand',    'Two-Handed'),
+(9, 'ring',        'Ring'),
+(10,'neck',        'Neck'),
+(11,'trinket',     'Trinket');
