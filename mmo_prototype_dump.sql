@@ -274,7 +274,9 @@ CREATE TABLE public.mob (
     current_mana integer DEFAULT 1 NOT NULL,
     is_aggressive boolean DEFAULT false NOT NULL,
     is_dead boolean DEFAULT false NOT NULL,
-    level integer NOT NULL
+    level integer NOT NULL,
+    rank_id     SMALLINT NOT NULL DEFAULT 1 REFERENCES mob_ranks(rank_id),
+    base_xp     INT  DEFAULT 1 NOT NULL 
 );
 
 
@@ -706,6 +708,8 @@ CREATE TABLE public.items (
 	vendor_price_sell int8 DEFAULT 1 NOT NULL,
 	equip_slot int8 DEFAULT 0 NULL,
 	level_requirement int8 DEFAULT 0 NOT NULL,
+	is_equippable bool DEFAULT false NOT NULL,
+	is_harvest bool DEFAULT false NOT NULL,
 	CONSTRAINT items_pkey PRIMARY KEY (id)
 );
 
@@ -1496,8 +1500,8 @@ INSERT INTO public.mob_attributes ("name",slug) VALUES
 INSERT INTO public.mob_attributes_mapping (mob_id,attribute_id,value) VALUES
 	 (1,1,100),
 	 (1,2,50),
-     (2,1,150),
-     (2,2,50);
+	 (2,1,150),
+	 (2,2,50);
 
 
 -- Insert initial data into item_types
@@ -1510,13 +1514,22 @@ INSERT INTO public.item_types ("name",slug) VALUES
     ('Resource','resource');
 
 -- Insert initial data into items
-INSERT INTO public.items (name,slug,description,is_qest_item,item_type) VALUES
-     ('Iron Sword','iron_sworld','A sturdy iron sword.',false,1),
-     ('Wooden Shield','wooden_shield','A basic wooden shield.',false,2),
-     ('Health Potion','health_potion','Restores 50 health points.',false,3),
-     ('Bread','bread','A loaf of bread to restore hunger.',false,4),
-     ('Ancient Artifact','ancient_artifact','A mysterious artifact for quests.',true,5),
-     ('Iron Ore','iron_ore','A piece of iron ore, useful for crafting.',false,6);
+INSERT INTO public.items ("name",slug,description,is_quest_item,item_type,weight,rarity_id,stack_max,is_container,is_durable,is_tradable,durability_max,vendor_price_buy,vendor_price_sell,equip_slot,level_requirement,is_equippable,is_harvest) VALUES
+	 ('Health Potion','health_potion','Restores 50 health points.',false,3,0.2,1,64,false,false,true,100,1,1,0,0,false,false),
+	 ('Bread','bread','A loaf of bread to restore hunger.',false,4,0.1,1,64,false,false,true,100,1,1,0,0,false,false),
+	 ('Ancient Artifact','ancient_artifact','A mysterious artifact for quests.',true,5,0.5,1,64,false,false,true,100,1,1,0,0,false,false),
+	 ('Iron Ore','iron_ore','A piece of iron ore, useful for crafting.',false,6,2.0,1,64,false,false,true,100,1,1,0,0,false,false),
+	 ('Small Animal Bone','small_animal_bone','A small bones of small animal.',false,6,0.5,1,64,false,false,true,100,1,1,0,0,false,true),
+	 ('Small Animal Skin','small_animal_skin','A basic skin of small animal.',false,6,0.0,1,64,false,false,true,100,1,1,0,0,false,true),
+	 ('Animal Fat','animal_fat','Fat extracted from animal.',false,6,0.0,1,64,false,false,true,100,1,1,0,0,false,true),
+	 ('Animal Blood','animal_blood','Blood extracted from animal.',false,6,0.0,1,64,false,false,true,100,1,1,0,0,false,true),
+	 ('Animal Meat','animal_meet','Meat extracted from animal.',false,6,0.0,1,64,false,false,true,100,1,1,0,0,false,true),
+	 ('Animal Fang','animal_fang','Fang extracted from animal.',false,6,0.0,1,64,false,false,true,100,1,1,0,0,false,true);
+INSERT INTO public.items ("name",slug,description,is_quest_item,item_type,weight,rarity_id,stack_max,is_container,is_durable,is_tradable,durability_max,vendor_price_buy,vendor_price_sell,equip_slot,level_requirement,is_equippable,is_harvest) VALUES
+	 ('Animal Eye','animal_eye','Eye extracted from animal.',false,6,0.0,1,64,false,false,true,100,1,1,0,0,false,true),
+	 ('Iron Sword','iron_sworld','A sturdy iron sword.',false,1,5.0,1,64,false,true,true,100,1,1,0,1,true,false),
+	 ('Wooden Shield','wooden_shield','A basic wooden shield.',false,2,3.0,1,64,false,true,true,100,1,1,0,2,true,false);
+
 
 -- Insert initial data into item_attributes
 INSERT INTO public.item_attributes (name,slug) VALUES
@@ -1529,20 +1542,23 @@ INSERT INTO public.item_attributes (name,slug) VALUES
 
 -- Insert initial data into item_attributes_mapping
 INSERT INTO public.item_attributes_mapping (item_id,attribute_id,value) VALUES
-     (1,1,10),  -- Iron Sword with 10 damage
-     (2,2,5),   -- Wooden Shield with 5 defense
-     (3,3,50),  -- Health Potion with 50 healing
-     (4,4,30),  -- Bread with 30 hunger restoration
-     (5,5,1),   -- Ancient Artifact with quest value 1
-     (6,6,100); -- Iron Ore with resource value 100
+	 (1,1,10),
+	 (2,2,5),
+	 (3,3,50),
+	 (4,4,30);
 
 -- Insert initial data into moob_loot_info
 INSERT INTO public.mob_loot_info (mob_id,item_id,drop_chance) VALUES
-        (1,1,0.20),  -- Small Fox drops Iron Sword with 20% chance
-        (1,3,0.10),  -- Small Fox drops Health Potion with 10% chance
-        (2,2,0.15),  -- Grey Wolf drops Wooden Shield with 15% chance
-        (2,4,0.05),  -- Grey Wolf drops Bread with 5% chance
-        (2,6,0.25);  -- Grey Wolf drops Iron Ore with 25% chance
+	 (1,6,0.80),
+	 (1,1,0.80),
+	 (1,3,0.80),
+	 (2,2,0.80),
+	 (2,4,0.80),
+	 (1,9,0.80),
+	 (1,10,0.50),
+	 (1,11,0.40),
+	 (1,12,0.20);
+
 
 -- Insert initial data into skills
 INSERT INTO public.character_skills (name,level) VALUES
@@ -1586,3 +1602,13 @@ INSERT INTO equip_slot (id, slug, name) VALUES
 (9, 'ring',        'Ring'),
 (10,'neck',        'Neck'),
 (11,'trinket',     'Trinket');
+
+CREATE TABLE mob_ranks (
+  rank_id   SMALLINT PRIMARY KEY,
+  code      TEXT UNIQUE NOT NULL,   -- 'normal','pack','strong','elite','miniboss','boss'
+  mult      NUMERIC(4,2) NOT NULL
+);
+
+INSERT INTO mob_ranks(rank_id, code, mult) VALUES
+(1,'normal',1.0),(2,'pack',0.6),(3,'strong',1.5),
+(4,'elite',2.2),(5,'miniboss',5.0),(6,'boss',20.0);
