@@ -26,6 +26,7 @@ set(SOURCE_FILES
     src/utils/Config.cpp
     src/utils/JSONParser.cpp
     src/utils/Logger.cpp
+    src/utils/TimestampUtils.cpp
     src/events/Event.cpp
     src/events/EventHandler.cpp
     src/events/EventQueue.cpp
@@ -48,6 +49,7 @@ set(HEADER_FILES
     include/utils/TerminalColors.hpp
     include/utils/Logger.hpp
     include/utils/ResponseBuilder.hpp
+    include/utils/TimestampUtils.hpp
     include/events/Event.hpp
     include/events/EventHandler.hpp
     include/events/EventQueue.hpp

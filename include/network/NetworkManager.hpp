@@ -18,6 +18,7 @@ public:
     void startIOEventLoop();
     void sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString);
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message);
+    std::string generateResponseMessage(const std::string &status, const nlohmann::json &message, const TimestampStruct &timestamps);
 
 private:
     static constexpr size_t max_length = 1024; // Define the appropriate value

@@ -184,7 +184,7 @@ void EventHandler::handleDisconnectClientEvent(const Event &event, ClientData &c
             // Remove the client data
             clientData.removeClientData(passedClientData.clientId);
 
-            //send the response to all clients
+            // send the response to all clients
             nlohmann::json response;
             ResponseBuilder builder;
             response = builder
@@ -227,18 +227,49 @@ void EventHandler::handlePingClientEvent(const Event &event, ClientData &clientD
         {
             ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
 
-            //send the response to all clients
+            // Get timestamps from event for lag compensation
+            TimestampStruct timestamps;
+            bool hasTimestamps = false;
+
+            try
+            {
+                if (event.hasTimestamps())
+                {
+                    timestamps = event.getTimestamps();
+                    hasTimestamps = true;
+                }
+            }
+            catch (const std::exception &)
+            {
+                // Event doesn't have timestamps, log warning but continue
+                logger_.log("Ping event without timestamps for client " + std::to_string(passedClientData.clientId));
+            }
+
+            // send the response to all clients
             nlohmann::json response;
             ResponseBuilder builder;
-            response = builder
-                           .setHeader("message", "Pong!")
-                           .setHeader("eventType", "pingClient")
-                           .setBody("", "")
-                           .build();
-            std::string responseData = networkManager_.generateResponseMessage("success", response);
 
-            // send the response to the client
-            networkManager_.sendResponse(passedClientData.socket, responseData);
+            if (hasTimestamps)
+            {
+                response = builder
+                               .setHeader("message", "Pong!")
+                               .setHeader("eventType", "pingClient")
+                               .setTimestamps(timestamps)
+                               .setBody("", "")
+                               .build();
+                std::string responseData = networkManager_.generateResponseMessage("success", response, timestamps);
+                networkManager_.sendResponse(passedClientData.socket, responseData);
+            }
+            else
+            {
+                response = builder
+                               .setHeader("message", "Pong!")
+                               .setHeader("eventType", "pingClient")
+                               .setBody("", "")
+                               .build();
+                std::string responseData = networkManager_.generateResponseMessage("success", response);
+                networkManager_.sendResponse(passedClientData.socket, responseData);
+            }
         }
         else
         {
@@ -250,7 +281,6 @@ void EventHandler::handlePingClientEvent(const Event &event, ClientData &clientD
         logger_.log("Error here:" + std::string(ex.what()));
     }
 }
-
 
 void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
 {

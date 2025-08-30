@@ -11,19 +11,21 @@
 // Define the types of data that can be sent in an event
 using EventData = std::variant<int, float, std::string, nlohmann::json, PositionStruct, CharacterDataStruct, ClientDataStruct /* other types */>;
 
-class Event {
+class Event
+{
 public:
-    enum EventType { 
+    enum EventType
+    {
         PING_CLIENT,
-        AUTH_CLIENT, 
-        DISCONNECT_CLIENT, 
-        GET_CHARACTERS_LIST, 
-        CREATE_CHARACTER, 
+        AUTH_CLIENT,
+        DISCONNECT_CLIENT,
+        GET_CHARACTERS_LIST,
+        CREATE_CHARACTER,
         DELETE_CHARACTER
     }; // Define more event types as needed
     Event() = default; // Default constructor
     Event(EventType type, int clientID, const EventData data, std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
-   // Event(EventType type, int clientID, const EventData data);
+    // Event(EventType type, int clientID, const EventData data);
 
     // Get Event Data
     const EventData getData() const;
@@ -31,12 +33,20 @@ public:
     int getClientID() const;
     // Get Client Socket
     std::shared_ptr<boost::asio::ip::tcp::socket> getClientSocket() const;
-    //Get Event Type
+    // Get Event Type
     EventType getType() const;
+    // Get Timestamps
+    const TimestampStruct &getTimestamps() const;
+    // Set Timestamps
+    void setTimestamps(const TimestampStruct &timestamps);
+    // Check if event has timestamps
+    bool hasTimestamps() const;
 
 private:
     int clientID;
     EventType type;
     EventData eventData;
     std::shared_ptr<boost::asio::ip::tcp::socket> currentClientSocket;
+    TimestampStruct timestamps_;
+    bool hasTimestamps_ = false;
 };

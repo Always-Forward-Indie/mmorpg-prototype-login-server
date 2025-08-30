@@ -1,4 +1,5 @@
 #include "network/NetworkManager.hpp"
+#include "utils/TimestampUtils.hpp"
 
 NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
     : acceptor_(io_context_),
@@ -132,7 +133,10 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
         ClientDataStruct clientData = jsonParser_.parseClientData(messageBuffer, messageLength);
         CharacterDataStruct characterData = jsonParser_.parseCharacterData(messageBuffer, messageLength);
         PositionStruct positionData = jsonParser_.parsePositionData(messageBuffer, messageLength);
-        MessageStruct message = jsonParser_.parseMessage(messageBuffer, messageLength);
+        MessageStruct messageStruct = jsonParser_.parseMessage(messageBuffer, messageLength);
+
+        // Parse timestamps for lag compensation
+        TimestampStruct timestamps = TimestampUtils::parseTimestampsFromBuffer(messageBuffer, messageLength);
 
         logger_.log("Event type: " + eventType, YELLOW);
         logger_.log("Client ID: " + std::to_string(clientData.clientId), YELLOW);
@@ -149,6 +153,7 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
 
             // Create a new event where authentificate the client and push it to the queue
             Event authentificationClientEvent(Event::AUTH_CLIENT, clientData.clientId, clientData, clientSocket);
+            authentificationClientEvent.setTimestamps(timestamps); // Add timestamps
             eventQueue_.push(authentificationClientEvent);
         }
 
@@ -162,6 +167,7 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
 
             // Create a new event where get characters list according client and push it to the queue
             Event getCharactersListEvent(Event::GET_CHARACTERS_LIST, clientData.clientId, clientData, clientSocket);
+            getCharactersListEvent.setTimestamps(timestamps); // Add timestamps
             eventQueue_.push(getCharactersListEvent);
         }
 
@@ -175,6 +181,7 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
 
             // Create a new event where disconnect the client and push it to the queue
             Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);
+            disconnectClientEvent.setTimestamps(timestamps); // Add timestamps
             eventQueue_.push(disconnectClientEvent);
         }
 
@@ -188,6 +195,7 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
 
             // Create a new event where ping the client and push it to the queue
             Event pingClientEvent(Event::PING_CLIENT, clientData.clientId, clientData, clientSocket);
+            pingClientEvent.setTimestamps(timestamps); // Add timestamps
             eventQueue_.push(pingClientEvent);
         }
     }
@@ -307,6 +315,29 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
     std::string responseString = response.dump();
 
     logger_.log("Response generated: " + responseString, YELLOW);
+
+    return responseString + "\n";
+}
+
+std::string NetworkManager::generateResponseMessage(const std::string &status, const nlohmann::json &message, const TimestampStruct &timestamps)
+{
+    nlohmann::json response;
+    std::string currentTimestamp = logger_.getCurrentTimestamp();
+    response["header"] = message["header"];
+    response["header"]["status"] = status;
+    response["header"]["timestamp"] = currentTimestamp;
+    response["header"]["version"] = "1.0";
+
+    // Add lag compensation timestamps to header
+    TimestampStruct finalTimestamps = timestamps;
+    TimestampUtils::setServerSendTimestamp(finalTimestamps); // Set serverSendMs to current time
+    TimestampUtils::addTimestampsToHeader(response, finalTimestamps);
+
+    response["body"] = message["body"];
+
+    std::string responseString = response.dump();
+
+    logger_.log("Response with timestamps generated: " + responseString, YELLOW);
 
     return responseString + "\n";
 }
