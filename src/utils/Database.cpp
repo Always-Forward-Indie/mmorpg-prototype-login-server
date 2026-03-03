@@ -4,15 +4,14 @@
 #include <thread>
 #include <chrono>
 
-Database::Database(std::tuple<DatabaseConfig, LoginServerConfig>& configs, Logger& logger) 
-: 
-logger_(logger)
+Database::Database(std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
+    : logger_(logger)
 {
     connect(configs);
     prepareDefaultQueries();
 }
 
-void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig>& configs)
+void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig> &configs)
 {
     int retries = 5;
     while (retries > 0)
@@ -27,7 +26,7 @@ void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig>& configs)
 
             logger_.log("Connecting to database...", YELLOW);
             logger_.log("Database name: " + databaseName, BLUE);
-            //logger_.log("User: " + user, BLUE);
+            // logger_.log("User: " + user, BLUE);
             logger_.log("Host: " + host, BLUE);
             logger_.log("Port: " + std::to_string(port), BLUE);
 
@@ -62,25 +61,33 @@ void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig>& configs)
     }
 }
 
-void Database::prepareDefaultQueries() {
-    if (connection_->is_open()) {
+void Database::prepareDefaultQueries()
+{
+    if (connection_->is_open())
+    {
         connection_->prepare("search_user", "SELECT * FROM users WHERE login = $1 AND password = $2 LIMIT 1;");
-        connection_->prepare("update_user", "UPDATE users SET session_key = $1 WHERE id = $2;");
+        connection_->prepare("create_user_session",
+                             "INSERT INTO user_sessions (user_id, token_hash, created_at, expires_at) "
+                             "VALUES ($1, $2, now(), now() + interval '30 days') "
+                             "ON CONFLICT (token_hash) DO NOTHING;");
+        ;
 
         connection_->prepare("get_characters_list", "SELECT characters.id as character_id, characters.level as character_lvl, "
-        "characters.name as character_name, character_class.name as character_class, race.name as race_name "
-        "FROM characters "
-        "JOIN character_class ON characters.class_id = character_class.id " 
-        "JOIN race on characters.race_id = race.id "
-        "WHERE characters.owner_id = $1;");
+                                                    "characters.name as character_name, character_class.name as character_class, race.name as race_name "
+                                                    "FROM characters "
+                                                    "JOIN character_class ON characters.class_id = character_class.id "
+                                                    "JOIN race on characters.race_id = race.id "
+                                                    "WHERE characters.owner_id = $1;");
         connection_->prepare("select_character", "SELECT characters.id as character_id, characters.level as character_lvl, "
-        "characters.name as character_name, character_class.name as character_class, race.name as race_name "
-        "FROM characters "
-        "JOIN character_class ON characters.class_id = character_class.id "
-        "JOIN race on characters.race_id = race.id "
-        "WHERE characters.owner_id = $1 AND characters.id = $2 LIMIT 1;");
+                                                 "characters.name as character_name, character_class.name as character_class, race.name as race_name "
+                                                 "FROM characters "
+                                                 "JOIN character_class ON characters.class_id = character_class.id "
+                                                 "JOIN race on characters.race_id = race.id "
+                                                 "WHERE characters.owner_id = $1 AND characters.id = $2 LIMIT 1;");
         connection_->prepare("create_character", "INSERT INTO characters (owner_id, name, class_id, race_id) VALUES ($1, $2, $3, $4);");
-    } else {
+    }
+    else
+    {
         logger_.logError("Cannot prepare queries: Database connection is not open.");
     }
 }
@@ -105,7 +112,7 @@ void Database::handleDatabaseError(const std::exception &e)
 }
 
 // Function to execute a query with a transaction
-//using ParamType = std::variant<int, float, double, std::string>; // Define a type of data alias for the parameter type
+// using ParamType = std::variant<int, float, double, std::string>; // Define a type of data alias for the parameter type
 pqxx::result Database::executeQueryWithTransaction(
     pqxx::work &transaction,
     const std::string &preparedQueryName,
@@ -117,12 +124,12 @@ pqxx::result Database::executeQueryWithTransaction(
         std::vector<std::string> paramStrings;
         for (const auto &param : parameters)
         {
-            paramStrings.push_back(std::visit([](const auto &value) -> std::string {
+            paramStrings.push_back(std::visit([](const auto &value) -> std::string
+                                              {
                 if constexpr (std::is_same_v<std::decay_t<decltype(value)>, std::string>)
                     return value;
                 else
-                    return std::to_string(value);
-            }, param));
+                    return std::to_string(value); }, param));
         }
 
         // Convert to a vector of raw C-style strings (needed for exec_prepared)
@@ -144,4 +151,3 @@ pqxx::result Database::executeQueryWithTransaction(
         return pqxx::result();
     }
 }
-

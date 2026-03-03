@@ -11,22 +11,26 @@
 using namespace pqxx;
 using namespace std;
 
-int Authenticator::authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password) {
-    try {
+int Authenticator::authenticate(Database &database, ClientData &clientData, const std::string &login, const std::string &password)
+{
+    try
+    {
         // Create a transactional object. It automatically starts a transaction.
         pqxx::work transaction(database.getConnection());
         // Check if the provided login and password match a record in the database
         pqxx::result getUserDBData = transaction.exec_prepared("search_user", login, password);
 
-        if (!getUserDBData.empty()) {
+        if (!getUserDBData.empty())
+        {
             int userID = 0;
 
             // Loop through the result set and process the data
-            for (pqxx::result::size_type i = 0; i < getUserDBData.size(); ++i) {
+            for (pqxx::result::size_type i = 0; i < getUserDBData.size(); ++i)
+            {
                 userID = getUserDBData[i][0].as<int>(); // Access the second column (index 1)
             }
 
-            transaction.commit(); // Commit the transaction
+            transaction.commit(); // Commit the transaction after user lookup
 
             // Generate a unique hash for the client
             boost::uuids::uuid uuid = boost::uuids::random_generator()();
@@ -38,19 +42,24 @@ int Authenticator::authenticate(Database& database, ClientData& clientData, cons
             clientDataStruct.login = login;
             clientDataStruct.hash = uniqueHash;
 
-            pqxx::result updateUserDBData = transaction.exec_prepared("update_user", uniqueHash, std::to_string(userID));
+            // Use a fresh transaction for inserting the session token
+            pqxx::work sessionTxn(database.getConnection());
+            sessionTxn.exec_prepared("create_user_session", userID, uniqueHash);
+            sessionTxn.commit();
 
-            transaction.commit(); // Commit the transaction
-
-            clientData.storeClientData(clientDataStruct);  // Store clientData in the ClientData class
+            clientData.storeClientData(clientDataStruct); // Store clientData in the ClientData class
 
             return userID;
-        } else {
+        }
+        else
+        {
             // Authentication failed, return false
             transaction.abort(); // Rollback the transaction (optional)
             return 0;
         }
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         // Handle database connection or query errors
         std::cerr << "Database error: " << e.what() << std::endl;
         // You might want to send an error response back to the client or log the error
