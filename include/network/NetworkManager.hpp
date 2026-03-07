@@ -34,5 +34,6 @@ private:
     std::tuple<DatabaseConfig, LoginServerConfig> &configs_;
     EventQueue &eventQueue_;
     Logger &logger_;
+    std::shared_ptr<spdlog::logger> log_;
     JSONParser jsonParser_;
 };

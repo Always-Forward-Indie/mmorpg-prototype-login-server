@@ -1,11 +1,12 @@
 // Authenticator.hpp
 #pragma once
 
+#include <pqxx/pqxx>
 #include <string>
-#include "data/ClientData.hpp" // Include the header file for ClientData
-#include "utils/Database.hpp" // Include the header file for Database
+#include "data/ClientData.hpp"
 
-class Authenticator {
+class Authenticator
+{
 public:
-    int authenticate(Database& database, ClientData& clientData, const std::string& login, const std::string& password);
+    int authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password);
 };

@@ -3,10 +3,12 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <spdlog/logger.h>
 
 Database::Database(std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
     : logger_(logger)
 {
+    log_ = logger.getSystem("db");
     connect(configs);
     prepareDefaultQueries();
 }
@@ -24,23 +26,23 @@ void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig> &configs)
             std::string user = std::get<0>(configs).user;
             std::string password = std::get<0>(configs).password;
 
-            logger_.log("Connecting to database...", YELLOW);
-            logger_.log("Database name: " + databaseName, BLUE);
-            // logger_.log("User: " + user, BLUE);
-            logger_.log("Host: " + host, BLUE);
-            logger_.log("Port: " + std::to_string(port), BLUE);
+            log_->info("Connecting to database...");
+            log_->debug("Database name: " + databaseName);
+            // log_->debug("User: " + user);
+            log_->debug("Host: " + host);
+            log_->debug("Port: " + std::to_string(port));
 
-            connection_ = std::make_unique<pqxx::connection>(
-                "dbname=" + databaseName + " user=" + user + " password=" + password + " host=" + host + " port=" + std::to_string(port));
+            connectionString_ = "dbname=" + databaseName + " user=" + user + " password=" + password + " host=" + host + " port=" + std::to_string(port);
+            connection_ = std::make_unique<pqxx::connection>(connectionString_);
 
             if (connection_->is_open())
             {
-                logger_.log("Database connection established!", GREEN);
+                log_->info("Database connection established!");
                 break;
             }
             else
             {
-                logger_.logError("Database connection failed!");
+                log_->error("Database connection failed!");
             }
         }
         catch (const std::exception &e)
@@ -51,12 +53,12 @@ void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig> &configs)
         retries--;
         if (retries > 0)
         {
-            logger_.log("Retrying in 5 seconds...", YELLOW);
+            log_->info("Retrying in 5 seconds...");
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
         else
         {
-            logger_.logError("Failed to connect to the database after multiple attempts.");
+            log_->error("Failed to connect to the database after multiple attempts.");
         }
     }
 }
@@ -64,32 +66,82 @@ void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig> &configs)
 void Database::prepareDefaultQueries()
 {
     if (connection_->is_open())
-    {
-        connection_->prepare("search_user", "SELECT * FROM users WHERE login = $1 AND password = $2 LIMIT 1;");
-        connection_->prepare("create_user_session",
-                             "INSERT INTO user_sessions (user_id, token_hash, created_at, expires_at) "
-                             "VALUES ($1, $2, now(), now() + interval '30 days') "
-                             "ON CONFLICT (token_hash) DO NOTHING;");
-        ;
-
-        connection_->prepare("get_characters_list", "SELECT characters.id as character_id, characters.level as character_lvl, "
-                                                    "characters.name as character_name, character_class.name as character_class, race.name as race_name "
-                                                    "FROM characters "
-                                                    "JOIN character_class ON characters.class_id = character_class.id "
-                                                    "JOIN race on characters.race_id = race.id "
-                                                    "WHERE characters.owner_id = $1;");
-        connection_->prepare("select_character", "SELECT characters.id as character_id, characters.level as character_lvl, "
-                                                 "characters.name as character_name, character_class.name as character_class, race.name as race_name "
-                                                 "FROM characters "
-                                                 "JOIN character_class ON characters.class_id = character_class.id "
-                                                 "JOIN race on characters.race_id = race.id "
-                                                 "WHERE characters.owner_id = $1 AND characters.id = $2 LIMIT 1;");
-        connection_->prepare("create_character", "INSERT INTO characters (owner_id, name, class_id, race_id) VALUES ($1, $2, $3, $4);");
-    }
+        prepareQueriesOn(*connection_);
     else
-    {
-        logger_.logError("Cannot prepare queries: Database connection is not open.");
-    }
+        log_->error("Cannot prepare queries: Database connection is not open.");
+}
+
+void Database::prepareQueriesOn(pqxx::connection &conn)
+{
+    // Search user by login — returns user row including hashed password for verification in app code.
+    // Also checks is_active and lock status (locked_until).
+    conn.prepare("search_user",
+                 "SELECT id, login, password, role, is_active, "
+                 "locked_until, failed_login_attempts "
+                 "FROM users "
+                 "WHERE login = $1 "
+                 "AND is_active = true "
+                 "AND (locked_until IS NULL OR locked_until < now()) "
+                 "LIMIT 1;");
+    conn.prepare("increment_failed_logins",
+                 "UPDATE users "
+                 "SET failed_login_attempts = failed_login_attempts + 1, "
+                 "locked_until = CASE WHEN failed_login_attempts + 1 >= 5 "
+                 "  THEN now() + interval '15 minutes' ELSE locked_until END "
+                 "WHERE login = $1;");
+    conn.prepare("reset_failed_logins",
+                 "UPDATE users "
+                 "SET failed_login_attempts = 0, locked_until = NULL, last_login = now(), last_login_ip = $2::inet "
+                 "WHERE id = $1;");
+    conn.prepare("create_user_session",
+                 "INSERT INTO user_sessions (user_id, token_hash, created_at, expires_at) "
+                 "VALUES ($1, $2, now(), now() + interval '30 days') "
+                 "ON CONFLICT (token_hash) DO NOTHING;");
+    ;
+
+    conn.prepare("get_characters_list",
+                 "SELECT c.id AS character_id, c.level AS character_lvl, "
+                 "c.name AS character_name, cc.name AS character_class, r.name AS race_name, "
+                 "c.experience_points, c.account_slot, cg.name AS gender_name, "
+                 "COALESCE(ccs.current_health, 1) AS current_health, "
+                 "COALESCE(ccs.current_mana, 1) AS current_mana "
+                 "FROM characters c "
+                 "JOIN character_class cc ON c.class_id = cc.id "
+                 "JOIN race r ON c.race_id = r.id "
+                 "LEFT JOIN character_genders cg ON cg.id = c.gender "
+                 "LEFT JOIN character_current_state ccs ON ccs.character_id = c.id "
+                 "WHERE c.owner_id = $1 AND c.deleted_at IS NULL "
+                 "ORDER BY c.account_slot;");
+    conn.prepare("select_character",
+                 "SELECT c.id AS character_id, c.level AS character_lvl, "
+                 "c.name AS character_name, cc.name AS character_class, r.name AS race_name, "
+                 "c.experience_points, c.account_slot "
+                 "FROM characters c "
+                 "JOIN character_class cc ON c.class_id = cc.id "
+                 "JOIN race r ON c.race_id = r.id "
+                 "WHERE c.owner_id = $1 AND c.id = $2 AND c.deleted_at IS NULL "
+                 "LIMIT 1;");
+    // create_character — inserts base record; resolves class/race/gender by name.
+    // Params: $1=owner_id(int), $2=character_name, $3=class_name, $4=race_name, $5=gender_name
+    conn.prepare("create_character",
+                 "INSERT INTO characters (owner_id, name, class_id, race_id, gender, account_slot) "
+                 "SELECT $1::int, $2, cc.id, r.id, cg.id, "
+                 "  COALESCE((SELECT MAX(account_slot) + 1 FROM characters WHERE owner_id = $1::int AND deleted_at IS NULL), 1) "
+                 "FROM character_class cc "
+                 "JOIN race r ON r.name = $4 "
+                 "JOIN character_genders cg ON cg.name = $5 "
+                 "WHERE cc.name = $3 "
+                 "RETURNING id;");
+    // init_character_state — called after create_character to set up health/mana state row
+    conn.prepare("init_character_state",
+                 "INSERT INTO character_current_state (character_id, current_health, current_mana) "
+                 "VALUES ($1, 1, 1) "
+                 "ON CONFLICT (character_id) DO NOTHING;");
+    // init_character_position — creates default position row (0,0,0 zone=1 village)
+    conn.prepare("init_character_position",
+                 "INSERT INTO character_position (character_id, x, y, z, zone_id) "
+                 "VALUES ($1, 0, 0, 200, 1) "
+                 "ON CONFLICT DO NOTHING;");
 }
 
 pqxx::connection &Database::getConnection()
@@ -102,6 +154,34 @@ pqxx::connection &Database::getConnection()
     {
         throw std::runtime_error("Database connection is not open.");
     }
+}
+
+Database::ScopedConnection Database::getConnectionLocked()
+{
+    std::unique_lock<std::mutex> lock(dbMutex_);
+    // HIGH-10: reconnect if the connection was lost
+    if (!connection_ || !connection_->is_open())
+    {
+        log_->info("Database connection lost — reconnecting...");
+        try
+        {
+            connection_ = std::make_unique<pqxx::connection>(connectionString_);
+            if (connection_->is_open())
+            {
+                log_->info("Database reconnected successfully.");
+                prepareDefaultQueries();
+            }
+            else
+            {
+                throw std::runtime_error("Reconnect attempt failed: connection not open.");
+            }
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Database reconnect failed: " + std::string(e.what()));
+        }
+    }
+    return ScopedConnection(std::move(lock), *connection_);
 }
 
 // Function to handle database errors

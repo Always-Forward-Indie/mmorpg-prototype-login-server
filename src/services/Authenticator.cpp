@@ -1,5 +1,4 @@
 #include "services/Authenticator.hpp"
-#include "utils/Database.hpp"
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -7,62 +6,59 @@
 #include <pqxx/pqxx>
 #include <iostream>
 
-// Add these using declarations for convenience
-using namespace pqxx;
-using namespace std;
-
-int Authenticator::authenticate(Database &database, ClientData &clientData, const std::string &login, const std::string &password)
+int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password)
 {
     try
     {
-        // Create a transactional object. It automatically starts a transaction.
-        pqxx::work transaction(database.getConnection());
-        // Check if the provided login and password match a record in the database
-        pqxx::result getUserDBData = transaction.exec_prepared("search_user", login, password);
+        // Step 1: fetch user row by login only (is_active check + lock check is in SQL)
+        pqxx::work transaction(conn);
+        pqxx::result getUserDBData = transaction.exec_prepared("search_user", login);
 
-        if (!getUserDBData.empty())
+        if (getUserDBData.empty())
         {
-            int userID = 0;
-
-            // Loop through the result set and process the data
-            for (pqxx::result::size_type i = 0; i < getUserDBData.size(); ++i)
-            {
-                userID = getUserDBData[i][0].as<int>(); // Access the second column (index 1)
-            }
-
-            transaction.commit(); // Commit the transaction after user lookup
-
-            // Generate a unique hash for the client
-            boost::uuids::uuid uuid = boost::uuids::random_generator()();
-            std::string uniqueHash = boost::uuids::to_string(uuid);
-
-            // Create a ClientDataStruct with the login, password, and unique hash
-            ClientDataStruct clientDataStruct;
-            clientDataStruct.clientId = userID;
-            clientDataStruct.login = login;
-            clientDataStruct.hash = uniqueHash;
-
-            // Use a fresh transaction for inserting the session token
-            pqxx::work sessionTxn(database.getConnection());
-            sessionTxn.exec_prepared("create_user_session", userID, uniqueHash);
-            sessionTxn.commit();
-
-            clientData.storeClientData(clientDataStruct); // Store clientData in the ClientData class
-
-            return userID;
-        }
-        else
-        {
-            // Authentication failed, return false
-            transaction.abort(); // Rollback the transaction (optional)
+            transaction.abort();
             return 0;
         }
+
+        const auto &row = getUserDBData[0];
+        int userID = row["id"].as<int>();
+        std::string storedPassword = row["password"].as<std::string>();
+
+        // Step 2: verify password.
+        // NOTE: The stored password is currently a plain string (legacy).
+        // TODO: migrate to bcrypt/argon2 hashing and update this comparison.
+        if (storedPassword != password)
+        {
+            // Increment failed login counter (may lock the account after 5 attempts)
+            transaction.exec_prepared("increment_failed_logins", login);
+            transaction.commit();
+            return 0;
+        }
+
+        // Step 3: reset failed login counter and update last_login
+        transaction.exec_prepared("reset_failed_logins", userID, "127.0.0.1");
+        transaction.commit();
+
+        // Step 4: generate session token
+        boost::uuids::uuid uuid = boost::uuids::random_generator()();
+        std::string uniqueHash = boost::uuids::to_string(uuid);
+
+        pqxx::work sessionTxn(conn);
+        sessionTxn.exec_prepared("create_user_session", userID, uniqueHash);
+        sessionTxn.commit();
+
+        // Step 5: store in-memory client data
+        ClientDataStruct clientDataStruct;
+        clientDataStruct.clientId = userID;
+        clientDataStruct.login = login;
+        clientDataStruct.hash = uniqueHash;
+
+        clientData.storeClientData(clientDataStruct);
+        return userID;
     }
     catch (const std::exception &e)
     {
-        // Handle database connection or query errors
         std::cerr << "Database error: " << e.what() << std::endl;
-        // You might want to send an error response back to the client or log the error
         return 0;
     }
 }

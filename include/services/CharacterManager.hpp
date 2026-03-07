@@ -1,28 +1,35 @@
 #pragma once
 
 #include <iostream>
+#include <pqxx/pqxx>
 #include <vector>
-#include <utils/Database.hpp>
 #include <data/ClientData.hpp>
 #include <utils/Logger.hpp>
 
-class CharacterManager {
+class CharacterManager
+{
 public:
     // Constructor
-    CharacterManager(Logger& logger);
+    CharacterManager(Logger &logger);
 
     // Method to get characters list
-    std::vector<CharacterDataStruct> getCharactersList(Database& database, ClientData& clientData, int accountId);
+    std::vector<CharacterDataStruct> getCharactersList(pqxx::connection &conn, ClientData &clientData, int accountId);
 
     // Method to select a character
-    CharacterDataStruct selectCharacter(Database& database, ClientData& clientData, int accountId, int characterId);
+    CharacterDataStruct selectCharacter(pqxx::connection &conn, ClientData &clientData, int accountId, int characterId);
 
     // Method to create a character
-    void createCharacter(Database& database, int accountId, const std::string& characterName, const std::string& characterClass);
+    // Returns the new character id on success, 0 on failure.
+    int createCharacter(pqxx::connection &conn, int accountId,
+                        const std::string &characterName,
+                        const std::string &characterClass,
+                        const std::string &characterRace,
+                        const std::string &characterGender);
 
     // Method to delete a character
-    void deleteCharacter(Database& database, int accountId, int characterId);
+    void deleteCharacter(pqxx::connection &conn, int accountId, int characterId);
 
 private:
-    Logger& logger_;
+    Logger &logger_;
+    std::shared_ptr<spdlog::logger> log_;
 };

@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     libpqxx-dev \
+    libspdlog-dev \
     pkg-config \
     gdb
 
@@ -43,6 +44,7 @@ RUN apt-get update && apt-get install -y \
     libasan6 \
     libubsan1 \
     libstdc++6 \
+    libfmt8 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

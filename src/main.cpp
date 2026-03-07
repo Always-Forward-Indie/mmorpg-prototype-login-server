@@ -4,7 +4,7 @@
 #include "utils/Config.hpp"
 #include "utils/Logger.hpp"
 #include "login_server/LoginServer.hpp"
-#include "utils/Database.hpp"
+#include "utils/DatabasePool.hpp"
 #include "services/CharacterManager.hpp"
 
 std::atomic<bool> running(true);
@@ -16,12 +16,11 @@ void signalHandler(int signal)
 
 int main()
 {
+    Logger logger("login-server");
     try
     {
         // Initialize the config
         Config config;
-        // Initialize Logger
-        Logger logger;
 
         // Parse the config file
         auto configs = config.parseConfig("config.json");
@@ -38,11 +37,11 @@ int main()
         // Initialize CharacterManager
         CharacterManager characterManager(logger);
 
-        // Initialize Database
-        Database database(configs, logger);
+        // Initialize DatabasePool (5 connections, each with prepared queries)
+        DatabasePool pool(std::get<0>(configs), logger);
 
         // Initialize the server
-        LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, database, characterManager, logger);
+        LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, pool, characterManager, logger);
 
         // Start accepting connections
         // networkManager.startAccept();
@@ -62,7 +61,7 @@ int main()
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1; // Indicate an error exit status
+        logger.critical("Fatal error: " + std::string(e.what()));
+        return 1;
     }
 }

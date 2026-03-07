@@ -1,5 +1,6 @@
 #include "network/NetworkManager.hpp"
 #include "utils/TimestampUtils.hpp"
+#include <spdlog/logger.h>
 
 NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
     : acceptor_(io_context_),
@@ -8,6 +9,7 @@ NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig
       jsonParser_(),
       eventQueue_(eventQueue)
 {
+    log_ = logger.getSystem("network");
     boost::system::error_code ec;
 
     // Get the custom port and IP address from the configs
@@ -22,7 +24,7 @@ NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig
     acceptor_.open(endpoint.protocol(), ec);
     if (!ec)
     {
-        logger_.log("Starting Login Server...", YELLOW);
+        log_->info("Starting Login Server...");
         acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true), ec);
         acceptor_.bind(endpoint, ec);
         acceptor_.listen(maxClients, ec);
@@ -35,7 +37,7 @@ NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig
     }
 
     // Print IP address and port when the server starts
-    logger_.log("Login Server started on IP: " + customIP + ", Port: " + std::to_string(customPort), GREEN);
+    log_->info("Login Server started on IP: " + customIP + ", Port: " + std::to_string(customPort));
 }
 
 void NetworkManager::startAccept()
@@ -51,13 +53,13 @@ void NetworkManager::startAccept()
                     std::string portNumber = std::to_string(remoteEndpoint.port());
 
                     // Print the Client IP address
-                    logger_.log("New Client with IP: " + clientIP + " Port: " + portNumber + " - connected!", GREEN);
+                    log_->info("New Client with IP: " + clientIP + " Port: " + portNumber + " - connected!");
                     
                     // Start reading data from the client
                     startReadingFromClient(clientSocket);
                 }
                 else{
-                    logger_.log("Accept client connection error: " + error.message(), RED);
+                    log_->warn("Accept client connection error: " + error.message());
                 }
 
                 // Continue accepting new connections even if there's an error
@@ -66,7 +68,7 @@ void NetworkManager::startAccept()
 
 void NetworkManager::startIOEventLoop()
 {
-    logger_.log("Starting Login Server IO Context...", YELLOW);
+    log_->info("Starting Login Server IO Context...");
 
     startAccept();
 
@@ -80,7 +82,7 @@ void NetworkManager::startIOEventLoop()
 
 NetworkManager::~NetworkManager()
 {
-    logger_.log("Network Manager destructor is called...", RED);
+    log_->warn("Network Manager destructor is called...");
     acceptor_.close();
     io_context_.stop();
     for (auto &thread : threadPool_)
@@ -108,7 +110,7 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
         std::string message = accumulatedData.substr(0, delimiterPos);
 
         // Log the received message
-        logger_.log("Received data from Client: " + message, YELLOW);
+        log_->info("Received data from Client: " + message);
 
         // Process the message
         processMessage(clientSocket, message);
@@ -138,10 +140,10 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
         // Parse timestamps for lag compensation
         TimestampStruct timestamps = TimestampUtils::parseTimestampsFromBuffer(messageBuffer, messageLength);
 
-        logger_.log("Event type: " + eventType, YELLOW);
-        logger_.log("Client ID: " + std::to_string(clientData.clientId), YELLOW);
-        logger_.log("Client hash: " + clientData.hash, YELLOW);
-        logger_.log("Character ID: " + std::to_string(characterData.characterId), YELLOW);
+        log_->info("Event type: " + eventType);
+        log_->info("Client ID: " + std::to_string(clientData.clientId));
+        log_->info("Client hash: " + clientData.hash);
+        log_->info("Character ID: " + std::to_string(characterData.characterId));
 
         // Check if the type of request is authentificationClient
         if (eventType == "authentificationClient" && clientData.login != "" && clientData.password != "")
@@ -169,6 +171,17 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
             Event getCharactersListEvent(Event::GET_CHARACTERS_LIST, clientData.clientId, clientData, clientSocket);
             getCharactersListEvent.setTimestamps(timestamps); // Add timestamps
             eventQueue_.push(getCharactersListEvent);
+        }
+
+        // Check if the type of request is createCharacter
+        if (eventType == "createCharacter" && clientData.hash != "" && clientData.clientId != 0)
+        {
+            clientData.characterData = characterData;
+            clientData.socket = clientSocket;
+
+            Event createCharacterEvent(Event::CREATE_CHARACTER, clientData.clientId, clientData, clientSocket);
+            createCharacterEvent.setTimestamps(timestamps);
+            eventQueue_.push(createCharacterEvent);
         }
 
         // Check if the type of request is disconnectClient
@@ -207,8 +220,12 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
 
 void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString)
 {
-    boost::asio::async_write(*clientSocket, boost::asio::buffer(responseString),
-                             [this, clientSocket](const boost::system::error_code &error, size_t bytes_transferred)
+    // CRITICAL-11 fix: responseString is a const-ref parameter; it may be destroyed before
+    // async_write completes. Copy once into a shared_ptr to keep data alive until completion.
+    auto dataPtr = std::make_shared<const std::string>(responseString);
+
+    boost::asio::async_write(*clientSocket, boost::asio::buffer(*dataPtr),
+                             [this, clientSocket, dataPtr](const boost::system::error_code &error, size_t bytes_transferred)
                              {
                                  boost::system::error_code ec;
                                  boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint(ec);
@@ -218,8 +235,8 @@ void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> 
                                      std::string ipAddress = remoteEndpoint.address().to_string();
                                      std::string portNumber = std::to_string(remoteEndpoint.port());
 
-                                     logger_.log("Bytes send: " + std::to_string(bytes_transferred), BLUE);
-                                     logger_.log("Data send successfully to the Client: " + ipAddress + ", Port: " + portNumber, BLUE);
+                                     log_->debug("Bytes send: " + std::to_string(bytes_transferred));
+                                     log_->debug("Data send successfully to the Client: " + ipAddress + ", Port: " + portNumber);
 
                                      // Now you can use ipAddress and portNumber as needed
                                  }
@@ -235,7 +252,7 @@ void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> 
                                  }
                                  else
                                  {
-                                     logger_.logError("Error during async_write: " + error.message(), RED);
+                                     log_->error("Error during async_write: " + error.message());
                                  }
                              });
 }
@@ -256,8 +273,8 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                           std::string ipAddress = remoteEndpoint.address().to_string();
                                           std::string portNumber = std::to_string(remoteEndpoint.port());
 
-                                          logger_.log("Bytes received: " + std::to_string(bytes_transferred), YELLOW);
-                                          logger_.log("Data received from Client IP address: " + ipAddress + ", Port: " + portNumber, YELLOW);
+                                          log_->info("Bytes received: " + std::to_string(bytes_transferred));
+                                          log_->info("Data received from Client IP address: " + ipAddress + ", Port: " + portNumber);
                                       }
                                       else
                                       {
@@ -276,7 +293,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                       else if (error == boost::asio::error::eof)
                                       {
                                           // The client has closed the connection
-                                          logger_.logError("Client disconnected gracefully.");
+                                          log_->error("Client disconnected gracefully.");
 
                                           // Close the client socket
                                           clientSocket->close();
@@ -284,7 +301,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                       else if (error == boost::asio::error::operation_aborted)
                                       {
                                           // The read operation was canceled, likely due to the client disconnecting
-                                          logger_.logError("Read operation canceled (client disconnected).");
+                                          log_->error("Read operation canceled (client disconnected).");
 
                                           // You can perform any cleanup or logging here if needed
 
@@ -294,7 +311,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                       else
                                       {
                                           // Handle other errors
-                                          logger_.logError("Error during async_read_some: " + error.message());
+                                          log_->error("Error during async_read_some: " + error.message());
 
                                           // You can also close the socket in case of other errors if needed
                                           clientSocket->close();
@@ -305,7 +322,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
 std::string NetworkManager::generateResponseMessage(const std::string &status, const nlohmann::json &message)
 {
     nlohmann::json response;
-    std::string currentTimestamp = logger_.getCurrentTimestamp();
+    std::string currentTimestamp = TimestampUtils::getCurrentTimestamp();
     response["header"] = message["header"];
     response["header"]["status"] = status;
     response["header"]["timestamp"] = currentTimestamp;
@@ -314,7 +331,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
 
     std::string responseString = response.dump();
 
-    logger_.log("Response generated: " + responseString, YELLOW);
+    log_->info("Response generated: " + responseString);
 
     return responseString + "\n";
 }
@@ -322,7 +339,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
 std::string NetworkManager::generateResponseMessage(const std::string &status, const nlohmann::json &message, const TimestampStruct &timestamps)
 {
     nlohmann::json response;
-    std::string currentTimestamp = logger_.getCurrentTimestamp();
+    std::string currentTimestamp = TimestampUtils::getCurrentTimestamp();
     response["header"] = message["header"];
     response["header"]["status"] = status;
     response["header"]["timestamp"] = currentTimestamp;
@@ -337,7 +354,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
 
     std::string responseString = response.dump();
 
-    logger_.log("Response with timestamps generated: " + responseString, YELLOW);
+    log_->info("Response with timestamps generated: " + responseString);
 
     return responseString + "\n";
 }

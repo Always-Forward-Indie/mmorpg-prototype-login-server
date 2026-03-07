@@ -32,6 +32,7 @@ struct CharacterDataStruct
     std::string characterName = "";
     std::string characterClass = "";
     std::string characterRace = "";
+    std::string characterGender = "";
     PositionStruct characterPosition;
     bool needDBUpdate = false;
 };

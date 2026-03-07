@@ -23,6 +23,7 @@ set(SOURCE_FILES
     src/data/ClientData.cpp
     src/utils/ThreadPool.cpp
     src/utils/Database.cpp
+    src/utils/DatabasePool.cpp
     src/utils/Config.cpp
     src/utils/JSONParser.cpp
     src/utils/Logger.cpp
@@ -63,8 +64,11 @@ include_directories(include)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(libpqxx REQUIRED IMPORTED_TARGET libpqxx)
 
+# spdlog
+find_package(spdlog REQUIRED)
+
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
 # Link against libpqxx and PostgreSQL
-target_link_libraries(${PROJECT_NAME} PkgConfig::libpqxx pq)
+target_link_libraries(${PROJECT_NAME} PkgConfig::libpqxx pq spdlog::spdlog_header_only)

@@ -1,15 +1,17 @@
 #include "events/EventHandler.hpp"
 #include "events/Event.hpp"
+#include <spdlog/logger.h>
 
 EventHandler::EventHandler(NetworkManager &networkManager,
-                           Database &database,
+                           DatabasePool &pool,
                            CharacterManager &characterManager,
                            Logger &logger)
     : networkManager_(networkManager),
-      database_(database),
+      pool_(pool),
       logger_(logger),
       characterManager_(characterManager)
 {
+    log_ = logger.getSystem("events");
 }
 
 void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientData &clientData)
@@ -30,7 +32,8 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
             ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
 
             // Authenticate the client
-            int authClientID = authenticator.authenticate(database_, clientData, passedClientData.login, passedClientData.password);
+            auto poolGuard = pool_.acquire();
+            int authClientID = authenticator.authenticate(poolGuard.get(), clientData, passedClientData.login, passedClientData.password);
 
             // Get the clientData object with the new init data
             const ClientDataStruct *currentClientData = clientData.getClientData(authClientID);
@@ -76,7 +79,7 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
         }
         else
         {
-            logger_.log("Error with extracting data!");
+            log_->info("Error with extracting data!");
         }
     }
     catch (const std::bad_variant_access &ex)
@@ -128,7 +131,8 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
             }
 
             // Get the character list from the database
-            std::vector<CharacterDataStruct> charactersList = characterManager_.getCharactersList(database_, clientData, clientID);
+            auto poolGuard = pool_.acquire();
+            std::vector<CharacterDataStruct> charactersList = characterManager_.getCharactersList(poolGuard.get(), clientData, clientID);
 
             // convert the charactersList to a json object
             nlohmann::json charactersListJson = nlohmann::json::array();
@@ -158,12 +162,86 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
         }
         else
         {
-            logger_.log("Error with extracting data!");
+            log_->info("Error with extracting data!");
         }
     }
     catch (const std::bad_variant_access &ex)
     {
         logger_.log("Error here: " + std::string(ex.what()));
+    }
+}
+
+void EventHandler::handleCreateCharacterEvent(const Event &event, ClientData &clientData)
+{
+    const auto data = event.getData();
+
+    try
+    {
+        if (std::holds_alternative<ClientDataStruct>(data))
+        {
+            ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
+
+            nlohmann::json response;
+            ResponseBuilder builder;
+
+            // Auth guard
+            if (passedClientData.clientId == 0 || passedClientData.hash.empty())
+            {
+                response = builder
+                               .setHeader("message", "Unauthorized")
+                               .setHeader("hash", passedClientData.hash)
+                               .setHeader("clientId", passedClientData.clientId)
+                               .setHeader("eventType", "createCharacter")
+                               .setBody("", "")
+                               .build();
+                networkManager_.sendResponse(passedClientData.socket,
+                                             networkManager_.generateResponseMessage("error", response));
+                return;
+            }
+
+            const CharacterDataStruct &charData = passedClientData.characterData;
+
+            auto poolGuard = pool_.acquire();
+            int newId = characterManager_.createCharacter(
+                poolGuard.get(),
+                passedClientData.clientId,
+                charData.characterName,
+                charData.characterClass,
+                charData.characterRace,
+                charData.characterGender);
+
+            if (newId == 0)
+            {
+                response = builder
+                               .setHeader("message", "Character creation failed")
+                               .setHeader("hash", passedClientData.hash)
+                               .setHeader("clientId", passedClientData.clientId)
+                               .setHeader("eventType", "createCharacter")
+                               .setBody("", "")
+                               .build();
+                networkManager_.sendResponse(passedClientData.socket,
+                                             networkManager_.generateResponseMessage("error", response));
+                return;
+            }
+
+            response = builder
+                           .setHeader("message", "Character created successfully")
+                           .setHeader("hash", passedClientData.hash)
+                           .setHeader("clientId", passedClientData.clientId)
+                           .setHeader("eventType", "createCharacter")
+                           .setBody("characterId", newId)
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("success", response));
+        }
+        else
+        {
+            log_->info("handleCreateCharacterEvent: unexpected event data type");
+        }
+    }
+    catch (const std::bad_variant_access &ex)
+    {
+        logger_.log("handleCreateCharacterEvent error: " + std::string(ex.what()));
     }
 }
 
@@ -204,7 +282,7 @@ void EventHandler::handleDisconnectClientEvent(const Event &event, ClientData &c
         }
         else
         {
-            logger_.log("Error with extracting data!");
+            log_->info("Error with extracting data!");
         }
     }
     catch (const std::bad_variant_access &ex)
@@ -242,7 +320,7 @@ void EventHandler::handlePingClientEvent(const Event &event, ClientData &clientD
             catch (const std::exception &)
             {
                 // Event doesn't have timestamps, log warning but continue
-                logger_.log("Ping event without timestamps for client " + std::to_string(passedClientData.clientId));
+                log_->info("Ping event without timestamps for client " + std::to_string(passedClientData.clientId));
             }
 
             // send the response to all clients
@@ -273,7 +351,7 @@ void EventHandler::handlePingClientEvent(const Event &event, ClientData &clientD
         }
         else
         {
-            logger_.log("Error with extracting data!");
+            log_->info("Error with extracting data!");
         }
     }
     catch (const std::bad_variant_access &ex)
@@ -294,6 +372,9 @@ void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
         break;
     case Event::GET_CHARACTERS_LIST:
         handleGetCharactersListEvent(event, clientData);
+        break;
+    case Event::CREATE_CHARACTER:
+        handleCreateCharacterEvent(event, clientData);
         break;
     case Event::DISCONNECT_CLIENT:
         handleDisconnectClientEvent(event, clientData);

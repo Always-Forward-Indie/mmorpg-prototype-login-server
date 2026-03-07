@@ -1,9 +1,10 @@
 #include "login_server/LoginServer.hpp"
+#include <spdlog/logger.h>
 
 LoginServer::LoginServer(ClientData &clientData,
                          EventQueue &eventQueueLoginServer,
                          NetworkManager &networkManager,
-                         Database &database,
+                         DatabasePool &pool,
                          CharacterManager &characterManager,
                          Logger &logger)
     : networkManager_(networkManager),
@@ -11,9 +12,10 @@ LoginServer::LoginServer(ClientData &clientData,
       logger_(logger),
       eventQueueLoginServer_(eventQueueLoginServer),
       characterManager_(characterManager),
-      eventHandler_(networkManager, database, characterManager, logger),
-      database_(database)
+      eventHandler_(networkManager, pool, characterManager, logger),
+      pool_(pool)
 {
+    log_ = logger.getSystem("gameloop");
 }
 
 void LoginServer::processBatch(const std::vector<Event> &eventsBatch)
@@ -71,12 +73,12 @@ void LoginServer::processBatch(const std::vector<Event> &eventsBatch)
 
 void LoginServer::mainEventLoop()
 {
-    logger_.log("Add Tasks To Login Server Scheduler...", YELLOW);
+    log_->info("Add Tasks To Login Server Scheduler...");
     constexpr int BATCH_SIZE = 10;
 
     try
     {
-        logger_.log("Starting Login Server Event Loop...", YELLOW);
+        log_->info("Starting Login Server Event Loop...");
         while (running_)
         {
             std::vector<Event> eventsBatch;
@@ -88,7 +90,7 @@ void LoginServer::mainEventLoop()
     }
     catch (const std::exception &e)
     {
-        logger_.logError(e.what(), RED);
+        log_->error(e.what());
     }
 }
 
@@ -97,7 +99,7 @@ void LoginServer::startMainEventLoop()
     // Start the main event loop in a new thread
     if (event_thread_.joinable())
     {
-        logger_.log("Login server event loops are already running!", RED);
+        log_->warn("Login server event loops are already running!");
         return;
     }
 
@@ -113,7 +115,7 @@ void LoginServer::stop()
 // destructor
 LoginServer::~LoginServer()
 {
-    logger_.log("Shutting down Login server...", YELLOW);
+    log_->info("Shutting down Login server...");
     // Stop the main event loop
     event_thread_.join();
 

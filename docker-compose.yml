@@ -32,6 +32,10 @@ services:
       - /usr/src/app/build
     environment:
       - ENV=development
+      - LOG_LEVEL=info
+      - LOG_LEVEL_NETWORK=warn
+      - LOG_LEVEL_GAMELOOP=warn
+      - LOG_LEVEL_EVENTS=warn
     restart: unless-stopped
     security_opt:
       - seccomp=unconfined

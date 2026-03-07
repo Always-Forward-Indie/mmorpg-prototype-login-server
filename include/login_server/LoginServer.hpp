@@ -10,6 +10,7 @@
 #include "events/EventHandler.hpp"
 #include "utils/Logger.hpp"
 #include "utils/ThreadPool.hpp"
+#include "utils/DatabasePool.hpp"
 #include "services/CharacterManager.hpp"
 
 class LoginServer
@@ -18,7 +19,7 @@ public:
     LoginServer(ClientData &clientData,
                 EventQueue &eventQueueLoginServer,
                 NetworkManager &networkManager,
-                Database &database,
+                DatabasePool &pool,
                 CharacterManager &characterManager,
                 Logger &logger);
     ~LoginServer();
@@ -39,9 +40,10 @@ private:
     std::thread event_thread_;
     ClientData &clientData_;
     Logger &logger_;
+    std::shared_ptr<spdlog::logger> log_;
     EventQueue &eventQueueLoginServer_;
     EventHandler eventHandler_;
     NetworkManager &networkManager_;
     CharacterManager &characterManager_;
-    Database &database_;
+    DatabasePool &pool_;
 };
