@@ -96,7 +96,17 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
                                       const std::array<char, max_length> &dataBuffer,
                                       size_t bytes_transferred)
 {
-    static std::string accumulatedData; // Buffer to accumulate data
+    // Per-connection accumulated buffer (thread-safe via mutex)
+    std::string accumulatedData;
+    {
+        std::lock_guard<std::mutex> lock(socketBufferMutex_);
+        auto it = socketBuffers_.find(clientSocket.get());
+        if (it != socketBuffers_.end())
+        {
+            accumulatedData = std::move(it->second);
+            it->second.clear();
+        }
+    }
 
     // Append new data to the accumulated buffer
     accumulatedData.append(dataBuffer.data(), bytes_transferred);
@@ -117,6 +127,13 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
 
         // Erase processed message and delimiter from the buffer
         accumulatedData.erase(0, delimiterPos + 1); // +1 to remove the delimiter as well
+    }
+
+    // Store any remaining partial message back into the per-socket buffer
+    if (!accumulatedData.empty())
+    {
+        std::lock_guard<std::mutex> lock(socketBufferMutex_);
+        socketBuffers_[clientSocket.get()] = std::move(accumulatedData);
     }
 }
 
@@ -286,35 +303,45 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                       {
                                           // Data has been read successfully, handle it
                                           handleClientData(clientSocket, *dataBufferClient, bytes_transferred);
-
-                                          // Continue reading from the client
-                                          startReadingFromClient(clientSocket);
+                                          // NOTE: do NOT call startReadingFromClient here.
+                                          // sendResponse's completion handler continues the read loop
+                                          // after the response is written, preventing two concurrent reads.
                                       }
                                       else if (error == boost::asio::error::eof)
                                       {
                                           // The client has closed the connection
                                           log_->error("Client disconnected gracefully.");
 
-                                          // Close the client socket
-                                          clientSocket->close();
+                                          {
+                                              std::lock_guard<std::mutex> lock(socketBufferMutex_);
+                                              socketBuffers_.erase(clientSocket.get());
+                                          }
+                                          boost::system::error_code closeEc;
+                                          clientSocket->close(closeEc);
                                       }
                                       else if (error == boost::asio::error::operation_aborted)
                                       {
                                           // The read operation was canceled, likely due to the client disconnecting
                                           log_->error("Read operation canceled (client disconnected).");
 
-                                          // You can perform any cleanup or logging here if needed
-
-                                          // Close the client socket
-                                          clientSocket->close();
+                                          {
+                                              std::lock_guard<std::mutex> lock(socketBufferMutex_);
+                                              socketBuffers_.erase(clientSocket.get());
+                                          }
+                                          boost::system::error_code closeEc;
+                                          clientSocket->close(closeEc);
                                       }
                                       else
                                       {
                                           // Handle other errors
                                           log_->error("Error during async_read_some: " + error.message());
 
-                                          // You can also close the socket in case of other errors if needed
-                                          clientSocket->close();
+                                          {
+                                              std::lock_guard<std::mutex> lock(socketBufferMutex_);
+                                              socketBuffers_.erase(clientSocket.get());
+                                          }
+                                          boost::system::error_code closeEc;
+                                          clientSocket->close(closeEc);
                                       }
                                   });
 }

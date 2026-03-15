@@ -1,3 +1,18 @@
+v0.1.0
+15.03.2026
+================
+New:
+DB dump (mmo_prototype_dump.sql) updated with 23 new tables: character_bestiary, character_pity, character_reputation, character_skill_mastery, damage_elements, factions, item_class_restrictions, item_set_bonuses, item_set_members, item_sets, item_use_effects, mastery_definitions, mob_resistances, mob_weaknesses, passive_skill_modifiers, player_active_effect, respawn_zones, skill_damage_formulas (replaced skill_effects), skill_damage_types (replaced skill_effects_type), status_effect_modifiers, status_effects, timed_champion_templates, zone_event_templates.
+New DB enum types: effect_modifier_type, node_type, quest_state, quest_step_type, status_effect_category.
+
+Bug Fixes:
+NetworkManager — fixed critical bug: global static accumulation buffer replaced with per-socket buffer map (socketBuffers_, protected by socketBufferMutex_). Previous implementation shared one buffer across all client connections, causing data corruption under concurrent load.
+NetworkManager — fixed concurrent read loop: startReadingFromClient() is no longer called inside the read completion handler, preventing two simultaneous async reads on the same socket.
+NetworkManager — socket cleanup on disconnect now erases the per-socket buffer from the map before closing (all disconnect paths: EOF, operation_aborted, and other errors).
+NetworkManager — socket close now uses the non-throwing error_code overload to avoid uncaught exceptions during teardown.
+
+---
+
 v0.0.3
 07.03.2026
 ================

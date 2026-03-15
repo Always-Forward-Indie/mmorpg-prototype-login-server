@@ -1,6 +1,8 @@
 #pragma once
 #include <array>
 #include <string>
+#include <unordered_map>
+#include <mutex>
 #include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 #include "data/DataStructs.hpp"
@@ -36,4 +38,6 @@ private:
     Logger &logger_;
     std::shared_ptr<spdlog::logger> log_;
     JSONParser jsonParser_;
+    std::mutex socketBufferMutex_;
+    std::unordered_map<boost::asio::ip::tcp::socket *, std::string> socketBuffers_;
 };
