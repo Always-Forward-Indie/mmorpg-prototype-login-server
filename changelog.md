@@ -1,3 +1,16 @@
+v0.1.1
+21.03.2026
+================
+Improvements:
+DB dump (mmo_prototype_dump.sql) updated with current test data:
+  - character_bestiary: added kill count records for characters 2 and 3 (mob templates 1 and 2).
+  - character_current_state: updated HP/mana snapshots for characters.
+  - player_active_effect: 180+ new active effect rows added.
+  - user_sessions: new test sessions added.
+  - Updated sequence counters: character_equipment_id_seq→26, player_active_effect_id_seq→340, player_inventory_id_seq→174, user_sessions_id_seq→528.
+
+---
+
 v0.1.0
 15.03.2026
 ================
