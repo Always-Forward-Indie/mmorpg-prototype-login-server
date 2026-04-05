@@ -1,3 +1,19 @@
+v0.1.2
+05.04.2026
+================
+Improvements:
+DB dump (mmo_prototype_dump.sql) updated to current schema and test data:
+  - New ENUM types added: `effect_modifier_type`, `node_type`, `quest_state`, `quest_step_type`, `status_effect_category`.
+  - New trigger function `game_config_set_updated_at()` for automatic `updated_at` stamping on the game_config table.
+  - New tables: `character_permanent_modifiers` (with full column comments), `entity_attributes` (global attribute registry with comments), `character_bestiary`, `character_class`, `character_current_state` (with `current_health`, `current_mana`, `is_dead`, `updated_at` comments), `character_equipment` (with `id`, `character_id`, `equip_slot_id`, `inventory_item_id`, `equipped_at` comments), `character_genders`, `character_pity`, `character_skill_mastery`, `character_reputation`.
+  - `character_position` updated: added `rot_z` float column (with comment) and corresponding sequence. `character_position_id_seq` recreated.
+  - `character_skills` updated: added `current_level` column (with comment); sequences `character_skills_id_seq1` recreated.
+  - `characters` updated: added `radius` and `free_skill_points` columns (with comments).
+  - Sequence values updated to reflect latest test data: `character_equipment_id_seq`, `player_active_effect_id_seq`, `player_inventory_id_seq`, `user_sessions_id_seq`, `character_attributes_id_seq`, `character_attributes_id_seq1`.
+config.json — minor host binding update.
+
+---
+
 v0.1.1
 21.03.2026
 ================
