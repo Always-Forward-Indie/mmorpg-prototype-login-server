@@ -1,3 +1,11 @@
+v0.1.3
+08.04.2026
+================
+Improvements:
+DB dump (mmo_prototype_dump.sql) актуализирован: обновлены и добавлены строки `skill_properties_mapping` для свойств `cast_ms` и `swing_ms` у всех активных скилов: `basic_attack` cast_ms 100→1000, swing_ms 1100→1200; `shield_bash` cast_ms 0→1000, swing_ms 800→1100; `whirlwind` cast_ms 0→1000, swing_ms 1000→1200; добавлены отсутствующие записи swing_ms для `power_slash` (2300), `fireball` (4500), `frost_bolt` (2300), `arcane_blast` (3500), `chain_lightning` (3000). Сиквенс `skills_attributes_mapping_id_seq` обновлён с 43 до 50.
+
+---
+
 v0.1.2
 05.04.2026
 ================

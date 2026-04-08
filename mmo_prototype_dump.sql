@@ -247,6 +247,34 @@ CREATE TABLE public.character_bestiary (
 
 
 --
+-- Name: TABLE character_bestiary; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_bestiary IS 'Бестиарий персонажа: сколько раз игрок убил каждый шаблон моба. Используется для разблокировки записей бестиария и potential pity-механик.';
+
+
+--
+-- Name: COLUMN character_bestiary.character_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_bestiary.character_id IS 'FK → characters.id. Персонаж-владелец записи бестиария.';
+
+
+--
+-- Name: COLUMN character_bestiary.mob_template_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_bestiary.mob_template_id IS 'FK → mob.id. Шаблон моба (не runtime-инстанс).';
+
+
+--
+-- Name: COLUMN character_bestiary.kill_count; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_bestiary.kill_count IS 'Суммарное количество убийств данного моба персонажем.';
+
+
+--
 -- Name: character_class; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -431,6 +459,34 @@ CREATE TABLE public.character_pity (
 
 
 --
+-- Name: TABLE character_pity; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_pity IS 'Pity-счётчики редких дропов. Хранит количество убийств без выпадения конкретного предмета, чтобы гарантировать дроп при превышении порога (гарантированный лут).';
+
+
+--
+-- Name: COLUMN character_pity.character_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_pity.character_id IS 'FK → characters.id. Персонаж.';
+
+
+--
+-- Name: COLUMN character_pity.item_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_pity.item_id IS 'FK → items.id. Предмет с pity-механикой (редкий дроп).';
+
+
+--
+-- Name: COLUMN character_pity.kill_count; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_pity.kill_count IS 'Счётчик убийств без выпадения данного предмета. Сбрасывается в 0 после получения предмета.';
+
+
+--
 -- Name: character_position; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -492,6 +548,34 @@ CREATE TABLE public.character_reputation (
 
 
 --
+-- Name: TABLE character_reputation; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_reputation IS 'Репутация персонажа у каждой фракции. Положительные значения = союзник, отрицательные = враг. Используется для диалоговых условий и доступа к контенту.';
+
+
+--
+-- Name: COLUMN character_reputation.character_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_reputation.character_id IS 'FK → characters.id. Персонаж.';
+
+
+--
+-- Name: COLUMN character_reputation.faction_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_reputation.faction_slug IS 'FK → factions.slug. Фракция.';
+
+
+--
+-- Name: COLUMN character_reputation.value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_reputation.value IS 'Очки репутации. > 0 = союзник, < 0 = враг. Диапазон определяется дизайном.';
+
+
+--
 -- Name: character_skill_mastery; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -500,6 +584,34 @@ CREATE TABLE public.character_skill_mastery (
     mastery_slug character varying(60) NOT NULL,
     value double precision DEFAULT 0.0 NOT NULL
 );
+
+
+--
+-- Name: TABLE character_skill_mastery; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_skill_mastery IS 'Накопленные очки мастерства персонажа по типу оружия/школы. Например, sword_mastery растёт при ударах мечом и влияет на бонусы к урону.';
+
+
+--
+-- Name: COLUMN character_skill_mastery.character_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_skill_mastery.character_id IS 'FK → characters.id. Персонаж.';
+
+
+--
+-- Name: COLUMN character_skill_mastery.mastery_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_skill_mastery.mastery_slug IS 'FK → mastery_definitions.slug. Тип мастерства.';
+
+
+--
+-- Name: COLUMN character_skill_mastery.value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_skill_mastery.value IS 'Текущие накопленные очки мастерства. Ограничены mastery_definitions.max_value.';
 
 
 --
@@ -546,6 +658,53 @@ CREATE SEQUENCE public.character_skills_id_seq1
 --
 
 ALTER SEQUENCE public.character_skills_id_seq1 OWNED BY public.character_skills.id;
+
+
+--
+-- Name: character_titles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.character_titles (
+    character_id integer NOT NULL,
+    title_slug character varying(80) NOT NULL,
+    equipped boolean DEFAULT false NOT NULL,
+    earned_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE character_titles; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_titles IS 'Титулы, заработанные персонажем. equipped=true означает, что этот титул отображается над именем в мире. Только один может быть активным одновременно.';
+
+
+--
+-- Name: COLUMN character_titles.character_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_titles.character_id IS 'FK → characters.id. Персонаж.';
+
+
+--
+-- Name: COLUMN character_titles.title_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_titles.title_slug IS 'FK → title_definitions.slug. Полученный титул.';
+
+
+--
+-- Name: COLUMN character_titles.equipped; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_titles.equipped IS 'TRUE = этот титул отображается над именем персонажа в игровом мире.';
+
+
+--
+-- Name: COLUMN character_titles.earned_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.character_titles.earned_at IS 'Временная метка получения титула.';
 
 
 --
@@ -911,6 +1070,20 @@ CREATE TABLE public.damage_elements (
 
 
 --
+-- Name: TABLE damage_elements; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.damage_elements IS 'Справочник элементов урона: fire, ice, physical, shadow, holy и т.д. PK — slug. Используется в mob_resistances и mob_weaknesses.';
+
+
+--
+-- Name: COLUMN damage_elements.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.damage_elements.slug IS 'PK. Уникальный код элемента урона: physical, fire, ice, shadow, holy, arcane и т.д.';
+
+
+--
 -- Name: dialogue; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1215,6 +1388,34 @@ CREATE TABLE public.factions (
 
 
 --
+-- Name: TABLE factions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.factions IS 'Справочник фракций игрового мира. Мобы и NPC принадлежат фракции (faction_slug). Репутация персонажа ко фракции хранится в character_reputation.';
+
+
+--
+-- Name: COLUMN factions.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.factions.id IS 'Суррогатный PK.';
+
+
+--
+-- Name: COLUMN factions.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.factions.slug IS 'Уникальный код фракции. Используется как FK в mob, npc, character_reputation.';
+
+
+--
+-- Name: COLUMN factions.name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.factions.name IS 'Отображаемое имя фракции.';
+
+
+--
 -- Name: factions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1427,6 +1628,27 @@ CREATE TABLE public.item_class_restrictions (
 
 
 --
+-- Name: TABLE item_class_restrictions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.item_class_restrictions IS 'Ограничения предмета по классу персонажа. Если для предмета есть хотя бы одна запись — предмет может использовать только указанный класс.';
+
+
+--
+-- Name: COLUMN item_class_restrictions.item_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_class_restrictions.item_id IS 'FK → items.id. Предмет с ограничением по классу.';
+
+
+--
+-- Name: COLUMN item_class_restrictions.class_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_class_restrictions.class_id IS 'FK → character_class.id. Класс, которому разрешён данный предмет.';
+
+
+--
 -- Name: item_set_bonuses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1437,6 +1659,41 @@ CREATE TABLE public.item_set_bonuses (
     attribute_id integer NOT NULL,
     bonus_value integer NOT NULL
 );
+
+
+--
+-- Name: TABLE item_set_bonuses; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.item_set_bonuses IS 'Сетовые бонусы: бонус к атрибуту, который даётся при надевании pieces_required предметов из одного сета. Несколько строк на сет для разных порогов.';
+
+
+--
+-- Name: COLUMN item_set_bonuses.set_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_set_bonuses.set_id IS 'FK → item_sets.id. Набор, к которому относится бонус.';
+
+
+--
+-- Name: COLUMN item_set_bonuses.pieces_required; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_set_bonuses.pieces_required IS 'Минимальное количество предметов набора для активации этого бонуса.';
+
+
+--
+-- Name: COLUMN item_set_bonuses.attribute_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_set_bonuses.attribute_id IS 'FK → entity_attributes.id. Атрибут, к которому прибавляется бонус.';
+
+
+--
+-- Name: COLUMN item_set_bonuses.bonus_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_set_bonuses.bonus_value IS 'Величина прибавки к атрибуту при активации бонуса.';
 
 
 --
@@ -1470,6 +1727,27 @@ CREATE TABLE public.item_set_members (
 
 
 --
+-- Name: TABLE item_set_members; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.item_set_members IS 'Состав сетов: какие предметы входят в набор. Один предмет может быть только в одном сете.';
+
+
+--
+-- Name: COLUMN item_set_members.set_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_set_members.set_id IS 'FK → item_sets.id. Набор.';
+
+
+--
+-- Name: COLUMN item_set_members.item_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_set_members.item_id IS 'FK → items.id. Предмет, входящий в набор.';
+
+
+--
 -- Name: item_sets; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1478,6 +1756,34 @@ CREATE TABLE public.item_sets (
     name character varying(128) NOT NULL,
     slug character varying(128) NOT NULL
 );
+
+
+--
+-- Name: TABLE item_sets; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.item_sets IS 'Именованные наборы предметов (сеты). Бонусы за сборку набора хранятся в item_set_bonuses.';
+
+
+--
+-- Name: COLUMN item_sets.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_sets.id IS 'Суррогатный PK.';
+
+
+--
+-- Name: COLUMN item_sets.name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_sets.name IS 'Отображаемое имя набора.';
+
+
+--
+-- Name: COLUMN item_sets.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_sets.slug IS 'Уникальный код набора: используется в game-server и клиентском UI.';
 
 
 --
@@ -1568,6 +1874,69 @@ CREATE TABLE public.item_use_effects (
     tick_ms integer DEFAULT 0 NOT NULL,
     cooldown_seconds integer DEFAULT 30 NOT NULL
 );
+
+
+--
+-- Name: TABLE item_use_effects; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.item_use_effects IS 'Эффекты, применяемые при использовании предмета (зелье, еда). is_instant=true → разовое мгновенное применение; false → эффект с длительностью и тиками.';
+
+
+--
+-- Name: COLUMN item_use_effects.item_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.item_id IS 'FK → items.id. Предмет, за которым закреплён эффект.';
+
+
+--
+-- Name: COLUMN item_use_effects.effect_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.effect_slug IS 'Идентификатор эффекта (произвольный slug или ссылка на status_effects.slug).';
+
+
+--
+-- Name: COLUMN item_use_effects.attribute_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.attribute_slug IS 'Атрибут-цель эффекта (ссылается на entity_attributes.slug).';
+
+
+--
+-- Name: COLUMN item_use_effects.value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.value IS 'Числовое значение изменения атрибута.';
+
+
+--
+-- Name: COLUMN item_use_effects.is_instant; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.is_instant IS 'TRUE = мгновенное применение (зелье). FALSE = длительный эффект.';
+
+
+--
+-- Name: COLUMN item_use_effects.duration_seconds; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.duration_seconds IS 'Продолжительность эффекта в секундах (0 для мгновенных).';
+
+
+--
+-- Name: COLUMN item_use_effects.tick_ms; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.tick_ms IS 'Интервал тика в мс для периодических эффектов (0 для мгновенных).';
+
+
+--
+-- Name: COLUMN item_use_effects.cooldown_seconds; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.item_use_effects.cooldown_seconds IS 'Кулдаун предмета после использования в секундах.';
 
 
 --
@@ -1768,6 +2137,13 @@ COMMENT ON COLUMN public.items.is_usable IS 'TRUE = предмет можно и
 
 
 --
+-- Name: COLUMN items.mastery_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.items.mastery_slug IS 'FK → mastery_definitions.slug. Требуемый тип мастерства для использования/экипировки предмета. NULL = без требований к мастерству.';
+
+
+--
 -- Name: items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1817,6 +2193,41 @@ CREATE TABLE public.mastery_definitions (
     weapon_type_slug character varying(60) DEFAULT NULL::character varying,
     max_value double precision DEFAULT 100.0 NOT NULL
 );
+
+
+--
+-- Name: TABLE mastery_definitions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.mastery_definitions IS 'Справочник типов мастерства оружия/магии (sword, bow, fire_magic и т.д.). PK — slug. max_value задаёт капу накопления.';
+
+
+--
+-- Name: COLUMN mastery_definitions.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mastery_definitions.slug IS 'PK. Уникальный код типа мастерства: sword, bow, fire_magic и т.д.';
+
+
+--
+-- Name: COLUMN mastery_definitions.name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mastery_definitions.name IS 'Отображаемое имя мастерства.';
+
+
+--
+-- Name: COLUMN mastery_definitions.weapon_type_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mastery_definitions.weapon_type_slug IS 'NULL = общая мастерства; иначе — привязана к конкретному типу оружия.';
+
+
+--
+-- Name: COLUMN mastery_definitions.max_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mastery_definitions.max_value IS 'Максимальный уровень накопления очков мастерства (капа).';
 
 
 --
@@ -2042,7 +2453,7 @@ COMMENT ON COLUMN public.mob_active_effect.source_type IS 'Источник ак
 -- Name: COLUMN mob_active_effect.source_player_id; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.mob_active_effect.source_player_id IS 'ID персонажа, применившего эффект';
+COMMENT ON COLUMN public.mob_active_effect.source_player_id IS 'FK → characters.id. Персонаж, наложивший эффект на моба. NULL = эффект от зоны, квеста или системы.';
 
 
 --
@@ -2271,6 +2682,27 @@ CREATE TABLE public.mob_resistances (
 
 
 --
+-- Name: TABLE mob_resistances; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.mob_resistances IS 'Сопротивления моба к элементам урона. Значение сопротивления задаётся логикой combat_calculator в chunk-server согласно записи в этой таблице.';
+
+
+--
+-- Name: COLUMN mob_resistances.mob_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mob_resistances.mob_id IS 'FK → mob.id. Шаблон моба.';
+
+
+--
+-- Name: COLUMN mob_resistances.element_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mob_resistances.element_slug IS 'FK → damage_elements.slug. Элемент, к которому у моба есть сопротивление.';
+
+
+--
 -- Name: mob_skills; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2381,6 +2813,27 @@ CREATE TABLE public.mob_weaknesses (
     mob_id integer NOT NULL,
     element_slug character varying(64) NOT NULL
 );
+
+
+--
+-- Name: TABLE mob_weaknesses; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.mob_weaknesses IS 'Уязвимости моба к элементам урона. При попадании атакой уязвимого элемента chunk-server применяет множитель урона.';
+
+
+--
+-- Name: COLUMN mob_weaknesses.mob_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mob_weaknesses.mob_id IS 'FK → mob.id. Шаблон моба.';
+
+
+--
+-- Name: COLUMN mob_weaknesses.element_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.mob_weaknesses.element_slug IS 'FK → damage_elements.slug. Элемент, к которому у моба есть уязвимость.';
 
 
 --
@@ -2653,6 +3106,44 @@ CREATE SEQUENCE public.npc_skills_id_seq
 --
 
 ALTER SEQUENCE public.npc_skills_id_seq OWNED BY public.npc_skills.id;
+
+
+--
+-- Name: npc_trainer_class; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.npc_trainer_class (
+    id integer NOT NULL,
+    npc_id integer NOT NULL,
+    class_id integer NOT NULL
+);
+
+
+--
+-- Name: TABLE npc_trainer_class; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.npc_trainer_class IS 'Maps trainer NPC ids to the class whose skills they can teach. Used by game-server to build setTrainerData payload sent to chunk-servers at startup.';
+
+
+--
+-- Name: npc_trainer_class_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.npc_trainer_class_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: npc_trainer_class_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.npc_trainer_class_id_seq OWNED BY public.npc_trainer_class.id;
 
 
 --
@@ -3275,6 +3766,62 @@ CREATE TABLE public.respawn_zones (
     zone_id integer DEFAULT 1 NOT NULL,
     is_default boolean DEFAULT false NOT NULL
 );
+
+
+--
+-- Name: TABLE respawn_zones; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.respawn_zones IS 'Точки возрождения персонажей в зонах. is_default=true — используется при первом входе или смерти без выбранной точки. Несколько точек на зону допустимо.';
+
+
+--
+-- Name: COLUMN respawn_zones.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.id IS 'Суррогатный PK.';
+
+
+--
+-- Name: COLUMN respawn_zones.name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.name IS 'Отображаемое название точки возрождения.';
+
+
+--
+-- Name: COLUMN respawn_zones.x; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.x IS 'X-координата точки возрождения.';
+
+
+--
+-- Name: COLUMN respawn_zones.y; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.y IS 'Y-координата точки возрождения.';
+
+
+--
+-- Name: COLUMN respawn_zones.z; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.z IS 'Z-координата точки возрождения.';
+
+
+--
+-- Name: COLUMN respawn_zones.zone_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.zone_id IS 'FK → zones.id. Зона, к которой принадлежит точка возрождения.';
+
+
+--
+-- Name: COLUMN respawn_zones.is_default; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.respawn_zones.is_default IS 'TRUE = эта точка используется по умолчанию при первом входе или смерти без явно выбранной точки.';
 
 
 --
@@ -3980,6 +4527,76 @@ CREATE TABLE public.timed_champion_templates (
 
 
 --
+-- Name: TABLE timed_champion_templates; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.timed_champion_templates IS 'Шаблоны мировых чемпионов с таймером спавна. Чемпион — усиленный моб, появляется с заданным интервалом в указанной зоне. next_spawn_at — unix-timestamp следующего спавна.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.id IS 'Суррогатный PK.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.slug IS 'Уникальный код шаблона чемпиона.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.zone_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.zone_id IS 'FK → zones.id. Зона, в которой появляется чемпион.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.mob_template_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.mob_template_id IS 'FK → mob.id. Шаблон моба, на основе которого создаётся чемпион.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.interval_hours; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.interval_hours IS 'Интервал между спавнами чемпиона в часах.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.window_minutes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.window_minutes IS 'Временное окно (в минутах) в котором чемпион может появиться после истечения интервала.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.next_spawn_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.next_spawn_at IS 'Unix timestamp (секунды) ближайшего возможного спавна. NULL = ещё не рассчитан.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.last_killed_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.last_killed_at IS 'Временная метка последнего убийства чемпиона.';
+
+
+--
+-- Name: COLUMN timed_champion_templates.announcement_key; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.timed_champion_templates.announcement_key IS 'Ключ строки анонса для клиентского UI при появлении чемпиона. NULL = без анонса.';
+
+
+--
 -- Name: timed_champion_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -3997,6 +4614,89 @@ CREATE SEQUENCE public.timed_champion_templates_id_seq
 --
 
 ALTER SEQUENCE public.timed_champion_templates_id_seq OWNED BY public.timed_champion_templates.id;
+
+
+--
+-- Name: title_definitions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.title_definitions (
+    id integer NOT NULL,
+    slug character varying(80) NOT NULL,
+    display_name character varying(120) NOT NULL,
+    description text DEFAULT ''::text NOT NULL,
+    earn_condition character varying(80) DEFAULT ''::character varying NOT NULL,
+    bonuses jsonb DEFAULT '[]'::jsonb NOT NULL
+);
+
+
+--
+-- Name: TABLE title_definitions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.title_definitions IS 'Каталог титулов. earn_condition — строковый ключ для логики выдачи на game-server. bonuses — JSON-массив модификаторов атрибутов.';
+
+
+--
+-- Name: COLUMN title_definitions.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.title_definitions.id IS 'Суррогатный PK.';
+
+
+--
+-- Name: COLUMN title_definitions.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.title_definitions.slug IS 'Уникальный код титула. Используется как FK в character_titles.';
+
+
+--
+-- Name: COLUMN title_definitions.display_name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.title_definitions.display_name IS 'Отображаемое имя титула в UI.';
+
+
+--
+-- Name: COLUMN title_definitions.description; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.title_definitions.description IS 'Описание способа получения/значения титула.';
+
+
+--
+-- Name: COLUMN title_definitions.earn_condition; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.title_definitions.earn_condition IS 'Строковый ключ условия получения. Обрабатывается логикой game-server (achievement_manager и т.п.).';
+
+
+--
+-- Name: COLUMN title_definitions.bonuses; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.title_definitions.bonuses IS 'JSON-массив бонусов: [{\"attribute\":\"slug\",\"value\":N}]. Применяются при активации титула.';
+
+
+--
+-- Name: title_definitions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.title_definitions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: title_definitions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.title_definitions_id_seq OWNED BY public.title_definitions.id;
 
 
 --
@@ -4301,7 +5001,7 @@ ALTER SEQUENCE public.vendor_npc_id_seq OWNED BY public.vendor_npc.id;
 CREATE TABLE public.zone_event_templates (
     id integer NOT NULL,
     slug character varying(60) NOT NULL,
-    game_zone_id integer DEFAULT 0,
+    game_zone_id integer,
     trigger_type character varying(20) DEFAULT 'manual'::character varying NOT NULL,
     duration_sec integer DEFAULT 1200 NOT NULL,
     loot_multiplier double precision DEFAULT 1.0 NOT NULL,
@@ -4311,11 +5011,130 @@ CREATE TABLE public.zone_event_templates (
     interval_hours integer DEFAULT 0,
     random_chance_per_hour double precision DEFAULT 0.0,
     has_invasion_wave boolean DEFAULT false,
-    invasion_mob_template_id integer DEFAULT 0,
+    invasion_mob_template_id integer,
     invasion_wave_count integer DEFAULT 0,
-    invasion_champion_template_id integer DEFAULT 0,
+    invasion_champion_template_id integer,
     invasion_champion_slug character varying(60) DEFAULT NULL::character varying
 );
+
+
+--
+-- Name: TABLE zone_event_templates; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.zone_event_templates IS 'Шаблоны мировых событий (вторжения, праздники, осады). При срабатывании trigger_type chunk-server клонирует шаблон в активное событие. invasion_* поля задают волну мобов.';
+
+
+--
+-- Name: COLUMN zone_event_templates.id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.id IS 'Суррогатный PK.';
+
+
+--
+-- Name: COLUMN zone_event_templates.slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.slug IS 'Уникальный код шаблона события.';
+
+
+--
+-- Name: COLUMN zone_event_templates.game_zone_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.game_zone_id IS 'FK → zones.id. Зона, в которой происходит событие. NULL = глобальное событие.';
+
+
+--
+-- Name: COLUMN zone_event_templates.trigger_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.trigger_type IS 'Способ запуска: manual (GM-команда), timed (по расписанию), random (случайный по вероятности).';
+
+
+--
+-- Name: COLUMN zone_event_templates.duration_sec; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.duration_sec IS 'Продолжительность активного события в секундах.';
+
+
+--
+-- Name: COLUMN zone_event_templates.loot_multiplier; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.loot_multiplier IS 'Множитель вероятности дропа во время события (1.0 = норма).';
+
+
+--
+-- Name: COLUMN zone_event_templates.spawn_rate_multiplier; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.spawn_rate_multiplier IS 'Множитель скорости спавна мобов (1.0 = норма).';
+
+
+--
+-- Name: COLUMN zone_event_templates.mob_speed_multiplier; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.mob_speed_multiplier IS 'Множитель скорости движения мобов (1.0 = норма).';
+
+
+--
+-- Name: COLUMN zone_event_templates.announce_key; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.announce_key IS 'Ключ строки анонса для клиентского UI при старте события. NULL = без анонса.';
+
+
+--
+-- Name: COLUMN zone_event_templates.interval_hours; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.interval_hours IS 'Интервал повторения события в часах (0 = не повторяется). Применяется при trigger_type=timed.';
+
+
+--
+-- Name: COLUMN zone_event_templates.random_chance_per_hour; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.random_chance_per_hour IS 'Вероятность случайного запуска в час (0.0–1.0). Применяется при trigger_type=random.';
+
+
+--
+-- Name: COLUMN zone_event_templates.has_invasion_wave; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.has_invasion_wave IS 'TRUE = событие сопровождается волной вторжения мобов.';
+
+
+--
+-- Name: COLUMN zone_event_templates.invasion_mob_template_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.invasion_mob_template_id IS 'FK → mob.id. Шаблон моба-захватчика. NULL = нет вторжения.';
+
+
+--
+-- Name: COLUMN zone_event_templates.invasion_wave_count; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.invasion_wave_count IS 'Количество волн вторжения.';
+
+
+--
+-- Name: COLUMN zone_event_templates.invasion_champion_template_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.invasion_champion_template_id IS 'FK → timed_champion_templates.id. Чемпион, появляющийся в финальной волне. NULL = без чемпиона.';
+
+
+--
+-- Name: COLUMN zone_event_templates.invasion_champion_slug; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.zone_event_templates.invasion_champion_slug IS 'Slug чемпиона (дублирует FK для runtime без JOIN). NULL = без чемпиона.';
 
 
 --
@@ -4492,6 +5311,13 @@ ALTER TABLE ONLY public.npc_skills ALTER COLUMN id SET DEFAULT nextval('public.n
 
 
 --
+-- Name: npc_trainer_class id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.npc_trainer_class ALTER COLUMN id SET DEFAULT nextval('public.npc_trainer_class_id_seq'::regclass);
+
+
+--
 -- Name: passive_skill_modifiers id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -4604,6 +5430,13 @@ ALTER TABLE ONLY public.timed_champion_templates ALTER COLUMN id SET DEFAULT nex
 
 
 --
+-- Name: title_definitions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.title_definitions ALTER COLUMN id SET DEFAULT nextval('public.title_definitions_id_seq'::regclass);
+
+
+--
 -- Name: user_bans id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -4650,9 +5483,9 @@ ALTER TABLE ONLY public.zones ALTER COLUMN id SET DEFAULT nextval('public.zones_
 --
 
 COPY public.character_bestiary (character_id, mob_template_id, kill_count) FROM stdin;
-3	1	117
-3	2	11
-2	1	1
+3	1	206
+2	1	3
+3	2	16
 \.
 
 
@@ -4671,9 +5504,9 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 --
 
 COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-2	207	486	f	2026-03-28 17:44:00.763827+00
-3	323	289	f	2026-03-28 18:04:48.390552+00
+3	365	122	f	2026-04-07 19:08:35.323121+00
 1	197	454	f	2026-03-07 12:41:29.615005+00
+2	103	486	f	2026-04-06 19:57:55.467019+00
 \.
 
 
@@ -4682,7 +5515,7 @@ COPY public.character_current_state (character_id, current_health, current_mana,
 --
 
 COPY public.character_equipment (id, character_id, equip_slot_id, inventory_item_id, equipped_at) FROM stdin;
-52	3	6	161	2026-03-27 15:39:26.732824+00
+78	3	6	176	2026-04-07 13:57:05.559872+00
 \.
 
 
@@ -4778,8 +5611,8 @@ COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
 
 COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
 1	1	-2000.00	4000.00	300.00	2	0
-2	2	182.46	3511.12	87.35	2	0
-3	3	101.64	3338.59	87.27	1	0
+2	2	1060.23	3286.58	87.15	2	-143.310089
+3	3	3388.69	4016.53	87.18	1	167.493683
 \.
 
 
@@ -4788,6 +5621,9 @@ COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM 
 --
 
 COPY public.character_reputation (character_id, faction_slug, value) FROM stdin;
+3	hunters	750
+3	city_guard	500
+3	merchants	-200
 \.
 
 
@@ -4807,6 +5643,18 @@ COPY public.character_skills (id, character_id, skill_id, current_level) FROM st
 1	1	1	1
 4	2	1	1
 5	3	1	1
+6	3	2	1
+7	3	3	1
+\.
+
+
+--
+-- Data for Name: character_titles; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.character_titles (character_id, title_slug, equipped, earned_at) FROM stdin;
+3	wolf_slayer	t	2026-04-07 12:41:10.088771+00
+3	first_blood	f	2026-04-07 12:41:10.088771+00
 \.
 
 
@@ -4815,9 +5663,9 @@ COPY public.character_skills (id, character_id, skill_id, current_level) FROM st
 --
 
 COPY public.characters (id, name, owner_id, class_id, race_id, experience_points, level, radius, free_skill_points, gender, account_slot, created_at, last_online_at, deleted_at, play_time_sec, bind_zone_id, bind_x, bind_y, bind_z, appearance, experience_debt) FROM stdin;
-2	TetsMage2Player	4	1	1	1440	3	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	0
 1	TetsMage1Player	5	1	1	57	2	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	0
-3	TetsWarrior1Player	3	2	1	16404	7	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	2459
+3	TetsWarrior1Player	3	2	1	5245	5	100	50	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	0
+2	TetsMage2Player	4	1	1	1460	3	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	0
 \.
 
 
@@ -4982,7 +5830,7 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 73	401	420	2	theron.choice.learn_whirlwind	{"all": [{"gte": 10, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "whirlwind", "type": "skill_not_learned"}, {"slug": "shield_bash", "type": "skill_learned"}, {"gte": 1, "type": "item", "item_id": 19}]}	\N	t
 74	401	430	3	theron.choice.learn_iron_skin	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "iron_skin", "type": "skill_not_learned"}]}	\N	t
 75	401	440	4	theron.choice.learn_constitution_mastery	{"all": [{"gte": 8, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "constitution_mastery", "type": "skill_not_learned"}, {"slug": "iron_skin", "type": "skill_learned"}]}	\N	t
-76	401	499	5	theron.choice.open_shop	\N	{"actions": [{"mode": "buy", "type": "open_vendor_shop"}]}	f
+76	401	499	5	theron.choice.open_shop	\N	{"actions": [{"type": "open_skill_shop"}]}	f
 28	6	4	0	milaya.choice.back	\N	\N	f
 30	8	4	0	milaya.choice.got_it	\N	\N	f
 29	7	1	0	milaya.choice.back	\N	\N	f
@@ -5018,7 +5866,6 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 104	501	530	3	sylara.choice.learn_chain_lightning	{"all": [{"gte": 12, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "chain_lightning", "type": "skill_not_learned"}, {"slug": "arcane_blast", "type": "skill_learned"}, {"gte": 1, "type": "item", "item_id": 24}]}	\N	t
 105	501	540	4	sylara.choice.learn_mana_shield	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "mana_shield", "type": "skill_not_learned"}]}	\N	t
 106	501	550	5	sylara.choice.learn_elemental_mastery	{"all": [{"gte": 10, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "elemental_mastery", "type": "skill_not_learned"}, {"slug": "mana_shield", "type": "skill_learned"}]}	\N	t
-107	501	599	6	sylara.choice.open_shop	\N	{"actions": [{"mode": "buy", "type": "open_vendor_shop"}]}	f
 108	501	599	7	sylara.choice.farewell	\N	\N	f
 110	502	503	0	sylara.choice.yes	\N	\N	f
 111	502	501	1	sylara.choice.no	\N	\N	f
@@ -5044,6 +5891,7 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 131	550	501	1	sylara.choice.no	\N	\N	f
 132	551	552	0	sylara.choice.continue	\N	\N	f
 133	552	501	0	sylara.choice.continue	\N	\N	f
+107	501	599	6	sylara.choice.open_shop	\N	{"actions": [{"type": "open_skill_shop"}]}	f
 \.
 
 
@@ -5738,6 +6586,16 @@ COPY public.npc_skills (id, npc_id, skill_id, current_level) FROM stdin;
 
 
 --
+-- Data for Name: npc_trainer_class; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.npc_trainer_class (id, npc_id, class_id) FROM stdin;
+1	4	2
+2	5	1
+\.
+
+
+--
 -- Data for Name: npc_type; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -6168,6 +7026,344 @@ COPY public.player_active_effect (id, player_id, status_effect_id, source_type, 
 398	3	1	death	\N	-2.000000	2026-03-21 17:14:19.609371+00	2026-03-21 17:16:19+00	18	0	\N
 399	3	1	death	\N	-2.000000	2026-03-21 17:14:19.612143+00	2026-03-21 17:16:19+00	19	0	\N
 400	3	1	death	\N	-2.000000	2026-03-21 17:14:19.615121+00	2026-03-21 17:16:19+00	20	0	\N
+401	3	1	death	\N	-84.000000	2026-03-31 17:45:05.61372+00	2026-03-31 17:47:05+00	1	0	\N
+402	3	1	death	\N	-58.000000	2026-03-31 17:45:05.623334+00	2026-03-31 17:47:05+00	2	0	\N
+403	3	1	death	\N	-7.000000	2026-03-31 17:45:05.626086+00	2026-03-31 17:47:05+00	3	0	\N
+404	3	1	death	\N	-5.000000	2026-03-31 17:45:05.629193+00	2026-03-31 17:47:05+00	4	0	\N
+405	3	1	death	\N	-2.000000	2026-03-31 17:45:05.632414+00	2026-03-31 17:47:05+00	5	0	\N
+406	3	1	death	\N	-11.000000	2026-03-31 17:45:05.635023+00	2026-03-31 17:47:05+00	6	0	\N
+407	3	1	death	\N	-4.000000	2026-03-31 17:45:05.637824+00	2026-03-31 17:47:05+00	7	0	\N
+408	3	1	death	\N	-7.000000	2026-03-31 17:45:05.640511+00	2026-03-31 17:47:05+00	8	0	\N
+409	3	1	death	\N	-1.000000	2026-03-31 17:45:05.643227+00	2026-03-31 17:47:05+00	9	0	\N
+410	3	1	death	\N	-1.000000	2026-03-31 17:45:05.645844+00	2026-03-31 17:47:05+00	10	0	\N
+411	3	1	death	\N	-1.000000	2026-03-31 17:45:05.648718+00	2026-03-31 17:47:05+00	11	0	\N
+412	3	1	death	\N	-11.000000	2026-03-31 17:45:05.651476+00	2026-03-31 17:47:05+00	12	0	\N
+413	3	1	death	\N	-2.000000	2026-03-31 17:45:05.654058+00	2026-03-31 17:47:05+00	13	0	\N
+414	3	1	death	\N	-3.000000	2026-03-31 17:45:05.65681+00	2026-03-31 17:47:05+00	14	0	\N
+415	3	1	death	\N	-2.000000	2026-03-31 17:45:05.6594+00	2026-03-31 17:47:05+00	15	0	\N
+416	3	1	death	\N	-7.000000	2026-03-31 17:45:05.662094+00	2026-03-31 17:47:05+00	16	0	\N
+417	3	1	death	\N	-3.000000	2026-03-31 17:45:05.66489+00	2026-03-31 17:47:05+00	17	0	\N
+418	3	1	death	\N	-2.000000	2026-03-31 17:45:05.667641+00	2026-03-31 17:47:05+00	18	0	\N
+419	3	1	death	\N	-2.000000	2026-03-31 17:45:05.670417+00	2026-03-31 17:47:05+00	19	0	\N
+420	3	1	death	\N	-2.000000	2026-03-31 17:45:05.673241+00	2026-03-31 17:47:05+00	20	0	\N
+421	3	1	death	\N	-54.000000	2026-04-03 18:59:02.707692+00	2026-04-03 19:01:02+00	1	0	\N
+422	3	1	death	\N	-51.000000	2026-04-03 18:59:02.71375+00	2026-04-03 19:01:02+00	2	0	\N
+423	3	1	death	\N	-4.000000	2026-04-03 18:59:02.716991+00	2026-04-03 19:01:02+00	3	0	\N
+424	3	1	death	\N	-4.000000	2026-04-03 18:59:02.720033+00	2026-04-03 19:01:02+00	4	0	\N
+425	3	1	death	\N	-1.000000	2026-04-03 18:59:02.723058+00	2026-04-03 19:01:02+00	5	0	\N
+426	3	1	death	\N	-5.000000	2026-04-03 18:59:02.726269+00	2026-04-03 19:01:02+00	6	0	\N
+427	3	1	death	\N	-2.000000	2026-04-03 18:59:02.729286+00	2026-04-03 19:01:02+00	7	0	\N
+428	3	1	death	\N	-6.000000	2026-04-03 18:59:02.732346+00	2026-04-03 19:01:02+00	8	0	\N
+429	3	1	death	\N	-1.000000	2026-04-03 18:59:02.735247+00	2026-04-03 19:01:02+00	9	0	\N
+430	3	1	death	\N	-1.000000	2026-04-03 18:59:02.738063+00	2026-04-03 19:01:02+00	10	0	\N
+431	3	1	death	\N	0.000000	2026-04-03 18:59:02.740922+00	2026-04-03 19:01:02+00	11	0	\N
+432	3	1	death	\N	-5.000000	2026-04-03 18:59:02.743643+00	2026-04-03 19:01:02+00	12	0	\N
+433	3	1	death	\N	-2.000000	2026-04-03 18:59:02.746541+00	2026-04-03 19:01:02+00	13	0	\N
+434	3	1	death	\N	-2.000000	2026-04-03 18:59:02.749683+00	2026-04-03 19:01:02+00	14	0	\N
+435	3	1	death	\N	-2.000000	2026-04-03 18:59:02.752863+00	2026-04-03 19:01:02+00	15	0	\N
+436	3	1	death	\N	-6.000000	2026-04-03 18:59:02.756005+00	2026-04-03 19:01:02+00	16	0	\N
+437	3	1	death	\N	-1.000000	2026-04-03 18:59:02.758997+00	2026-04-03 19:01:02+00	17	0	\N
+438	3	1	death	\N	-2.000000	2026-04-03 18:59:02.761775+00	2026-04-03 19:01:02+00	18	0	\N
+439	3	1	death	\N	-2.000000	2026-04-03 18:59:02.764307+00	2026-04-03 19:01:02+00	19	0	\N
+440	3	1	death	\N	-2.000000	2026-04-03 18:59:02.767086+00	2026-04-03 19:01:02+00	20	0	\N
+441	3	1	death	\N	-54.000000	2026-04-03 19:28:05.092302+00	2026-04-03 19:30:05+00	1	0	\N
+442	3	1	death	\N	-51.000000	2026-04-03 19:28:05.096836+00	2026-04-03 19:30:05+00	2	0	\N
+443	3	1	death	\N	-4.000000	2026-04-03 19:28:05.100087+00	2026-04-03 19:30:05+00	3	0	\N
+444	3	1	death	\N	-4.000000	2026-04-03 19:28:05.103183+00	2026-04-03 19:30:05+00	4	0	\N
+445	3	1	death	\N	-1.000000	2026-04-03 19:28:05.106317+00	2026-04-03 19:30:05+00	5	0	\N
+446	3	1	death	\N	-5.000000	2026-04-03 19:28:05.109517+00	2026-04-03 19:30:05+00	6	0	\N
+447	3	1	death	\N	-2.000000	2026-04-03 19:28:05.112673+00	2026-04-03 19:30:05+00	7	0	\N
+448	3	1	death	\N	-6.000000	2026-04-03 19:28:05.115575+00	2026-04-03 19:30:05+00	8	0	\N
+449	3	1	death	\N	-1.000000	2026-04-03 19:28:05.118241+00	2026-04-03 19:30:05+00	9	0	\N
+450	3	1	death	\N	-1.000000	2026-04-03 19:28:05.12108+00	2026-04-03 19:30:05+00	10	0	\N
+451	3	1	death	\N	0.000000	2026-04-03 19:28:05.123768+00	2026-04-03 19:30:05+00	11	0	\N
+452	3	1	death	\N	-5.000000	2026-04-03 19:28:05.126566+00	2026-04-03 19:30:05+00	12	0	\N
+453	3	1	death	\N	-2.000000	2026-04-03 19:28:05.129339+00	2026-04-03 19:30:05+00	13	0	\N
+454	3	1	death	\N	-2.000000	2026-04-03 19:28:05.132189+00	2026-04-03 19:30:05+00	14	0	\N
+455	3	1	death	\N	-2.000000	2026-04-03 19:28:05.135006+00	2026-04-03 19:30:05+00	15	0	\N
+456	3	1	death	\N	-6.000000	2026-04-03 19:28:05.138294+00	2026-04-03 19:30:05+00	16	0	\N
+457	3	1	death	\N	-1.000000	2026-04-03 19:28:05.141257+00	2026-04-03 19:30:05+00	17	0	\N
+458	3	1	death	\N	-2.000000	2026-04-03 19:28:05.144173+00	2026-04-03 19:30:05+00	18	0	\N
+459	3	1	death	\N	-2.000000	2026-04-03 19:28:05.147088+00	2026-04-03 19:30:05+00	19	0	\N
+460	3	1	death	\N	-2.000000	2026-04-03 19:28:05.149829+00	2026-04-03 19:30:05+00	20	0	\N
+461	3	1	death	\N	-54.000000	2026-04-03 19:49:48.143258+00	2026-04-03 19:51:48+00	1	0	\N
+462	3	1	death	\N	-51.000000	2026-04-03 19:49:48.146586+00	2026-04-03 19:51:48+00	2	0	\N
+463	3	1	death	\N	-4.000000	2026-04-03 19:49:48.149578+00	2026-04-03 19:51:48+00	3	0	\N
+464	3	1	death	\N	-4.000000	2026-04-03 19:49:48.152762+00	2026-04-03 19:51:48+00	4	0	\N
+465	3	1	death	\N	-1.000000	2026-04-03 19:49:48.156045+00	2026-04-03 19:51:48+00	5	0	\N
+466	3	1	death	\N	-5.000000	2026-04-03 19:49:48.159274+00	2026-04-03 19:51:48+00	6	0	\N
+467	3	1	death	\N	-2.000000	2026-04-03 19:49:48.162509+00	2026-04-03 19:51:48+00	7	0	\N
+468	3	1	death	\N	-6.000000	2026-04-03 19:49:48.165626+00	2026-04-03 19:51:48+00	8	0	\N
+469	3	1	death	\N	-1.000000	2026-04-03 19:49:48.168507+00	2026-04-03 19:51:48+00	9	0	\N
+470	3	1	death	\N	-1.000000	2026-04-03 19:49:48.171513+00	2026-04-03 19:51:48+00	10	0	\N
+471	3	1	death	\N	0.000000	2026-04-03 19:49:48.174265+00	2026-04-03 19:51:48+00	11	0	\N
+472	3	1	death	\N	-5.000000	2026-04-03 19:49:48.177059+00	2026-04-03 19:51:48+00	12	0	\N
+473	3	1	death	\N	-2.000000	2026-04-03 19:49:48.179712+00	2026-04-03 19:51:48+00	13	0	\N
+474	3	1	death	\N	-2.000000	2026-04-03 19:49:48.182614+00	2026-04-03 19:51:48+00	14	0	\N
+475	3	1	death	\N	-2.000000	2026-04-03 19:49:48.185593+00	2026-04-03 19:51:48+00	15	0	\N
+476	3	1	death	\N	-6.000000	2026-04-03 19:49:48.188566+00	2026-04-03 19:51:48+00	16	0	\N
+477	3	1	death	\N	-1.000000	2026-04-03 19:49:48.191707+00	2026-04-03 19:51:48+00	17	0	\N
+478	3	1	death	\N	-2.000000	2026-04-03 19:49:48.194798+00	2026-04-03 19:51:48+00	18	0	\N
+479	3	1	death	\N	-2.000000	2026-04-03 19:49:48.197765+00	2026-04-03 19:51:48+00	19	0	\N
+480	3	1	death	\N	-2.000000	2026-04-03 19:49:48.200636+00	2026-04-03 19:51:48+00	20	0	\N
+481	3	1	death	\N	-54.000000	2026-04-03 19:50:52.016017+00	2026-04-03 19:52:52+00	1	0	\N
+482	3	1	death	\N	-51.000000	2026-04-03 19:50:52.01915+00	2026-04-03 19:52:52+00	2	0	\N
+483	3	1	death	\N	-4.000000	2026-04-03 19:50:52.022141+00	2026-04-03 19:52:52+00	3	0	\N
+484	3	1	death	\N	-4.000000	2026-04-03 19:50:52.025168+00	2026-04-03 19:52:52+00	4	0	\N
+485	3	1	death	\N	-1.000000	2026-04-03 19:50:52.028164+00	2026-04-03 19:52:52+00	5	0	\N
+486	3	1	death	\N	-5.000000	2026-04-03 19:50:52.030862+00	2026-04-03 19:52:52+00	6	0	\N
+487	3	1	death	\N	-2.000000	2026-04-03 19:50:52.033781+00	2026-04-03 19:52:52+00	7	0	\N
+488	3	1	death	\N	-6.000000	2026-04-03 19:50:52.0368+00	2026-04-03 19:52:52+00	8	0	\N
+489	3	1	death	\N	-1.000000	2026-04-03 19:50:52.039666+00	2026-04-03 19:52:52+00	9	0	\N
+490	3	1	death	\N	-1.000000	2026-04-03 19:50:52.046606+00	2026-04-03 19:52:52+00	10	0	\N
+491	3	1	death	\N	0.000000	2026-04-03 19:50:52.049359+00	2026-04-03 19:52:52+00	11	0	\N
+492	3	1	death	\N	-5.000000	2026-04-03 19:50:52.052269+00	2026-04-03 19:52:52+00	12	0	\N
+493	3	1	death	\N	-2.000000	2026-04-03 19:50:52.055049+00	2026-04-03 19:52:52+00	13	0	\N
+494	3	1	death	\N	-2.000000	2026-04-03 19:50:52.058136+00	2026-04-03 19:52:52+00	14	0	\N
+495	3	1	death	\N	-2.000000	2026-04-03 19:50:52.061243+00	2026-04-03 19:52:52+00	15	0	\N
+496	3	1	death	\N	-6.000000	2026-04-03 19:50:52.064225+00	2026-04-03 19:52:52+00	16	0	\N
+497	3	1	death	\N	-1.000000	2026-04-03 19:50:52.067537+00	2026-04-03 19:52:52+00	17	0	\N
+498	3	1	death	\N	-2.000000	2026-04-03 19:50:52.070406+00	2026-04-03 19:52:52+00	18	0	\N
+499	3	1	death	\N	-2.000000	2026-04-03 19:50:52.074527+00	2026-04-03 19:52:52+00	19	0	\N
+500	3	1	death	\N	-2.000000	2026-04-03 19:50:52.077665+00	2026-04-03 19:52:52+00	20	0	\N
+501	3	1	death	\N	-54.000000	2026-04-04 10:35:10.04763+00	2026-04-04 10:37:10+00	1	0	\N
+502	3	1	death	\N	-51.000000	2026-04-04 10:35:10.055235+00	2026-04-04 10:37:10+00	2	0	\N
+503	3	1	death	\N	-4.000000	2026-04-04 10:35:10.058272+00	2026-04-04 10:37:10+00	3	0	\N
+504	3	1	death	\N	-4.000000	2026-04-04 10:35:10.061194+00	2026-04-04 10:37:10+00	4	0	\N
+505	3	1	death	\N	-1.000000	2026-04-04 10:35:10.064279+00	2026-04-04 10:37:10+00	5	0	\N
+506	3	1	death	\N	-5.000000	2026-04-04 10:35:10.067055+00	2026-04-04 10:37:10+00	6	0	\N
+507	3	1	death	\N	-2.000000	2026-04-04 10:35:10.069993+00	2026-04-04 10:37:10+00	7	0	\N
+508	3	1	death	\N	-6.000000	2026-04-04 10:35:10.072671+00	2026-04-04 10:37:10+00	8	0	\N
+509	3	1	death	\N	-1.000000	2026-04-04 10:35:10.075396+00	2026-04-04 10:37:10+00	9	0	\N
+510	3	1	death	\N	-1.000000	2026-04-04 10:35:10.077962+00	2026-04-04 10:37:10+00	10	0	\N
+511	3	1	death	\N	0.000000	2026-04-04 10:35:10.08061+00	2026-04-04 10:37:10+00	11	0	\N
+512	3	1	death	\N	-5.000000	2026-04-04 10:35:10.083263+00	2026-04-04 10:37:10+00	12	0	\N
+513	3	1	death	\N	-2.000000	2026-04-04 10:35:10.085908+00	2026-04-04 10:37:10+00	13	0	\N
+514	3	1	death	\N	-2.000000	2026-04-04 10:35:10.088488+00	2026-04-04 10:37:10+00	14	0	\N
+515	3	1	death	\N	-2.000000	2026-04-04 10:35:10.09111+00	2026-04-04 10:37:10+00	15	0	\N
+516	3	1	death	\N	-6.000000	2026-04-04 10:35:10.09381+00	2026-04-04 10:37:10+00	16	0	\N
+517	3	1	death	\N	-1.000000	2026-04-04 10:35:10.096865+00	2026-04-04 10:37:10+00	17	0	\N
+518	3	1	death	\N	-2.000000	2026-04-04 10:35:10.099831+00	2026-04-04 10:37:10+00	18	0	\N
+519	3	1	death	\N	-2.000000	2026-04-04 10:35:10.105455+00	2026-04-04 10:37:10+00	19	0	\N
+520	3	1	death	\N	-2.000000	2026-04-04 10:35:10.108945+00	2026-04-04 10:37:10+00	20	0	\N
+521	3	1	death	\N	-54.000000	2026-04-04 11:09:26.804448+00	2026-04-04 11:11:26+00	1	0	\N
+522	3	1	death	\N	-51.000000	2026-04-04 11:09:26.808032+00	2026-04-04 11:11:26+00	2	0	\N
+523	3	1	death	\N	-4.000000	2026-04-04 11:09:26.81109+00	2026-04-04 11:11:26+00	3	0	\N
+524	3	1	death	\N	-4.000000	2026-04-04 11:09:26.814938+00	2026-04-04 11:11:26+00	4	0	\N
+525	3	1	death	\N	-1.000000	2026-04-04 11:09:26.817978+00	2026-04-04 11:11:26+00	5	0	\N
+526	3	1	death	\N	-5.000000	2026-04-04 11:09:26.82129+00	2026-04-04 11:11:26+00	6	0	\N
+527	3	1	death	\N	-2.000000	2026-04-04 11:09:26.824341+00	2026-04-04 11:11:26+00	7	0	\N
+528	3	1	death	\N	-6.000000	2026-04-04 11:09:26.827245+00	2026-04-04 11:11:26+00	8	0	\N
+529	3	1	death	\N	-1.000000	2026-04-04 11:09:26.83038+00	2026-04-04 11:11:26+00	9	0	\N
+530	3	1	death	\N	-1.000000	2026-04-04 11:09:26.833855+00	2026-04-04 11:11:26+00	10	0	\N
+531	3	1	death	\N	0.000000	2026-04-04 11:09:26.83672+00	2026-04-04 11:11:26+00	11	0	\N
+532	3	1	death	\N	-5.000000	2026-04-04 11:09:26.83946+00	2026-04-04 11:11:26+00	12	0	\N
+533	3	1	death	\N	-2.000000	2026-04-04 11:09:26.842081+00	2026-04-04 11:11:26+00	13	0	\N
+534	3	1	death	\N	-2.000000	2026-04-04 11:09:26.844761+00	2026-04-04 11:11:26+00	14	0	\N
+535	3	1	death	\N	-2.000000	2026-04-04 11:09:26.847549+00	2026-04-04 11:11:26+00	15	0	\N
+536	3	1	death	\N	-6.000000	2026-04-04 11:09:26.850138+00	2026-04-04 11:11:26+00	16	0	\N
+537	3	1	death	\N	-1.000000	2026-04-04 11:09:26.852945+00	2026-04-04 11:11:26+00	17	0	\N
+538	3	1	death	\N	-2.000000	2026-04-04 11:09:26.856407+00	2026-04-04 11:11:26+00	18	0	\N
+539	3	1	death	\N	-2.000000	2026-04-04 11:09:26.859665+00	2026-04-04 11:11:26+00	19	0	\N
+540	3	1	death	\N	-2.000000	2026-04-04 11:09:26.863006+00	2026-04-04 11:11:26+00	20	0	\N
+541	3	1	death	\N	-54.000000	2026-04-04 11:18:59.155828+00	2026-04-04 11:20:59+00	1	0	\N
+542	3	1	death	\N	0.000000	2026-04-04 11:18:59.159216+00	2026-04-04 11:20:59+00	11	0	\N
+543	3	1	death	\N	-4.000000	2026-04-04 11:18:59.16239+00	2026-04-04 11:20:59+00	3	0	\N
+544	3	1	death	\N	-4.000000	2026-04-04 11:18:59.165837+00	2026-04-04 11:20:59+00	4	0	\N
+545	3	1	death	\N	-1.000000	2026-04-04 11:18:59.168852+00	2026-04-04 11:20:59+00	5	0	\N
+546	3	1	death	\N	-5.000000	2026-04-04 11:18:59.171932+00	2026-04-04 11:20:59+00	6	0	\N
+547	3	1	death	\N	-2.000000	2026-04-04 11:18:59.175067+00	2026-04-04 11:20:59+00	7	0	\N
+548	3	1	death	\N	-6.000000	2026-04-04 11:18:59.17822+00	2026-04-04 11:20:59+00	8	0	\N
+549	3	1	death	\N	-1.000000	2026-04-04 11:18:59.18122+00	2026-04-04 11:20:59+00	9	0	\N
+550	3	1	death	\N	-1.000000	2026-04-04 11:18:59.184049+00	2026-04-04 11:20:59+00	10	0	\N
+551	3	1	death	\N	-51.000000	2026-04-04 11:18:59.186823+00	2026-04-04 11:20:59+00	2	0	\N
+552	3	1	death	\N	-5.000000	2026-04-04 11:18:59.189689+00	2026-04-04 11:20:59+00	12	0	\N
+553	3	1	death	\N	-2.000000	2026-04-04 11:18:59.19259+00	2026-04-04 11:20:59+00	13	0	\N
+554	3	1	death	\N	-2.000000	2026-04-04 11:18:59.195309+00	2026-04-04 11:20:59+00	14	0	\N
+555	3	1	death	\N	-2.000000	2026-04-04 11:18:59.198165+00	2026-04-04 11:20:59+00	15	0	\N
+556	3	1	death	\N	-6.000000	2026-04-04 11:18:59.201329+00	2026-04-04 11:20:59+00	16	0	\N
+557	3	1	death	\N	-1.000000	2026-04-04 11:18:59.204225+00	2026-04-04 11:20:59+00	17	0	\N
+558	3	1	death	\N	-2.000000	2026-04-04 11:18:59.207482+00	2026-04-04 11:20:59+00	18	0	\N
+559	3	1	death	\N	-2.000000	2026-04-04 11:18:59.21301+00	2026-04-04 11:20:59+00	19	0	\N
+560	3	1	death	\N	-2.000000	2026-04-04 11:18:59.216424+00	2026-04-04 11:20:59+00	20	0	\N
+561	3	1	death	\N	-54.000000	2026-04-04 11:33:32.18565+00	2026-04-04 11:35:32+00	1	0	\N
+562	3	1	death	\N	-51.000000	2026-04-04 11:33:32.189761+00	2026-04-04 11:35:32+00	2	0	\N
+563	3	1	death	\N	-4.000000	2026-04-04 11:33:32.19294+00	2026-04-04 11:35:32+00	3	0	\N
+564	3	1	death	\N	-4.000000	2026-04-04 11:33:32.196718+00	2026-04-04 11:35:32+00	4	0	\N
+565	3	1	death	\N	-1.000000	2026-04-04 11:33:32.199806+00	2026-04-04 11:35:32+00	5	0	\N
+566	3	1	death	\N	-5.000000	2026-04-04 11:33:32.203064+00	2026-04-04 11:35:32+00	6	0	\N
+567	3	1	death	\N	-2.000000	2026-04-04 11:33:32.206356+00	2026-04-04 11:35:32+00	7	0	\N
+568	3	1	death	\N	-6.000000	2026-04-04 11:33:32.209607+00	2026-04-04 11:35:32+00	8	0	\N
+569	3	1	death	\N	-1.000000	2026-04-04 11:33:32.212727+00	2026-04-04 11:35:32+00	9	0	\N
+570	3	1	death	\N	-1.000000	2026-04-04 11:33:32.215729+00	2026-04-04 11:35:32+00	10	0	\N
+571	3	1	death	\N	0.000000	2026-04-04 11:33:32.218764+00	2026-04-04 11:35:32+00	11	0	\N
+572	3	1	death	\N	-5.000000	2026-04-04 11:33:32.221808+00	2026-04-04 11:35:32+00	12	0	\N
+573	3	1	death	\N	-2.000000	2026-04-04 11:33:32.224843+00	2026-04-04 11:35:32+00	13	0	\N
+574	3	1	death	\N	-2.000000	2026-04-04 11:33:32.228575+00	2026-04-04 11:35:32+00	14	0	\N
+575	3	1	death	\N	-2.000000	2026-04-04 11:33:32.231998+00	2026-04-04 11:35:32+00	15	0	\N
+576	3	1	death	\N	-6.000000	2026-04-04 11:33:32.235296+00	2026-04-04 11:35:32+00	16	0	\N
+577	3	1	death	\N	-1.000000	2026-04-04 11:33:32.239245+00	2026-04-04 11:35:32+00	17	0	\N
+578	3	1	death	\N	-2.000000	2026-04-04 11:33:32.242534+00	2026-04-04 11:35:32+00	18	0	\N
+579	3	1	death	\N	-2.000000	2026-04-04 11:33:32.245865+00	2026-04-04 11:35:32+00	19	0	\N
+580	3	1	death	\N	-2.000000	2026-04-04 11:33:32.249166+00	2026-04-04 11:35:32+00	20	0	\N
+581	3	1	death	\N	-54.000000	2026-04-04 11:37:33.252351+00	2026-04-04 11:39:33+00	1	0	\N
+582	3	1	death	\N	-51.000000	2026-04-04 11:37:33.257748+00	2026-04-04 11:39:33+00	2	0	\N
+583	3	1	death	\N	-4.000000	2026-04-04 11:37:33.261403+00	2026-04-04 11:39:33+00	3	0	\N
+584	3	1	death	\N	-4.000000	2026-04-04 11:37:33.264823+00	2026-04-04 11:39:33+00	4	0	\N
+585	3	1	death	\N	-1.000000	2026-04-04 11:37:33.267922+00	2026-04-04 11:39:33+00	5	0	\N
+586	3	1	death	\N	-5.000000	2026-04-04 11:37:33.271222+00	2026-04-04 11:39:33+00	6	0	\N
+587	3	1	death	\N	-2.000000	2026-04-04 11:37:33.27506+00	2026-04-04 11:39:33+00	7	0	\N
+588	3	1	death	\N	-6.000000	2026-04-04 11:37:33.278485+00	2026-04-04 11:39:33+00	8	0	\N
+589	3	1	death	\N	-1.000000	2026-04-04 11:37:33.281739+00	2026-04-04 11:39:33+00	9	0	\N
+590	3	1	death	\N	-1.000000	2026-04-04 11:37:33.285106+00	2026-04-04 11:39:33+00	10	0	\N
+591	3	1	death	\N	0.000000	2026-04-04 11:37:33.288378+00	2026-04-04 11:39:33+00	11	0	\N
+592	3	1	death	\N	-5.000000	2026-04-04 11:37:33.291648+00	2026-04-04 11:39:33+00	12	0	\N
+593	3	1	death	\N	-2.000000	2026-04-04 11:37:33.29456+00	2026-04-04 11:39:33+00	13	0	\N
+594	3	1	death	\N	-2.000000	2026-04-04 11:37:33.297942+00	2026-04-04 11:39:33+00	14	0	\N
+595	3	1	death	\N	-2.000000	2026-04-04 11:37:33.301358+00	2026-04-04 11:39:33+00	15	0	\N
+596	3	1	death	\N	-6.000000	2026-04-04 11:37:33.304829+00	2026-04-04 11:39:33+00	16	0	\N
+597	3	1	death	\N	-1.000000	2026-04-04 11:37:33.308312+00	2026-04-04 11:39:33+00	17	0	\N
+598	3	1	death	\N	-2.000000	2026-04-04 11:37:33.311737+00	2026-04-04 11:39:33+00	18	0	\N
+599	3	1	death	\N	-2.000000	2026-04-04 11:37:33.315075+00	2026-04-04 11:39:33+00	19	0	\N
+600	3	1	death	\N	-2.000000	2026-04-04 11:37:33.318465+00	2026-04-04 11:39:33+00	20	0	\N
+601	3	1	death	\N	-54.000000	2026-04-04 11:46:47.823996+00	2026-04-04 11:48:47+00	1	0	\N
+602	3	1	death	\N	-51.000000	2026-04-04 11:46:47.832261+00	2026-04-04 11:48:47+00	2	0	\N
+603	3	1	death	\N	-4.000000	2026-04-04 11:46:47.835378+00	2026-04-04 11:48:47+00	3	0	\N
+604	3	1	death	\N	-4.000000	2026-04-04 11:46:47.838715+00	2026-04-04 11:48:47+00	4	0	\N
+605	3	1	death	\N	-1.000000	2026-04-04 11:46:47.841633+00	2026-04-04 11:48:47+00	5	0	\N
+606	3	1	death	\N	-5.000000	2026-04-04 11:46:47.844689+00	2026-04-04 11:48:47+00	6	0	\N
+607	3	1	death	\N	-2.000000	2026-04-04 11:46:47.847583+00	2026-04-04 11:48:47+00	7	0	\N
+608	3	1	death	\N	-6.000000	2026-04-04 11:46:47.850834+00	2026-04-04 11:48:47+00	8	0	\N
+609	3	1	death	\N	-1.000000	2026-04-04 11:46:47.853565+00	2026-04-04 11:48:47+00	9	0	\N
+610	3	1	death	\N	-1.000000	2026-04-04 11:46:47.856635+00	2026-04-04 11:48:47+00	10	0	\N
+611	3	1	death	\N	0.000000	2026-04-04 11:46:47.859587+00	2026-04-04 11:48:47+00	11	0	\N
+612	3	1	death	\N	-5.000000	2026-04-04 11:46:47.862571+00	2026-04-04 11:48:47+00	12	0	\N
+613	3	1	death	\N	-2.000000	2026-04-04 11:46:47.865754+00	2026-04-04 11:48:47+00	13	0	\N
+614	3	1	death	\N	-2.000000	2026-04-04 11:46:47.868864+00	2026-04-04 11:48:47+00	14	0	\N
+615	3	1	death	\N	-2.000000	2026-04-04 11:46:47.872075+00	2026-04-04 11:48:47+00	15	0	\N
+616	3	1	death	\N	-6.000000	2026-04-04 11:46:47.875373+00	2026-04-04 11:48:47+00	16	0	\N
+617	3	1	death	\N	-1.000000	2026-04-04 11:46:47.878453+00	2026-04-04 11:48:47+00	17	0	\N
+618	3	1	death	\N	-2.000000	2026-04-04 11:46:47.882369+00	2026-04-04 11:48:47+00	18	0	\N
+619	3	1	death	\N	-2.000000	2026-04-04 11:46:47.885588+00	2026-04-04 11:48:47+00	19	0	\N
+620	3	1	death	\N	-2.000000	2026-04-04 11:46:47.888528+00	2026-04-04 11:48:47+00	20	0	\N
+621	2	1	death	\N	-41.000000	2026-04-04 11:47:22.283906+00	2026-04-04 11:49:22+00	1	0	\N
+622	2	1	death	\N	-97.000000	2026-04-04 11:47:22.289404+00	2026-04-04 11:49:22+00	2	0	\N
+623	2	1	death	\N	-2.000000	2026-04-04 11:47:22.292239+00	2026-04-04 11:49:22+00	3	0	\N
+624	2	1	death	\N	-8.000000	2026-04-04 11:47:22.295173+00	2026-04-04 11:49:22+00	4	0	\N
+625	2	1	death	\N	-2.000000	2026-04-04 11:47:22.298059+00	2026-04-04 11:49:22+00	5	0	\N
+626	2	1	death	\N	-3.000000	2026-04-04 11:47:22.300992+00	2026-04-04 11:49:22+00	6	0	\N
+627	2	1	death	\N	-4.000000	2026-04-04 11:47:22.303765+00	2026-04-04 11:49:22+00	7	0	\N
+628	2	1	death	\N	-6.000000	2026-04-04 11:47:22.306394+00	2026-04-04 11:49:22+00	8	0	\N
+629	2	1	death	\N	-1.000000	2026-04-04 11:47:22.30919+00	2026-04-04 11:49:22+00	9	0	\N
+630	2	1	death	\N	-1.000000	2026-04-04 11:47:22.312252+00	2026-04-04 11:49:22+00	10	0	\N
+631	2	1	death	\N	-1.000000	2026-04-04 11:47:22.315369+00	2026-04-04 11:49:22+00	11	0	\N
+632	2	1	death	\N	-1.000000	2026-04-04 11:47:22.318242+00	2026-04-04 11:49:22+00	12	0	\N
+633	2	1	death	\N	-3.000000	2026-04-04 11:47:22.321197+00	2026-04-04 11:49:22+00	13	0	\N
+634	2	1	death	\N	-2.000000	2026-04-04 11:47:22.324354+00	2026-04-04 11:49:22+00	14	0	\N
+635	2	1	death	\N	-2.000000	2026-04-04 11:47:22.327253+00	2026-04-04 11:49:22+00	15	0	\N
+636	2	1	death	\N	-2.000000	2026-04-04 11:47:22.330037+00	2026-04-04 11:49:22+00	18	0	\N
+637	2	1	death	\N	-2.000000	2026-04-04 11:47:22.33299+00	2026-04-04 11:49:22+00	19	0	\N
+638	2	1	death	\N	-3.000000	2026-04-04 11:47:22.335785+00	2026-04-04 11:49:22+00	20	0	\N
+639	3	1	death	\N	-54.000000	2026-04-04 12:34:27.266264+00	2026-04-04 12:36:27+00	1	0	\N
+640	3	1	death	\N	-51.000000	2026-04-04 12:34:27.271839+00	2026-04-04 12:36:27+00	2	0	\N
+641	3	1	death	\N	-4.000000	2026-04-04 12:34:27.275204+00	2026-04-04 12:36:27+00	3	0	\N
+642	3	1	death	\N	-4.000000	2026-04-04 12:34:27.278565+00	2026-04-04 12:36:27+00	4	0	\N
+643	3	1	death	\N	-1.000000	2026-04-04 12:34:27.281938+00	2026-04-04 12:36:27+00	5	0	\N
+644	3	1	death	\N	-5.000000	2026-04-04 12:34:27.284924+00	2026-04-04 12:36:27+00	6	0	\N
+645	3	1	death	\N	-2.000000	2026-04-04 12:34:27.287825+00	2026-04-04 12:36:27+00	7	0	\N
+646	3	1	death	\N	-6.000000	2026-04-04 12:34:27.290894+00	2026-04-04 12:36:27+00	8	0	\N
+647	3	1	death	\N	-1.000000	2026-04-04 12:34:27.293778+00	2026-04-04 12:36:27+00	9	0	\N
+648	3	1	death	\N	-1.000000	2026-04-04 12:34:27.296789+00	2026-04-04 12:36:27+00	10	0	\N
+649	3	1	death	\N	0.000000	2026-04-04 12:34:27.299959+00	2026-04-04 12:36:27+00	11	0	\N
+650	3	1	death	\N	-5.000000	2026-04-04 12:34:27.3035+00	2026-04-04 12:36:27+00	12	0	\N
+651	3	1	death	\N	-2.000000	2026-04-04 12:34:27.306652+00	2026-04-04 12:36:27+00	13	0	\N
+652	3	1	death	\N	-2.000000	2026-04-04 12:34:27.309828+00	2026-04-04 12:36:27+00	14	0	\N
+653	3	1	death	\N	-2.000000	2026-04-04 12:34:27.313172+00	2026-04-04 12:36:27+00	15	0	\N
+654	3	1	death	\N	-6.000000	2026-04-04 12:34:27.316643+00	2026-04-04 12:36:27+00	16	0	\N
+655	3	1	death	\N	-1.000000	2026-04-04 12:34:27.319966+00	2026-04-04 12:36:27+00	17	0	\N
+656	3	1	death	\N	-2.000000	2026-04-04 12:34:27.32324+00	2026-04-04 12:36:27+00	18	0	\N
+657	3	1	death	\N	-2.000000	2026-04-04 12:34:27.326415+00	2026-04-04 12:36:27+00	19	0	\N
+658	3	1	death	\N	-2.000000	2026-04-04 12:34:27.334936+00	2026-04-04 12:36:27+00	20	0	\N
+659	3	1	death	\N	-54.000000	2026-04-04 12:45:17.431293+00	2026-04-04 12:47:17+00	1	0	\N
+660	3	1	death	\N	-51.000000	2026-04-04 12:45:17.435649+00	2026-04-04 12:47:17+00	2	0	\N
+661	3	1	death	\N	-4.000000	2026-04-04 12:45:17.438654+00	2026-04-04 12:47:17+00	3	0	\N
+662	3	1	death	\N	-4.000000	2026-04-04 12:45:17.441591+00	2026-04-04 12:47:17+00	4	0	\N
+663	3	1	death	\N	-1.000000	2026-04-04 12:45:17.444876+00	2026-04-04 12:47:17+00	5	0	\N
+664	3	1	death	\N	-5.000000	2026-04-04 12:45:17.447962+00	2026-04-04 12:47:17+00	6	0	\N
+665	3	1	death	\N	-2.000000	2026-04-04 12:45:17.451056+00	2026-04-04 12:47:17+00	7	0	\N
+666	3	1	death	\N	-6.000000	2026-04-04 12:45:17.454264+00	2026-04-04 12:47:17+00	8	0	\N
+667	3	1	death	\N	-1.000000	2026-04-04 12:45:17.457313+00	2026-04-04 12:47:17+00	9	0	\N
+668	3	1	death	\N	-1.000000	2026-04-04 12:45:17.460589+00	2026-04-04 12:47:17+00	10	0	\N
+669	3	1	death	\N	0.000000	2026-04-04 12:45:17.463723+00	2026-04-04 12:47:17+00	11	0	\N
+670	3	1	death	\N	-5.000000	2026-04-04 12:45:17.46714+00	2026-04-04 12:47:17+00	12	0	\N
+671	3	1	death	\N	-2.000000	2026-04-04 12:45:17.470476+00	2026-04-04 12:47:17+00	13	0	\N
+672	3	1	death	\N	-2.000000	2026-04-04 12:45:17.473787+00	2026-04-04 12:47:17+00	14	0	\N
+673	3	1	death	\N	-2.000000	2026-04-04 12:45:17.47662+00	2026-04-04 12:47:17+00	15	0	\N
+674	3	1	death	\N	-6.000000	2026-04-04 12:45:17.479697+00	2026-04-04 12:47:17+00	16	0	\N
+675	3	1	death	\N	-1.000000	2026-04-04 12:45:17.483186+00	2026-04-04 12:47:17+00	17	0	\N
+676	3	1	death	\N	-2.000000	2026-04-04 12:45:17.486489+00	2026-04-04 12:47:17+00	18	0	\N
+677	3	1	death	\N	-2.000000	2026-04-04 12:45:17.48972+00	2026-04-04 12:47:17+00	19	0	\N
+678	3	1	death	\N	-2.000000	2026-04-04 12:45:17.492942+00	2026-04-04 12:47:17+00	20	0	\N
+679	3	1	death	\N	-54.000000	2026-04-04 15:52:33.5477+00	2026-04-04 15:54:33+00	1	0	\N
+680	3	1	death	\N	-51.000000	2026-04-04 15:52:33.557453+00	2026-04-04 15:54:33+00	2	0	\N
+681	3	1	death	\N	-4.000000	2026-04-04 15:52:33.56048+00	2026-04-04 15:54:33+00	3	0	\N
+682	3	1	death	\N	-4.000000	2026-04-04 15:52:33.563699+00	2026-04-04 15:54:33+00	4	0	\N
+683	3	1	death	\N	-1.000000	2026-04-04 15:52:33.566971+00	2026-04-04 15:54:33+00	5	0	\N
+684	3	1	death	\N	-5.000000	2026-04-04 15:52:33.570012+00	2026-04-04 15:54:33+00	6	0	\N
+685	3	1	death	\N	-2.000000	2026-04-04 15:52:33.572598+00	2026-04-04 15:54:33+00	7	0	\N
+686	3	1	death	\N	-6.000000	2026-04-04 15:52:33.575423+00	2026-04-04 15:54:33+00	8	0	\N
+687	3	1	death	\N	-1.000000	2026-04-04 15:52:33.578227+00	2026-04-04 15:54:33+00	9	0	\N
+688	3	1	death	\N	-1.000000	2026-04-04 15:52:33.580776+00	2026-04-04 15:54:33+00	10	0	\N
+689	3	1	death	\N	0.000000	2026-04-04 15:52:33.583596+00	2026-04-04 15:54:33+00	11	0	\N
+690	3	1	death	\N	-5.000000	2026-04-04 15:52:33.586451+00	2026-04-04 15:54:33+00	12	0	\N
+691	3	1	death	\N	-2.000000	2026-04-04 15:52:33.589384+00	2026-04-04 15:54:33+00	13	0	\N
+692	3	1	death	\N	-2.000000	2026-04-04 15:52:33.592288+00	2026-04-04 15:54:33+00	14	0	\N
+693	3	1	death	\N	-2.000000	2026-04-04 15:52:33.595009+00	2026-04-04 15:54:33+00	15	0	\N
+694	3	1	death	\N	-6.000000	2026-04-04 15:52:33.59821+00	2026-04-04 15:54:33+00	16	0	\N
+695	3	1	death	\N	-1.000000	2026-04-04 15:52:33.601115+00	2026-04-04 15:54:33+00	17	0	\N
+696	3	1	death	\N	-2.000000	2026-04-04 15:52:33.605083+00	2026-04-04 15:54:33+00	18	0	\N
+697	3	1	death	\N	-2.000000	2026-04-04 15:52:33.608448+00	2026-04-04 15:54:33+00	19	0	\N
+698	3	1	death	\N	-2.000000	2026-04-04 15:52:33.611577+00	2026-04-04 15:54:33+00	20	0	\N
+699	3	1	death	\N	-54.000000	2026-04-04 16:12:41.354773+00	2026-04-04 16:14:41+00	1	0	\N
+700	3	1	death	\N	-2.000000	2026-04-04 16:12:41.35821+00	2026-04-04 16:14:41+00	13	0	\N
+701	3	1	death	\N	-4.000000	2026-04-04 16:12:41.361478+00	2026-04-04 16:14:41+00	3	0	\N
+702	3	1	death	\N	-4.000000	2026-04-04 16:12:41.364591+00	2026-04-04 16:14:41+00	4	0	\N
+703	3	1	death	\N	-1.000000	2026-04-04 16:12:41.367925+00	2026-04-04 16:14:41+00	5	0	\N
+704	3	1	death	\N	-5.000000	2026-04-04 16:12:41.370914+00	2026-04-04 16:14:41+00	6	0	\N
+705	3	1	death	\N	-2.000000	2026-04-04 16:12:41.373967+00	2026-04-04 16:14:41+00	7	0	\N
+706	3	1	death	\N	-6.000000	2026-04-04 16:12:41.3775+00	2026-04-04 16:14:41+00	8	0	\N
+707	3	1	death	\N	-1.000000	2026-04-04 16:12:41.380553+00	2026-04-04 16:14:41+00	9	0	\N
+708	3	1	death	\N	-1.000000	2026-04-04 16:12:41.383556+00	2026-04-04 16:14:41+00	10	0	\N
+709	3	1	death	\N	0.000000	2026-04-04 16:12:41.386423+00	2026-04-04 16:14:41+00	11	0	\N
+710	3	1	death	\N	-5.000000	2026-04-04 16:12:41.389245+00	2026-04-04 16:14:41+00	12	0	\N
+711	3	1	death	\N	-51.000000	2026-04-04 16:12:41.392069+00	2026-04-04 16:14:41+00	2	0	\N
+712	3	1	death	\N	-2.000000	2026-04-04 16:12:41.394978+00	2026-04-04 16:14:41+00	14	0	\N
+713	3	1	death	\N	-2.000000	2026-04-04 16:12:41.397772+00	2026-04-04 16:14:41+00	15	0	\N
+714	3	1	death	\N	-6.000000	2026-04-04 16:12:41.400586+00	2026-04-04 16:14:41+00	16	0	\N
+715	3	1	death	\N	-1.000000	2026-04-04 16:12:41.403543+00	2026-04-04 16:14:41+00	17	0	\N
+716	3	1	death	\N	-2.000000	2026-04-04 16:12:41.406363+00	2026-04-04 16:14:41+00	18	0	\N
+717	3	1	death	\N	-2.000000	2026-04-04 16:12:41.409663+00	2026-04-04 16:14:41+00	19	0	\N
+718	3	1	death	\N	-2.000000	2026-04-04 16:12:41.41307+00	2026-04-04 16:14:41+00	20	0	\N
+719	3	1	death	\N	-54.000000	2026-04-05 18:41:11.334849+00	2026-04-05 18:43:11+00	1	0	\N
+720	3	1	death	\N	-51.000000	2026-04-05 18:41:11.346807+00	2026-04-05 18:43:11+00	2	0	\N
+721	3	1	death	\N	-4.000000	2026-04-05 18:41:11.350009+00	2026-04-05 18:43:11+00	3	0	\N
+722	3	1	death	\N	-4.000000	2026-04-05 18:41:11.35325+00	2026-04-05 18:43:11+00	4	0	\N
+723	3	1	death	\N	-1.000000	2026-04-05 18:41:11.356245+00	2026-04-05 18:43:11+00	5	0	\N
+724	3	1	death	\N	-5.000000	2026-04-05 18:41:11.359139+00	2026-04-05 18:43:11+00	6	0	\N
+725	3	1	death	\N	-2.000000	2026-04-05 18:41:11.362096+00	2026-04-05 18:43:11+00	7	0	\N
+726	3	1	death	\N	-6.000000	2026-04-05 18:41:11.364919+00	2026-04-05 18:43:11+00	8	0	\N
+727	3	1	death	\N	-1.000000	2026-04-05 18:41:11.36785+00	2026-04-05 18:43:11+00	9	0	\N
+728	3	1	death	\N	-1.000000	2026-04-05 18:41:11.37071+00	2026-04-05 18:43:11+00	10	0	\N
+729	3	1	death	\N	0.000000	2026-04-05 18:41:11.373632+00	2026-04-05 18:43:11+00	11	0	\N
+730	3	1	death	\N	-5.000000	2026-04-05 18:41:11.376876+00	2026-04-05 18:43:11+00	12	0	\N
+731	3	1	death	\N	-2.000000	2026-04-05 18:41:11.380035+00	2026-04-05 18:43:11+00	13	0	\N
+732	3	1	death	\N	-2.000000	2026-04-05 18:41:11.383333+00	2026-04-05 18:43:11+00	14	0	\N
+733	3	1	death	\N	-2.000000	2026-04-05 18:41:11.386418+00	2026-04-05 18:43:11+00	15	0	\N
+734	3	1	death	\N	-6.000000	2026-04-05 18:41:11.389729+00	2026-04-05 18:43:11+00	16	0	\N
+735	3	1	death	\N	-1.000000	2026-04-05 18:41:11.392825+00	2026-04-05 18:43:11+00	17	0	\N
+736	3	1	death	\N	-2.000000	2026-04-05 18:41:11.39586+00	2026-04-05 18:43:11+00	18	0	\N
+737	3	1	death	\N	-2.000000	2026-04-05 18:41:11.398845+00	2026-04-05 18:43:11+00	19	0	\N
+738	3	1	death	\N	-2.000000	2026-04-05 18:41:11.402153+00	2026-04-05 18:43:11+00	20	0	\N
 \.
 
 
@@ -6189,15 +7385,15 @@ COPY public.player_flag (player_id, flag_key, int_value, bool_value, updated_at)
 --
 
 COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, durability_current, kill_count) FROM stdin;
-174	3	4	1	\N	\N	0
 3	1	3	5	\N	\N	0
 4	2	3	5	\N	\N	0
-169	3	16	26	\N	\N	0
-161	3	1	1	\N	21	3
-209	3	9	1	\N	\N	0
-176	3	15	1	\N	\N	0
+169	3	16	780	\N	\N	0
+165	3	3	85	\N	\N	0
+176	3	15	1	\N	35	0
+221	3	1	1	\N	80	0
+228	3	11	1	\N	\N	0
+218	3	9	2	\N	\N	0
 18	3	17	7	\N	\N	0
-165	3	3	82	\N	\N	0
 \.
 
 
@@ -6206,7 +7402,7 @@ COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, d
 --
 
 COPY public.player_quest (player_id, quest_id, state, current_step, progress, updated_at) FROM stdin;
-3	1	active	1	{}	2026-03-28 18:04:48.393922+00
+3	1	active	1	{}	2026-04-07 19:08:35.325484+00
 \.
 
 
@@ -6355,7 +7551,6 @@ COPY public.skill_properties_mapping (id, skill_id, skill_level, property_id, pr
 3	2	1	2	6000
 4	2	1	3	1000
 5	2	1	6	2.5
-6	3	1	5	25
 7	3	1	2	8000
 9	3	1	6	15
 10	1	1	3	500
@@ -6366,17 +7561,17 @@ COPY public.skill_properties_mapping (id, skill_id, skill_level, property_id, pr
 14	1	1	4	1000
 15	4	1	2	5000
 16	4	1	3	1000
-17	4	1	4	0
+17	4	1	4	1000
 18	4	1	5	30
 19	4	1	6	2.5
-20	4	1	8	800
+20	4	1	8	1100
 21	5	1	2	12000
 22	5	1	3	1000
-23	5	1	4	0
+23	5	1	4	1000
 24	5	1	5	50
 25	5	1	6	3.0
 26	5	1	7	4.0
-27	5	1	8	1000
+27	5	1	8	1200
 28	8	1	2	7000
 29	8	1	3	1000
 30	8	1	4	2000
@@ -6393,6 +7588,13 @@ COPY public.skill_properties_mapping (id, skill_id, skill_level, property_id, pr
 41	10	1	5	70
 42	10	1	6	15
 43	10	1	7	8.0
+6	3	1	5	3
+44	1	1	8	1200
+46	2	1	8	2300
+47	3	1	8	4500
+48	8	1	8	2300
+49	9	1	8	3500
+50	10	1	8	3000
 \.
 
 
@@ -6496,6 +7698,18 @@ COPY public.target_type (id, slug) FROM stdin;
 --
 
 COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interval_hours, window_minutes, next_spawn_at, last_killed_at, announcement_key) FROM stdin;
+\.
+
+
+--
+-- Data for Name: title_definitions; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.title_definitions (id, slug, display_name, description, earn_condition, bonuses) FROM stdin;
+1	wolf_slayer	Wolf Slayer	Slain 100 wolves	kill_wolves_100	[{"value": 2.0, "attributeSlug": "physical_attack"}, {"value": 1.0, "attributeSlug": "move_speed"}]
+2	first_blood	First Blood	First PvP kill	pvp_kill_first	[{"value": 0.5, "attributeSlug": "crit_chance"}]
+3	dungeon_delver	Dungeon Delver	Completed a dungeon	dungeon_complete_first	[{"value": 3.0, "attributeSlug": "physical_defense"}]
+4	merchant	Merchant	Bought 50 items	buy_items_50	[{"value": 1.0, "attributeSlug": "strength"}]
 \.
 
 
@@ -7371,6 +8585,501 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 846	3	f203e6cb-9826-4517-89c8-fb1eaa909062	\N	\N	2026-03-28 17:38:56.040632+00	2026-04-27 17:38:56.040632+00	\N
 847	4	60a5bd04-13bb-4c78-9785-346e55255efa	\N	\N	2026-03-28 17:42:19.897387+00	2026-04-27 17:42:19.897387+00	\N
 848	3	da9b1ae3-cb37-4c53-aa2c-e0c6134eaff5	\N	\N	2026-03-28 18:04:40.989911+00	2026-04-27 18:04:40.989911+00	\N
+849	3	65c6b8f6-eda0-44ce-8336-898f6fbbe2c4	\N	\N	2026-03-28 20:45:32.919205+00	2026-04-27 20:45:32.919205+00	\N
+850	3	30139958-6b8e-4c7c-bb81-0f84a0e0ab1c	\N	\N	2026-03-28 20:50:21.137609+00	2026-04-27 20:50:21.137609+00	\N
+851	3	9cd6c980-a784-4f2d-baaa-3a44686139ed	\N	\N	2026-03-28 20:55:34.748919+00	2026-04-27 20:55:34.748919+00	\N
+852	3	49647f20-285d-4d8c-a335-c9bea1fe80e4	\N	\N	2026-03-28 21:25:42.500808+00	2026-04-27 21:25:42.500808+00	\N
+853	3	a08b91cf-91b2-49e9-a5ac-fe90dbb3124c	\N	\N	2026-03-28 21:30:18.047056+00	2026-04-27 21:30:18.047056+00	\N
+854	3	1be6950a-4222-46c8-9bee-ec2f2f4e51de	\N	\N	2026-03-28 21:32:37.434796+00	2026-04-27 21:32:37.434796+00	\N
+855	3	263ec621-100f-4fe1-b5f0-13151b6762a9	\N	\N	2026-03-28 21:33:34.422688+00	2026-04-27 21:33:34.422688+00	\N
+856	3	3543a892-865d-4375-9758-f6aaa8ee3fe1	\N	\N	2026-03-28 21:35:12.405669+00	2026-04-27 21:35:12.405669+00	\N
+857	3	c230fc5d-a17c-407b-ad8c-2800af2a9962	\N	\N	2026-03-28 22:00:59.451896+00	2026-04-27 22:00:59.451896+00	\N
+858	3	6ed16cfd-1c96-4c22-9285-f572699f397b	\N	\N	2026-03-28 22:03:27.035503+00	2026-04-27 22:03:27.035503+00	\N
+859	3	8ed03f67-e4e8-443b-99a1-e0d76e057644	\N	\N	2026-03-29 08:25:10.706069+00	2026-04-28 08:25:10.706069+00	\N
+860	3	be4c7c12-8443-498e-8ced-2fc752c437d6	\N	\N	2026-03-29 08:28:56.944407+00	2026-04-28 08:28:56.944407+00	\N
+861	3	2b809edb-bcc3-4aa2-9c44-2b13ee413281	\N	\N	2026-03-29 11:54:55.804766+00	2026-04-28 11:54:55.804766+00	\N
+862	3	75a5fa09-11a3-4cbf-9c6e-96a389c6e55c	\N	\N	2026-03-29 11:58:23.388285+00	2026-04-28 11:58:23.388285+00	\N
+863	3	966cb995-3070-4943-b2eb-bd731038b8dc	\N	\N	2026-03-29 12:03:30.991603+00	2026-04-28 12:03:30.991603+00	\N
+864	3	2dff8dea-29c0-4d31-992a-75bca3d3ea4a	\N	\N	2026-03-29 12:08:37.294806+00	2026-04-28 12:08:37.294806+00	\N
+865	3	6b6f0973-981c-4598-a7dc-3dbebba0cecf	\N	\N	2026-03-29 12:31:04.140683+00	2026-04-28 12:31:04.140683+00	\N
+866	3	3405fdd9-f5ae-463a-a73a-33b9854958cd	\N	\N	2026-03-29 12:31:14.757706+00	2026-04-28 12:31:14.757706+00	\N
+867	3	848a75ed-3baa-41da-a0ec-73bee26db928	\N	\N	2026-03-29 12:35:49.410073+00	2026-04-28 12:35:49.410073+00	\N
+868	4	b44f87f1-fe0e-4d6f-89fd-385904fa3fe1	\N	\N	2026-03-29 12:36:05.070436+00	2026-04-28 12:36:05.070436+00	\N
+869	3	b5f2128b-e68a-492c-a6ea-88e14f2559dd	\N	\N	2026-03-29 12:44:08.029+00	2026-04-28 12:44:08.029+00	\N
+870	3	d471b0a7-bd6e-4a98-829d-eba37480d7f3	\N	\N	2026-03-29 12:46:10.025793+00	2026-04-28 12:46:10.025793+00	\N
+871	3	2bf2566e-f9a9-4cf7-9d61-500c7db5131a	\N	\N	2026-03-29 13:22:37.334906+00	2026-04-28 13:22:37.334906+00	\N
+872	3	6d859fd7-8624-4fc3-97c7-9c3d16b7177b	\N	\N	2026-03-29 13:24:01.134489+00	2026-04-28 13:24:01.134489+00	\N
+873	3	79c2060c-9d80-4b6e-8e3c-e11f0cde8188	\N	\N	2026-03-29 13:25:12.342616+00	2026-04-28 13:25:12.342616+00	\N
+874	3	875bd3cc-1703-47e2-ae30-e55ec6e450e9	\N	\N	2026-03-29 13:47:49.23446+00	2026-04-28 13:47:49.23446+00	\N
+875	3	7e38e350-5af5-4ccd-9bc9-d2ed06876c26	\N	\N	2026-03-29 13:49:56.898762+00	2026-04-28 13:49:56.898762+00	\N
+876	3	9cdb5556-8135-4e89-9da3-71b42120000e	\N	\N	2026-03-29 13:52:05.648899+00	2026-04-28 13:52:05.648899+00	\N
+877	3	3a588271-f00b-4506-a90d-eb0942ca3f6c	\N	\N	2026-03-29 15:38:30.91362+00	2026-04-28 15:38:30.91362+00	\N
+878	3	3c306ebc-5040-423e-8510-3f6a9526b37a	\N	\N	2026-03-29 15:38:51.508102+00	2026-04-28 15:38:51.508102+00	\N
+879	3	9c90f07f-6b60-42f1-9436-998f9ed4e5db	\N	\N	2026-03-29 16:09:49.11445+00	2026-04-28 16:09:49.11445+00	\N
+880	3	ee8ad72b-43fc-4468-ade0-5b0f2d3b21c0	\N	\N	2026-03-29 16:17:07.107102+00	2026-04-28 16:17:07.107102+00	\N
+881	3	43fdb263-5e3b-4d33-9ef3-c18b7694c2a9	\N	\N	2026-03-29 16:24:28.345548+00	2026-04-28 16:24:28.345548+00	\N
+882	3	34f113ff-8f5d-4bd5-ad83-9e0e2f69530e	\N	\N	2026-03-29 16:25:09.482964+00	2026-04-28 16:25:09.482964+00	\N
+883	3	fd2802f5-a787-4767-97fd-9d0d3a6a1cdc	\N	\N	2026-03-29 16:38:56.51304+00	2026-04-28 16:38:56.51304+00	\N
+884	3	95c2687b-3a32-4a9f-8eb7-3f5c58457d4a	\N	\N	2026-03-29 16:50:26.723667+00	2026-04-28 16:50:26.723667+00	\N
+885	3	1113b109-2faf-4e22-b990-2824289d87bb	\N	\N	2026-03-29 17:23:42.372731+00	2026-04-28 17:23:42.372731+00	\N
+886	4	5e5c940a-4381-4ee9-b279-880802d84d88	\N	\N	2026-03-29 17:24:10.889006+00	2026-04-28 17:24:10.889006+00	\N
+887	3	aa8a0702-4d86-4db7-be51-ef600469b688	\N	\N	2026-03-29 17:50:26.512696+00	2026-04-28 17:50:26.512696+00	\N
+888	3	b29d6811-ef24-4bc9-ae47-6e5d3b292820	\N	\N	2026-03-29 17:50:37.073566+00	2026-04-28 17:50:37.073566+00	\N
+889	3	f80ec0b9-f45d-4341-bca8-c4792c8fc831	\N	\N	2026-03-29 18:41:36.191213+00	2026-04-28 18:41:36.191213+00	\N
+890	3	ff9b6b12-d5be-43fd-b075-cc80cd06ed1c	\N	\N	2026-03-29 18:44:12.679191+00	2026-04-28 18:44:12.679191+00	\N
+891	3	216f59b4-e45c-4bde-b069-cab3c2d81a00	\N	\N	2026-03-29 18:51:16.588775+00	2026-04-28 18:51:16.588775+00	\N
+892	3	a0329c55-c0f9-4705-af2c-f0bb75c66b34	\N	\N	2026-03-29 18:53:15.52856+00	2026-04-28 18:53:15.52856+00	\N
+893	3	11f53dbb-bb37-4b14-bb12-5b433ce5acaf	\N	\N	2026-03-29 18:57:40.497718+00	2026-04-28 18:57:40.497718+00	\N
+894	3	ce95f6f0-e1b6-40c0-a423-9a0a949179cd	\N	\N	2026-03-29 18:57:59.768229+00	2026-04-28 18:57:59.768229+00	\N
+895	3	8bed817b-1a2d-4075-aa1c-bdd39195f961	\N	\N	2026-03-29 19:17:55.814313+00	2026-04-28 19:17:55.814313+00	\N
+896	3	18dfef10-4f95-498e-a1e6-77b29cd3d501	\N	\N	2026-03-29 19:23:47.418676+00	2026-04-28 19:23:47.418676+00	\N
+897	3	e0bf7830-c542-41c2-bd36-172a25e7c1f4	\N	\N	2026-03-29 19:30:26.746667+00	2026-04-28 19:30:26.746667+00	\N
+898	3	324df5f5-b32d-4ebd-b55a-11d9f9fdbf68	\N	\N	2026-03-29 19:31:03.807887+00	2026-04-28 19:31:03.807887+00	\N
+899	3	399773ab-3034-4c44-8a4f-a6919136e7cd	\N	\N	2026-03-29 19:58:03.629937+00	2026-04-28 19:58:03.629937+00	\N
+900	3	22bac16f-d0f5-482b-a467-62ccbf65c3b6	\N	\N	2026-03-29 20:14:42.450116+00	2026-04-28 20:14:42.450116+00	\N
+901	3	1cdf02ff-99e9-4bfe-a2e1-20ef7bd969e2	\N	\N	2026-03-30 10:43:56.332285+00	2026-04-29 10:43:56.332285+00	\N
+902	3	ce6ae892-b7d5-458b-ad97-45986e6fa9ea	\N	\N	2026-03-30 10:57:23.785539+00	2026-04-29 10:57:23.785539+00	\N
+903	3	582846bd-63fa-4580-b8a5-c3a25c0cd3ba	\N	\N	2026-03-30 17:27:26.676737+00	2026-04-29 17:27:26.676737+00	\N
+904	3	448f6160-38f7-45bb-9c81-17ddf0b03c20	\N	\N	2026-03-30 17:28:28.382717+00	2026-04-29 17:28:28.382717+00	\N
+905	3	4b095963-93c5-4269-8433-40ff03223440	\N	\N	2026-03-30 19:28:29.715491+00	2026-04-29 19:28:29.715491+00	\N
+906	3	d0c3a093-1acd-4d4f-8a7c-5640de7e3eb1	\N	\N	2026-03-30 19:31:51.901715+00	2026-04-29 19:31:51.901715+00	\N
+907	3	59300325-3b6e-4a0b-a9ed-63bbd754bafd	\N	\N	2026-03-30 19:32:35.570328+00	2026-04-29 19:32:35.570328+00	\N
+908	3	ea9848bb-b9dc-4171-aaea-d35195d2c159	\N	\N	2026-03-30 19:39:51.35304+00	2026-04-29 19:39:51.35304+00	\N
+909	3	7a8289fb-7e50-47f3-ba29-89a5665c818e	\N	\N	2026-03-30 19:40:26.509224+00	2026-04-29 19:40:26.509224+00	\N
+910	3	0506597e-9bf5-4265-bf76-19ce092b1a12	\N	\N	2026-03-30 19:41:11.139212+00	2026-04-29 19:41:11.139212+00	\N
+911	3	41fa83f8-120f-427c-8acc-958d767d31e7	\N	\N	2026-03-30 19:45:32.565318+00	2026-04-29 19:45:32.565318+00	\N
+912	3	698cd3e1-9f03-46ac-954a-f7fe6eaad331	\N	\N	2026-03-31 09:23:12.786386+00	2026-04-30 09:23:12.786386+00	\N
+913	3	440763d4-8582-45bc-9e90-19ed23c16749	\N	\N	2026-03-31 10:23:00.315123+00	2026-04-30 10:23:00.315123+00	\N
+914	3	59505fe5-b304-4bcb-9939-9c4fb57bd1d0	\N	\N	2026-03-31 13:51:08.578975+00	2026-04-30 13:51:08.578975+00	\N
+915	3	591ed98b-bc2a-4293-9d3a-a8d3c6b91949	\N	\N	2026-03-31 13:52:33.310458+00	2026-04-30 13:52:33.310458+00	\N
+916	3	bd43d7b7-07a1-49f5-ad48-f8677fe5ddde	\N	\N	2026-03-31 14:08:38.062146+00	2026-04-30 14:08:38.062146+00	\N
+917	3	7ee7e5a1-2d80-4bb1-9b42-8924d8e77028	\N	\N	2026-03-31 14:08:56.845108+00	2026-04-30 14:08:56.845108+00	\N
+918	3	3c77a1fa-fbfb-4780-bc45-dcc31b7ed88f	\N	\N	2026-03-31 14:28:36.153554+00	2026-04-30 14:28:36.153554+00	\N
+919	3	bba14f32-acf2-43ff-9140-778882347bbf	\N	\N	2026-03-31 14:31:49.728869+00	2026-04-30 14:31:49.728869+00	\N
+920	3	3e14e5ef-35ae-4162-a84e-d969750b8dbc	\N	\N	2026-03-31 15:44:18.230725+00	2026-04-30 15:44:18.230725+00	\N
+921	3	4a92d0fe-b219-49dc-8523-fd0c185f5ac8	\N	\N	2026-03-31 15:47:56.793208+00	2026-04-30 15:47:56.793208+00	\N
+922	3	01da5332-210b-42a0-8481-9bec467d5334	\N	\N	2026-03-31 15:48:20.918136+00	2026-04-30 15:48:20.918136+00	\N
+923	3	74bdbb98-2b33-483a-8bff-38d0df15d3c3	\N	\N	2026-03-31 15:52:39.027829+00	2026-04-30 15:52:39.027829+00	\N
+924	3	c011e3b4-e2e7-43e0-a77c-719ef062f0f8	\N	\N	2026-03-31 16:23:23.22105+00	2026-04-30 16:23:23.22105+00	\N
+925	3	c48b0e2c-efe3-4a2a-8866-3b4b3b2137da	\N	\N	2026-03-31 16:24:38.436312+00	2026-04-30 16:24:38.436312+00	\N
+926	3	b1b54817-7d25-4dc6-85e8-58a60feed7b4	\N	\N	2026-03-31 16:26:50.713953+00	2026-04-30 16:26:50.713953+00	\N
+927	3	7b9c1c44-dea7-4bbd-8cfa-c3a76b67de7b	\N	\N	2026-03-31 17:17:38.92479+00	2026-04-30 17:17:38.92479+00	\N
+928	3	209243a9-eff1-4664-bd93-1a30bd7da2d0	\N	\N	2026-03-31 17:17:53.318696+00	2026-04-30 17:17:53.318696+00	\N
+929	3	520094c7-bb60-4249-9159-436029ec0dde	\N	\N	2026-03-31 17:19:08.000334+00	2026-04-30 17:19:08.000334+00	\N
+930	3	71db2bfc-55ef-4f04-8380-6da645b922a7	\N	\N	2026-03-31 17:32:27.922517+00	2026-04-30 17:32:27.922517+00	\N
+931	3	e667717d-ad5a-40b6-b96b-4b9bb87fc118	\N	\N	2026-03-31 17:36:17.787978+00	2026-04-30 17:36:17.787978+00	\N
+936	3	ad74ca80-ccef-4ee8-aad6-16bd88d989df	\N	\N	2026-03-31 20:15:53.528191+00	2026-04-30 20:15:53.528191+00	\N
+932	3	33642752-cd5d-4a0a-a0ba-6bc343092bec	\N	\N	2026-03-31 17:44:53.596873+00	2026-04-30 17:44:53.596873+00	\N
+933	3	d2ce01a0-8f07-4458-b676-2d844f4d9320	\N	\N	2026-03-31 17:45:25.319208+00	2026-04-30 17:45:25.319208+00	\N
+934	3	8fd4cafd-ddb3-4d96-9d3c-db56ecec79d5	\N	\N	2026-03-31 17:45:33.369434+00	2026-04-30 17:45:33.369434+00	\N
+935	3	9079e1fc-35dd-4266-8bf0-68a3d265d802	\N	\N	2026-03-31 18:16:54.046334+00	2026-04-30 18:16:54.046334+00	\N
+937	3	f992cca2-e91d-458d-8cc8-fe547749a1e1	\N	\N	2026-04-01 08:24:28.669501+00	2026-05-01 08:24:28.669501+00	\N
+938	3	c19cfeab-75a1-4572-872e-3b09f0e9a149	\N	\N	2026-04-01 08:38:58.66228+00	2026-05-01 08:38:58.66228+00	\N
+939	3	1a47cdf7-e520-4dce-8f43-eb1e61529077	\N	\N	2026-04-01 08:40:42.491056+00	2026-05-01 08:40:42.491056+00	\N
+940	3	ae730a35-d4db-4e7e-9072-59d249b19a41	\N	\N	2026-04-01 09:01:29.747161+00	2026-05-01 09:01:29.747161+00	\N
+941	3	2d97807f-2582-477f-b2b6-df4ad4b53fb2	\N	\N	2026-04-01 09:49:23.441476+00	2026-05-01 09:49:23.441476+00	\N
+942	3	68af0ba0-2558-4d18-85dd-e19aa68dbe53	\N	\N	2026-04-01 09:49:52.816277+00	2026-05-01 09:49:52.816277+00	\N
+943	3	493427a8-9dea-465e-ba50-4bb476e610c1	\N	\N	2026-04-01 10:12:30.666806+00	2026-05-01 10:12:30.666806+00	\N
+944	3	4cf871ce-9f30-402f-be64-e7fc266dc907	\N	\N	2026-04-01 11:35:42.542476+00	2026-05-01 11:35:42.542476+00	\N
+945	3	fb652c28-5be0-4e53-8244-f1d785381378	\N	\N	2026-04-01 11:41:43.364818+00	2026-05-01 11:41:43.364818+00	\N
+946	3	fca36c07-98c3-4321-a2d0-aade7c86a08d	\N	\N	2026-04-01 11:58:53.163395+00	2026-05-01 11:58:53.163395+00	\N
+947	3	c834aa20-0ce0-4a99-91fe-fc90fca8939d	\N	\N	2026-04-01 12:07:17.029142+00	2026-05-01 12:07:17.029142+00	\N
+948	3	420c7e0d-6f52-4836-8c48-bdbd1703bddd	\N	\N	2026-04-01 12:22:30.426358+00	2026-05-01 12:22:30.426358+00	\N
+949	3	a3931360-556f-4ef3-8074-8b3033d47c71	\N	\N	2026-04-01 12:26:16.406508+00	2026-05-01 12:26:16.406508+00	\N
+950	3	29d03be2-053d-428a-a514-f0f825f66080	\N	\N	2026-04-01 12:50:02.232277+00	2026-05-01 12:50:02.232277+00	\N
+951	3	f826a0d2-3d8b-423b-ba62-44d7b71c7156	\N	\N	2026-04-01 13:18:13.530954+00	2026-05-01 13:18:13.530954+00	\N
+952	3	f1028e6b-56b2-4e8b-b12d-8e612f3da943	\N	\N	2026-04-01 13:25:32.443963+00	2026-05-01 13:25:32.443963+00	\N
+953	3	6982ea30-a223-451b-9c97-7ccfc769d411	\N	\N	2026-04-01 13:25:56.357933+00	2026-05-01 13:25:56.357933+00	\N
+954	3	b586c42f-7128-4d84-8651-0658b1a18b47	\N	\N	2026-04-01 13:26:04.630858+00	2026-05-01 13:26:04.630858+00	\N
+955	3	c61b59ef-b9ca-4137-b2af-062ad4dcb3c0	\N	\N	2026-04-01 13:41:44.294211+00	2026-05-01 13:41:44.294211+00	\N
+956	3	61ab0649-68cf-45bd-a45f-00d8889e6487	\N	\N	2026-04-01 14:36:30.789498+00	2026-05-01 14:36:30.789498+00	\N
+957	3	b232ad3c-d444-4d08-876f-52a2b804393e	\N	\N	2026-04-01 14:37:04.350427+00	2026-05-01 14:37:04.350427+00	\N
+958	3	79d0571e-9791-498b-b26b-8afa7876731e	\N	\N	2026-04-01 14:41:04.625411+00	2026-05-01 14:41:04.625411+00	\N
+959	3	2cfaa4ba-8390-4f04-a70b-df98ab5135e3	\N	\N	2026-04-01 14:59:31.828951+00	2026-05-01 14:59:31.828951+00	\N
+960	3	5c7933a9-4b36-4eaa-8cc9-237bb41405c9	\N	\N	2026-04-01 14:59:42.613749+00	2026-05-01 14:59:42.613749+00	\N
+961	3	5a23ce0a-6df5-4c5d-94c9-699cd7063e60	\N	\N	2026-04-01 15:05:41.429925+00	2026-05-01 15:05:41.429925+00	\N
+962	3	234bad61-4e64-46f3-8bc8-2f4a00a8b915	\N	\N	2026-04-01 15:05:55.074215+00	2026-05-01 15:05:55.074215+00	\N
+963	3	4aeb895a-a21f-4974-87d4-3aafaa0c9fd0	\N	\N	2026-04-01 15:16:29.688361+00	2026-05-01 15:16:29.688361+00	\N
+964	3	495e11dc-5a8c-41a5-b0a9-954475d97fba	\N	\N	2026-04-01 15:16:45.54297+00	2026-05-01 15:16:45.54297+00	\N
+965	3	2dd65787-1825-4b75-bc24-743fb21eacee	\N	\N	2026-04-01 15:16:58.605164+00	2026-05-01 15:16:58.605164+00	\N
+966	3	7a423fcd-9477-40a5-ad1d-7a00c70a5a00	\N	\N	2026-04-01 15:22:43.039929+00	2026-05-01 15:22:43.039929+00	\N
+967	3	224015a1-1e2d-4137-8974-ee64d64a530a	\N	\N	2026-04-01 15:50:30.310778+00	2026-05-01 15:50:30.310778+00	\N
+968	3	0cd1df80-5b9a-4eb1-9344-bdac1b337606	\N	\N	2026-04-01 15:50:37.834462+00	2026-05-01 15:50:37.834462+00	\N
+969	3	238f70cb-c867-475b-b380-db139843cd86	\N	\N	2026-04-01 15:51:04.331215+00	2026-05-01 15:51:04.331215+00	\N
+970	3	9904d6e8-b9f5-412d-95e1-8c6b5182c6aa	\N	\N	2026-04-01 15:57:26.168867+00	2026-05-01 15:57:26.168867+00	\N
+971	3	5b29a8e3-5127-45c0-8341-765760c82ddc	\N	\N	2026-04-01 16:14:45.097638+00	2026-05-01 16:14:45.097638+00	\N
+972	3	dca8ec60-bc01-4add-9df5-ea64de069ce8	\N	\N	2026-04-01 16:23:40.333119+00	2026-05-01 16:23:40.333119+00	\N
+973	3	4a2d2615-30c7-4f21-ace0-f6d4aba474bb	\N	\N	2026-04-01 18:52:28.715849+00	2026-05-01 18:52:28.715849+00	\N
+974	3	4f30dc85-5666-485d-a3b8-50ccad127c5d	\N	\N	2026-04-01 18:52:58.704077+00	2026-05-01 18:52:58.704077+00	\N
+975	3	13638edf-28dc-4489-90aa-8a72ce3d777c	\N	\N	2026-04-01 18:53:06.502095+00	2026-05-01 18:53:06.502095+00	\N
+976	3	b149d606-3b71-472c-8386-71e835d59496	\N	\N	2026-04-01 18:53:15.936766+00	2026-05-01 18:53:15.936766+00	\N
+977	3	27f4226d-80b7-4489-b7c3-594f33e785c1	\N	\N	2026-04-01 19:02:48.189918+00	2026-05-01 19:02:48.189918+00	\N
+978	3	808aed36-90df-486a-8602-a0c56b8d0ff1	\N	\N	2026-04-01 19:03:02.025757+00	2026-05-01 19:03:02.025757+00	\N
+979	3	fd04fe2d-d420-4db8-b825-a5033f8383dc	\N	\N	2026-04-01 19:33:11.263084+00	2026-05-01 19:33:11.263084+00	\N
+980	3	bbe10206-7efa-446b-828c-91e970615d7a	\N	\N	2026-04-01 19:33:24.891394+00	2026-05-01 19:33:24.891394+00	\N
+981	3	92205f26-5d86-451f-b1d5-82494e046ca4	\N	\N	2026-04-01 19:51:24.327118+00	2026-05-01 19:51:24.327118+00	\N
+982	3	2b80bebd-c2c2-4b78-b548-57e235ad31c4	\N	\N	2026-04-01 19:51:35.71618+00	2026-05-01 19:51:35.71618+00	\N
+983	3	076ef0b3-de3f-4c52-8ff0-657c609100d2	\N	\N	2026-04-01 19:57:05.650141+00	2026-05-01 19:57:05.650141+00	\N
+984	3	79261c36-73db-4df1-bb3c-414d090d07e8	\N	\N	2026-04-01 19:57:14.814802+00	2026-05-01 19:57:14.814802+00	\N
+985	3	2d1dce80-5e6a-4dff-b63f-0237d5d1bb18	\N	\N	2026-04-02 17:01:22.23146+00	2026-05-02 17:01:22.23146+00	\N
+986	3	8a57e425-49d1-4ebe-8fc9-12ef5be80a9f	\N	\N	2026-04-02 17:54:30.343274+00	2026-05-02 17:54:30.343274+00	\N
+987	3	2ccb2d02-f147-418c-aabe-131f08122a58	\N	\N	2026-04-03 08:24:02.143907+00	2026-05-03 08:24:02.143907+00	\N
+988	3	0af2245a-2c45-43c6-8857-4c41ad5b51a6	\N	\N	2026-04-03 09:15:29.930163+00	2026-05-03 09:15:29.930163+00	\N
+989	3	5f254440-a87e-4e4c-a1a9-b88671f6b674	\N	\N	2026-04-03 09:41:52.471976+00	2026-05-03 09:41:52.471976+00	\N
+990	3	58f3f418-7af0-4452-8298-7992b52c0ead	\N	\N	2026-04-03 09:42:10.3077+00	2026-05-03 09:42:10.3077+00	\N
+991	3	45dcb99c-3551-4bdb-b127-5cb1ab737406	\N	\N	2026-04-03 09:44:48.058781+00	2026-05-03 09:44:48.058781+00	\N
+992	3	641206ef-90e3-4416-a0c2-e7d935006005	\N	\N	2026-04-03 10:04:14.673171+00	2026-05-03 10:04:14.673171+00	\N
+993	3	eeeadbfc-83ff-43ca-996d-c64e2c317d07	\N	\N	2026-04-03 10:05:12.004266+00	2026-05-03 10:05:12.004266+00	\N
+994	3	7641f9e4-62cf-4d33-bea3-36962b1e7a74	\N	\N	2026-04-03 10:09:05.866963+00	2026-05-03 10:09:05.866963+00	\N
+995	3	15238e04-5876-47b0-b1f0-26c525d10e21	\N	\N	2026-04-03 10:25:18.296712+00	2026-05-03 10:25:18.296712+00	\N
+996	3	f2355f62-f9e2-4a48-8523-973eb1ffd397	\N	\N	2026-04-03 10:31:16.651143+00	2026-05-03 10:31:16.651143+00	\N
+997	3	d8f75c7d-3f56-48b6-9e6e-8817803ebbc8	\N	\N	2026-04-03 11:20:22.32699+00	2026-05-03 11:20:22.32699+00	\N
+998	3	cfcc2a2a-33c7-4ad3-96b4-fbc0d6fbf8cb	\N	\N	2026-04-03 11:28:45.320249+00	2026-05-03 11:28:45.320249+00	\N
+999	3	c890062e-582b-40cb-990f-716421721188	\N	\N	2026-04-03 12:01:46.526402+00	2026-05-03 12:01:46.526402+00	\N
+1000	3	11256eb9-d58a-4f85-8e7d-171173b249a2	\N	\N	2026-04-03 12:02:42.509342+00	2026-05-03 12:02:42.509342+00	\N
+1001	3	e90fab59-6cd4-4c9e-b6b5-38f5dbb8905b	\N	\N	2026-04-03 12:04:38.395582+00	2026-05-03 12:04:38.395582+00	\N
+1002	3	9dfa99c0-4572-47f7-a1cc-a51eaa56298c	\N	\N	2026-04-03 12:06:48.24894+00	2026-05-03 12:06:48.24894+00	\N
+1003	3	7ae3f49d-4f78-47ab-87c3-17086bad5b34	\N	\N	2026-04-03 12:16:20.793186+00	2026-05-03 12:16:20.793186+00	\N
+1004	3	74f602f5-2585-4447-b1e9-ced982500cba	\N	\N	2026-04-03 12:23:21.098285+00	2026-05-03 12:23:21.098285+00	\N
+1005	3	ffad9f0a-8434-4ff0-af0b-a17270cc7bb1	\N	\N	2026-04-03 12:23:48.407396+00	2026-05-03 12:23:48.407396+00	\N
+1006	3	a0f52218-1277-4ab3-8f72-c2092c673d42	\N	\N	2026-04-03 12:24:49.864199+00	2026-05-03 12:24:49.864199+00	\N
+1007	3	a94a2bf8-8a4e-4307-87ae-f2c809b8fbea	\N	\N	2026-04-03 12:32:52.2835+00	2026-05-03 12:32:52.2835+00	\N
+1008	3	6208776f-1664-4eea-b90a-fb1f05c9e856	\N	\N	2026-04-03 12:33:13.303133+00	2026-05-03 12:33:13.303133+00	\N
+1009	3	ba63a9e1-fa48-4d41-9032-c784f30f14d1	\N	\N	2026-04-03 12:35:08.959317+00	2026-05-03 12:35:08.959317+00	\N
+1010	3	6ff69134-9484-454e-9e01-c6f1f449ffdc	\N	\N	2026-04-03 12:38:30.00163+00	2026-05-03 12:38:30.00163+00	\N
+1011	3	943d1f97-e044-4215-8bd6-8699de733243	\N	\N	2026-04-03 12:40:15.257549+00	2026-05-03 12:40:15.257549+00	\N
+1012	3	9630250d-1390-4950-bdd4-b3418dad21f3	\N	\N	2026-04-03 12:53:35.100678+00	2026-05-03 12:53:35.100678+00	\N
+1013	3	b96ef056-1fe0-4ad8-aec6-fb494ef7f448	\N	\N	2026-04-03 12:57:44.633945+00	2026-05-03 12:57:44.633945+00	\N
+1014	3	571590c9-c9b6-4f03-a9cf-a2c1b15684fe	\N	\N	2026-04-03 12:58:14.350447+00	2026-05-03 12:58:14.350447+00	\N
+1015	3	328d2b7a-efba-47ff-b60c-89bf5b02837a	\N	\N	2026-04-03 13:07:04.480611+00	2026-05-03 13:07:04.480611+00	\N
+1016	3	275c7a77-b6e4-4a26-ab34-8567f28b0a30	\N	\N	2026-04-03 13:17:29.490512+00	2026-05-03 13:17:29.490512+00	\N
+1017	4	a9b37ad3-5b97-4f4c-aa89-223a55d5bbcf	\N	\N	2026-04-03 13:18:31.860226+00	2026-05-03 13:18:31.860226+00	\N
+1018	3	7c9f9d6e-03a8-4d4b-9dc7-7a3480334c67	\N	\N	2026-04-03 18:52:29.713283+00	2026-05-03 18:52:29.713283+00	\N
+1019	3	53f3c69e-a6b6-40a6-931e-696e6f918b98	\N	\N	2026-04-03 18:53:26.185191+00	2026-05-03 18:53:26.185191+00	\N
+1020	3	8ffb0588-073d-4519-baec-a132ea9ac4b7	\N	\N	2026-04-03 18:54:16.087308+00	2026-05-03 18:54:16.087308+00	\N
+1021	3	a08a3a24-ee08-49a4-b2c2-8dc205d71cd2	\N	\N	2026-04-03 18:58:44.636559+00	2026-05-03 18:58:44.636559+00	\N
+1022	3	4686bc5d-f928-4a37-af22-86be15f67465	\N	\N	2026-04-03 19:00:05.047883+00	2026-05-03 19:00:05.047883+00	\N
+1023	4	19d36f78-549a-4f83-9394-006dbfeff239	\N	\N	2026-04-03 19:00:10.486239+00	2026-05-03 19:00:10.486239+00	\N
+1024	3	b2e3deb3-9aff-4b23-a7f9-e4e467d2c280	\N	\N	2026-04-03 19:01:54.886059+00	2026-05-03 19:01:54.886059+00	\N
+1025	3	1f501cba-2c5a-4add-8067-40d2fe2265af	\N	\N	2026-04-03 19:13:16.802206+00	2026-05-03 19:13:16.802206+00	\N
+1026	4	0c6be95e-9d3e-4a51-be0f-87ef33a131f9	\N	\N	2026-04-03 19:13:35.763849+00	2026-05-03 19:13:35.763849+00	\N
+1027	3	87c4ff3b-92f0-455c-86c3-e3e7a8be94ed	\N	\N	2026-04-03 19:27:59.552167+00	2026-05-03 19:27:59.552167+00	\N
+1028	4	5fb8fd84-424e-4452-8582-e9c5ddbf5bfe	\N	\N	2026-04-03 19:28:09.974575+00	2026-05-03 19:28:09.974575+00	\N
+1029	3	4549f170-e943-4cf6-841e-c75df80da66e	\N	\N	2026-04-03 19:38:46.727547+00	2026-05-03 19:38:46.727547+00	\N
+1030	4	252b0904-cff3-4c95-84b6-bf045bca693c	\N	\N	2026-04-03 19:38:55.496796+00	2026-05-03 19:38:55.496796+00	\N
+1031	3	af2cdd8d-2067-4fcd-aab8-737740d37a60	\N	\N	2026-04-03 19:41:01.174384+00	2026-05-03 19:41:01.174384+00	\N
+1032	4	b50ec493-a958-472b-94e1-7c27b741a7ac	\N	\N	2026-04-03 19:41:05.933661+00	2026-05-03 19:41:05.933661+00	\N
+1033	3	bab1e1ef-76e6-4284-a405-97e13a0c6066	\N	\N	2026-04-03 19:48:25.190885+00	2026-05-03 19:48:25.190885+00	\N
+1034	4	a839f54e-1dba-45fc-8c29-105c86034566	\N	\N	2026-04-03 19:48:31.163971+00	2026-05-03 19:48:31.163971+00	\N
+1035	3	ebf25165-c1ec-4f04-b6a8-72afbe627c75	\N	\N	2026-04-03 19:49:41.700701+00	2026-05-03 19:49:41.700701+00	\N
+1036	4	b8e64ac7-5a51-49db-b960-ddcc6aa1b597	\N	\N	2026-04-03 19:49:54.12587+00	2026-05-03 19:49:54.12587+00	\N
+1037	3	1534220c-6e2a-4b63-89ed-f147f211df7d	\N	\N	2026-04-03 19:50:15.06765+00	2026-05-03 19:50:15.06765+00	\N
+1038	3	0d46ad64-1151-44f1-a1b8-7623055c0993	\N	\N	2026-04-03 19:50:40.232376+00	2026-05-03 19:50:40.232376+00	\N
+1039	3	fe536220-146d-43c6-a8a5-032b62c90b78	\N	\N	2026-04-03 19:51:26.581357+00	2026-05-03 19:51:26.581357+00	\N
+1040	4	b1a3886e-2d46-4847-bb34-80c8c27a12a3	\N	\N	2026-04-03 19:51:31.387477+00	2026-05-03 19:51:31.387477+00	\N
+1041	3	3570d8ff-739b-4989-b088-bd3c0d1e0643	\N	\N	2026-04-03 20:06:34.997727+00	2026-05-03 20:06:34.997727+00	\N
+1042	4	1f197d9b-093a-4564-b3e1-846f8bdc4709	\N	\N	2026-04-03 20:06:47.560739+00	2026-05-03 20:06:47.560739+00	\N
+1043	3	0c21527f-cce2-4447-91df-6b8d2d6371c9	\N	\N	2026-04-03 20:14:15.345101+00	2026-05-03 20:14:15.345101+00	\N
+1044	4	3076ed6a-c861-4cbf-8379-c1276d0ae883	\N	\N	2026-04-03 20:14:25.014014+00	2026-05-03 20:14:25.014014+00	\N
+1045	3	fc8a5845-a499-4e5e-9751-bc81105c517a	\N	\N	2026-04-03 20:15:24.590718+00	2026-05-03 20:15:24.590718+00	\N
+1046	4	efad3f6a-3cbc-44ea-9017-8ccd5c504bd4	\N	\N	2026-04-03 20:15:29.318569+00	2026-05-03 20:15:29.318569+00	\N
+1047	3	932abf55-2b7a-4198-b843-c727d5f1ed26	\N	\N	2026-04-03 20:18:32.272926+00	2026-05-03 20:18:32.272926+00	\N
+1048	4	39af66e6-4982-494c-8095-cc4b3fe4d20e	\N	\N	2026-04-03 20:18:41.922536+00	2026-05-03 20:18:41.922536+00	\N
+1049	3	59c5c9c1-6f93-46c9-8418-55c015d2e74e	\N	\N	2026-04-04 09:02:11.599793+00	2026-05-04 09:02:11.599793+00	\N
+1050	3	4e09df96-3391-4215-b2dc-76ff27e63895	\N	\N	2026-04-04 09:18:59.720115+00	2026-05-04 09:18:59.720115+00	\N
+1051	3	6df668b5-e12a-4c72-b264-8b76ba1a5d95	\N	\N	2026-04-04 09:19:29.927879+00	2026-05-04 09:19:29.927879+00	\N
+1052	3	872197b8-b599-41be-83dd-3a16e2259f44	\N	\N	2026-04-04 09:20:09.141392+00	2026-05-04 09:20:09.141392+00	\N
+1053	3	c91ad896-436f-474a-a9cd-45c904877b32	\N	\N	2026-04-04 09:21:11.157143+00	2026-05-04 09:21:11.157143+00	\N
+1054	3	0af0d118-3739-4577-9970-58071f76cade	\N	\N	2026-04-04 09:26:14.629244+00	2026-05-04 09:26:14.629244+00	\N
+1055	4	e6ea1560-3b0b-4f25-a94b-016decd71006	\N	\N	2026-04-04 09:26:17.208844+00	2026-05-04 09:26:17.208844+00	\N
+1056	3	b00e4761-853e-47c9-95b9-690888eb807c	\N	\N	2026-04-04 09:27:09.094712+00	2026-05-04 09:27:09.094712+00	\N
+1057	3	99db9485-eec0-4388-93da-e4d564519c3c	\N	\N	2026-04-04 09:35:50.281113+00	2026-05-04 09:35:50.281113+00	\N
+1058	3	39334e48-6c1b-42fb-b773-6b7a52d5e340	\N	\N	2026-04-04 09:44:44.019885+00	2026-05-04 09:44:44.019885+00	\N
+1059	3	f99ac837-f755-4cbc-90c5-285208289eca	\N	\N	2026-04-04 09:52:23.346397+00	2026-05-04 09:52:23.346397+00	\N
+1060	3	92654675-84d4-4fe7-9f77-f02f7c2f3dc3	\N	\N	2026-04-04 10:25:34.026406+00	2026-05-04 10:25:34.026406+00	\N
+1061	4	37801df2-b81a-42a8-9235-53693a055e43	\N	\N	2026-04-04 10:25:45.101737+00	2026-05-04 10:25:45.101737+00	\N
+1062	3	c5f04944-e318-4ffe-a54c-69f36528bbbf	\N	\N	2026-04-04 10:34:29.159416+00	2026-05-04 10:34:29.159416+00	\N
+1063	4	5fe55e1a-a7b5-4a8b-b8a7-d11f7af2231c	\N	\N	2026-04-04 10:34:35.182404+00	2026-05-04 10:34:35.182404+00	\N
+1064	3	af56b21c-ee5a-47a0-950e-ab9c33d526c7	\N	\N	2026-04-04 11:08:01.967278+00	2026-05-04 11:08:01.967278+00	\N
+1065	3	4298a155-1f61-4253-97eb-f9c47801a1f5	\N	\N	2026-04-04 11:08:43.535914+00	2026-05-04 11:08:43.535914+00	\N
+1066	3	1d0abea4-6f8a-412f-85e3-531cbfccbef3	\N	\N	2026-04-04 11:09:22.751616+00	2026-05-04 11:09:22.751616+00	\N
+1067	4	fe4c92e9-c2b5-440e-955b-9f8534c7f288	\N	\N	2026-04-04 11:09:32.215539+00	2026-05-04 11:09:32.215539+00	\N
+1068	3	6f27a330-a2b6-4214-acd0-680a5d232afa	\N	\N	2026-04-04 11:14:59.258211+00	2026-05-04 11:14:59.258211+00	\N
+1069	4	c8605b0a-c3bf-473d-8767-e592a77db2e6	\N	\N	2026-04-04 11:15:06.412262+00	2026-05-04 11:15:06.412262+00	\N
+1070	3	2e13c50b-b1dd-4ae6-ad44-fe2965331d37	\N	\N	2026-04-04 11:16:07.239515+00	2026-05-04 11:16:07.239515+00	\N
+1071	4	2849f847-240c-4e03-a843-ead817a30833	\N	\N	2026-04-04 11:16:12.406337+00	2026-05-04 11:16:12.406337+00	\N
+1072	3	82cd9d51-26b9-4261-9c1a-7a9f534d09d7	\N	\N	2026-04-04 11:16:41.30539+00	2026-05-04 11:16:41.30539+00	\N
+1073	4	ee75f2a4-5bba-4880-b071-22b874a62d10	\N	\N	2026-04-04 11:16:46.479182+00	2026-05-04 11:16:46.479182+00	\N
+1074	3	94373013-584f-4b02-ab2a-62a9430d5479	\N	\N	2026-04-04 11:17:46.466991+00	2026-05-04 11:17:46.466991+00	\N
+1075	3	ec769916-de20-45dd-996d-7ecb1a8fb280	\N	\N	2026-04-04 11:18:54.758547+00	2026-05-04 11:18:54.758547+00	\N
+1076	4	5d481d5c-2523-4d03-9592-df289d9fbc85	\N	\N	2026-04-04 11:19:01.4485+00	2026-05-04 11:19:01.4485+00	\N
+1077	3	884532b6-6ed8-4661-acda-1c45539580cc	\N	\N	2026-04-04 11:27:02.617641+00	2026-05-04 11:27:02.617641+00	\N
+1078	4	4a940016-703f-4833-855b-b8c55986f699	\N	\N	2026-04-04 11:27:09.75014+00	2026-05-04 11:27:09.75014+00	\N
+1079	3	81d6ccb3-39be-4ba9-a46d-eec62bba2d78	\N	\N	2026-04-04 11:28:59.539039+00	2026-05-04 11:28:59.539039+00	\N
+1080	4	6e8dd1db-00ce-455e-9576-4ad8c55009d4	\N	\N	2026-04-04 11:29:05.121209+00	2026-05-04 11:29:05.121209+00	\N
+1081	3	883a7b8a-3685-48b9-a9e4-d8528f158db7	\N	\N	2026-04-04 11:32:33.910076+00	2026-05-04 11:32:33.910076+00	\N
+1082	3	f1ce4e7a-bbc8-496d-a639-ef50e73a7a44	\N	\N	2026-04-04 11:33:06.44621+00	2026-05-04 11:33:06.44621+00	\N
+1083	4	1a48386d-e98b-4d94-8d5b-973295e5cb04	\N	\N	2026-04-04 11:33:16.69988+00	2026-05-04 11:33:16.69988+00	\N
+1084	4	00d787f7-a7c8-4b68-92e4-51cf971663c3	\N	\N	2026-04-04 11:34:31.443597+00	2026-05-04 11:34:31.443597+00	\N
+1085	3	c08fb349-71d6-4ef9-91d3-2188c23902b7	\N	\N	2026-04-04 11:34:42.037266+00	2026-05-04 11:34:42.037266+00	\N
+1086	3	6b985600-0d53-4127-a940-19ff26e292c3	\N	\N	2026-04-04 11:35:47.098612+00	2026-05-04 11:35:47.098612+00	\N
+1087	3	aa203c59-0d25-435e-b05c-aa66364affe9	\N	\N	2026-04-04 11:37:20.698229+00	2026-05-04 11:37:20.698229+00	\N
+1088	4	cde9d547-a86f-4c3e-a022-27f141bb579e	\N	\N	2026-04-04 11:37:23.681431+00	2026-05-04 11:37:23.681431+00	\N
+1089	3	19b7bd7f-689f-4b19-8afc-453cae3fb827	\N	\N	2026-04-04 11:39:06.818985+00	2026-05-04 11:39:06.818985+00	\N
+1090	3	ac4a9d56-f403-485c-a91e-4441089a430a	\N	\N	2026-04-04 11:39:20.707411+00	2026-05-04 11:39:20.707411+00	\N
+1091	3	71241f69-8d68-46e1-b4e7-9d7a611556af	\N	\N	2026-04-04 11:46:27.875292+00	2026-05-04 11:46:27.875292+00	\N
+1092	4	ff57f636-57c9-45ae-98d7-824b3e12c99e	\N	\N	2026-04-04 11:46:56.897019+00	2026-05-04 11:46:56.897019+00	\N
+1093	3	82859274-da3e-44a1-bf3f-58e9a2d3f3be	\N	\N	2026-04-04 11:48:30.066057+00	2026-05-04 11:48:30.066057+00	\N
+1094	4	c4188824-e0fd-47a0-aead-509569ed766b	\N	\N	2026-04-04 11:48:38.327576+00	2026-05-04 11:48:38.327576+00	\N
+1095	3	141d04f7-831c-40db-b124-498e5c80fb6c	\N	\N	2026-04-04 11:49:04.254786+00	2026-05-04 11:49:04.254786+00	\N
+1096	4	ffcb2988-7359-417a-bb53-896c6da921ff	\N	\N	2026-04-04 11:49:10.723147+00	2026-05-04 11:49:10.723147+00	\N
+1097	3	af6b18c2-a543-4b47-b2d5-420eb0cde04e	\N	\N	2026-04-04 12:00:36.918898+00	2026-05-04 12:00:36.918898+00	\N
+1098	4	5170087c-0c82-4ab5-a53e-35827c98a22c	\N	\N	2026-04-04 12:00:51.971826+00	2026-05-04 12:00:51.971826+00	\N
+1103	3	795d7558-be76-41c4-92c3-ba7c052bdeaa	\N	\N	2026-04-04 12:34:17.615379+00	2026-05-04 12:34:17.615379+00	\N
+1108	3	103adedb-0bbb-4b5b-bfe9-53f5f5460902	\N	\N	2026-04-04 13:01:57.199418+00	2026-05-04 13:01:57.199418+00	\N
+1113	3	ee05da4f-ae69-48f0-a8b1-aac49f40768a	\N	\N	2026-04-04 13:05:57.907125+00	2026-05-04 13:05:57.907125+00	\N
+1118	3	cdc9c280-7f88-4f97-bf69-54c99726a935	\N	\N	2026-04-04 13:36:13.289956+00	2026-05-04 13:36:13.289956+00	\N
+1123	3	956b4d11-28c3-4fcd-8b44-91eef4145c7f	\N	\N	2026-04-04 13:41:50.557633+00	2026-05-04 13:41:50.557633+00	\N
+1128	3	196d590a-aea0-4cd1-ab91-746c8fc8c88e	\N	\N	2026-04-04 13:50:35.135115+00	2026-05-04 13:50:35.135115+00	\N
+1133	4	151fd6b8-6e19-42bc-bf2e-05dd8369ddcb	\N	\N	2026-04-04 13:54:37.819718+00	2026-05-04 13:54:37.819718+00	\N
+1099	3	607d8138-0bcc-4b77-b89d-db338661d035	\N	\N	2026-04-04 12:09:24.973991+00	2026-05-04 12:09:24.973991+00	\N
+1104	4	1b46fa66-1f0c-4be2-872a-4c2c94cd3d4b	\N	\N	2026-04-04 12:34:34.288609+00	2026-05-04 12:34:34.288609+00	\N
+1109	3	40019ad5-9b69-47f0-84aa-036415d0fcb3	\N	\N	2026-04-04 13:04:00.590929+00	2026-05-04 13:04:00.590929+00	\N
+1114	4	334a13c3-a4ef-47ae-a65b-f2fb91b32894	\N	\N	2026-04-04 13:06:04.964864+00	2026-05-04 13:06:04.964864+00	\N
+1119	4	c23d1229-2bda-4b36-949d-80c02061ec61	\N	\N	2026-04-04 13:36:50.068299+00	2026-05-04 13:36:50.068299+00	\N
+1124	3	46f6c0d2-a04a-4ff3-8031-74f70d5788fa	\N	\N	2026-04-04 13:42:09.137499+00	2026-05-04 13:42:09.137499+00	\N
+1129	4	215d2285-d6b4-4354-badb-a6c1782708b4	\N	\N	2026-04-04 13:50:44.289779+00	2026-05-04 13:50:44.289779+00	\N
+1134	3	82f1aab3-a511-4f2d-afdd-3a79f58228c8	\N	\N	2026-04-04 14:07:00.215032+00	2026-05-04 14:07:00.215032+00	\N
+1100	4	7f7aa052-b901-4ed2-9e3d-ed90e6ff47a0	\N	\N	2026-04-04 12:09:32.826857+00	2026-05-04 12:09:32.826857+00	\N
+1105	3	eb5ec3f3-85f8-4961-88b0-5401c62df250	\N	\N	2026-04-04 12:45:07.934473+00	2026-05-04 12:45:07.934473+00	\N
+1110	4	d377884d-f1db-400b-9b43-27607e8a5ae5	\N	\N	2026-04-04 13:04:13.421099+00	2026-05-04 13:04:13.421099+00	\N
+1115	3	9b51ffc2-e568-4caa-935a-6889f11e453d	\N	\N	2026-04-04 13:25:41.077147+00	2026-05-04 13:25:41.077147+00	\N
+1120	3	fd3b8eed-f355-47af-976a-ef28d8e8f586	\N	\N	2026-04-04 13:37:55.580936+00	2026-05-04 13:37:55.580936+00	\N
+1125	3	bd828aac-6bd2-46c3-a52c-11e0bdc1a636	\N	\N	2026-04-04 13:44:33.776471+00	2026-05-04 13:44:33.776471+00	\N
+1130	3	9fa501cc-94cc-4132-a423-052848dcf946	\N	\N	2026-04-04 13:52:36.53405+00	2026-05-04 13:52:36.53405+00	\N
+1135	4	cf9ad00d-aa61-4b8f-b14f-aecae56a8db7	\N	\N	2026-04-04 14:07:06.872562+00	2026-05-04 14:07:06.872562+00	\N
+1101	3	1118a6ac-924a-4408-922f-6ffed47a22dc	\N	\N	2026-04-04 12:19:12.904336+00	2026-05-04 12:19:12.904336+00	\N
+1106	4	b23f51ec-9bed-4e92-83bf-cb779d838d3d	\N	\N	2026-04-04 12:45:25.536037+00	2026-05-04 12:45:25.536037+00	\N
+1111	3	2ea6d6dd-63b9-4beb-a807-e75c9cab6ae1	\N	\N	2026-04-04 13:04:51.464262+00	2026-05-04 13:04:51.464262+00	\N
+1116	4	61c69ddf-4095-4231-aa07-2c454d545029	\N	\N	2026-04-04 13:25:49.587753+00	2026-05-04 13:25:49.587753+00	\N
+1121	3	9fcc8bf0-9e63-41ab-a0ba-1be8ba3a52c3	\N	\N	2026-04-04 13:40:46.062803+00	2026-05-04 13:40:46.062803+00	\N
+1126	3	86053d45-0c1a-4973-847d-974f1d12f718	\N	\N	2026-04-04 13:49:43.849738+00	2026-05-04 13:49:43.849738+00	\N
+1131	4	c34c47a3-610c-464c-a27e-7e14678831bd	\N	\N	2026-04-04 13:52:58.493131+00	2026-05-04 13:52:58.493131+00	\N
+1136	3	129aff9f-7173-4c17-a55b-52cdcf374a66	\N	\N	2026-04-04 14:07:35.629667+00	2026-05-04 14:07:35.629667+00	\N
+1102	4	8a7017a1-f907-4233-ab8a-57ee077e0bf1	\N	\N	2026-04-04 12:19:17.425901+00	2026-05-04 12:19:17.425901+00	\N
+1107	3	c385b36c-9f3f-4bdd-bdde-7d6a28f6f586	\N	\N	2026-04-04 13:01:27.566255+00	2026-05-04 13:01:27.566255+00	\N
+1112	4	ce4ca17b-8066-4b6f-a487-582ae3772f65	\N	\N	2026-04-04 13:04:59.866412+00	2026-05-04 13:04:59.866412+00	\N
+1117	3	946fe4a0-4240-469c-9584-b3b343fa8d10	\N	\N	2026-04-04 13:26:52.008434+00	2026-05-04 13:26:52.008434+00	\N
+1122	4	2683debe-dddb-490f-a12c-f51054f47b9e	\N	\N	2026-04-04 13:40:58.133392+00	2026-05-04 13:40:58.133392+00	\N
+1127	4	f61fdc72-98ed-4238-8e94-55b833e18d78	\N	\N	2026-04-04 13:49:48.805484+00	2026-05-04 13:49:48.805484+00	\N
+1132	3	ad9b16a2-75f0-4e55-8bc0-d099ee0397f5	\N	\N	2026-04-04 13:54:30.434998+00	2026-05-04 13:54:30.434998+00	\N
+1137	4	b9587b1f-327e-4dc4-aa2d-f31e1670312e	\N	\N	2026-04-04 14:07:41.19341+00	2026-05-04 14:07:41.19341+00	\N
+1138	3	c78486b3-34e2-4ea1-994b-d0fe7c236414	\N	\N	2026-04-04 14:11:52.520076+00	2026-05-04 14:11:52.520076+00	\N
+1139	4	f5919d58-f5a1-4eb2-9b8d-7570ac9f64a6	\N	\N	2026-04-04 14:11:58.272902+00	2026-05-04 14:11:58.272902+00	\N
+1140	3	6bd18794-7031-41ef-8741-4cf4df5ef1d1	\N	\N	2026-04-04 14:18:45.930803+00	2026-05-04 14:18:45.930803+00	\N
+1141	4	bc0d040c-fc74-4634-87d2-f1a0c5bdb3e6	\N	\N	2026-04-04 14:18:53.935231+00	2026-05-04 14:18:53.935231+00	\N
+1142	3	4a4de6b0-7bef-457d-95c7-109ea186beaa	\N	\N	2026-04-04 14:19:53.388624+00	2026-05-04 14:19:53.388624+00	\N
+1143	4	69a04344-415c-4752-a6eb-c06da83faf98	\N	\N	2026-04-04 14:19:57.147648+00	2026-05-04 14:19:57.147648+00	\N
+1144	3	605de1da-c542-4bc4-bfe6-1ffcf9c6eee9	\N	\N	2026-04-04 14:23:55.380161+00	2026-05-04 14:23:55.380161+00	\N
+1145	4	d0f7e597-9dd4-4b55-9cba-eaee477000ea	\N	\N	2026-04-04 14:24:02.768898+00	2026-05-04 14:24:02.768898+00	\N
+1146	3	5081e4bf-c6bd-4775-896b-2316a53ee3f0	\N	\N	2026-04-04 14:24:31.550608+00	2026-05-04 14:24:31.550608+00	\N
+1147	4	3ea22bd5-c9c1-4a7f-895a-97238ab0144a	\N	\N	2026-04-04 14:24:35.778882+00	2026-05-04 14:24:35.778882+00	\N
+1148	3	0ec3c1be-8eee-4ae1-b2b6-db806614eb5c	\N	\N	2026-04-04 14:31:09.959997+00	2026-05-04 14:31:09.959997+00	\N
+1149	4	df568d62-1452-43a2-849e-beb4c060982b	\N	\N	2026-04-04 14:31:17.711902+00	2026-05-04 14:31:17.711902+00	\N
+1150	3	e5046dba-59ae-4ec6-8c1b-fc394ed82ac1	\N	\N	2026-04-04 14:31:52.173293+00	2026-05-04 14:31:52.173293+00	\N
+1151	4	f9629b28-f0ad-4ec3-90aa-5508baef7244	\N	\N	2026-04-04 14:31:55.820754+00	2026-05-04 14:31:55.820754+00	\N
+1152	3	de5f4a71-2247-4f42-84fc-c87da712d716	\N	\N	2026-04-04 14:35:18.311833+00	2026-05-04 14:35:18.311833+00	\N
+1153	4	a32d7cab-b487-47f1-8bcc-adf22ce0cfb5	\N	\N	2026-04-04 14:35:26.707317+00	2026-05-04 14:35:26.707317+00	\N
+1154	3	19e773d2-4614-4d42-aab5-03dd5554e9f3	\N	\N	2026-04-04 14:35:41.679374+00	2026-05-04 14:35:41.679374+00	\N
+1155	3	e0dee71b-4f81-4132-a57a-1f6eebd4d114	\N	\N	2026-04-04 14:36:28.625681+00	2026-05-04 14:36:28.625681+00	\N
+1156	3	e18c6e6c-3f2b-4eaf-9e7f-1a04a3231084	\N	\N	2026-04-04 14:38:54.692027+00	2026-05-04 14:38:54.692027+00	\N
+1157	4	92a9f0ac-002d-4853-affa-fb4baffd66cf	\N	\N	2026-04-04 14:39:04.224755+00	2026-05-04 14:39:04.224755+00	\N
+1158	3	da31545a-1a8c-47a8-be78-620847b8a788	\N	\N	2026-04-04 14:39:27.713399+00	2026-05-04 14:39:27.713399+00	\N
+1159	3	40e7da15-a030-4b0b-b4f7-e97a68c8c56f	\N	\N	2026-04-04 14:39:56.063343+00	2026-05-04 14:39:56.063343+00	\N
+1160	4	9846cc2e-6942-4eb0-bb38-59d910309d4c	\N	\N	2026-04-04 14:40:48.395298+00	2026-05-04 14:40:48.395298+00	\N
+1161	3	558bab22-4dcb-4d46-bdb2-933651bc93ac	\N	\N	2026-04-04 14:43:12.478216+00	2026-05-04 14:43:12.478216+00	\N
+1162	4	14863f95-3c3e-463e-849e-97f26138935d	\N	\N	2026-04-04 14:43:30.98742+00	2026-05-04 14:43:30.98742+00	\N
+1163	3	771a5836-8497-4819-9fad-45e60027842d	\N	\N	2026-04-04 14:46:30.42077+00	2026-05-04 14:46:30.42077+00	\N
+1164	3	ad3e26bd-d7ec-49ec-83c1-c06529c705c7	\N	\N	2026-04-04 15:05:02.791187+00	2026-05-04 15:05:02.791187+00	\N
+1165	3	4c6370ea-6ab4-4c61-bad0-3982e1b4ba26	\N	\N	2026-04-04 15:38:47.362809+00	2026-05-04 15:38:47.362809+00	\N
+1166	3	4b24161f-b031-4066-8ce6-44beffb00a4c	\N	\N	2026-04-04 15:52:29.115543+00	2026-05-04 15:52:29.115543+00	\N
+1167	3	3d169f3e-3330-4884-8d11-2b8553323290	\N	\N	2026-04-04 16:11:03.632546+00	2026-05-04 16:11:03.632546+00	\N
+1168	3	2c84bbca-5590-4f31-bcc5-495eb0f6ee7c	\N	\N	2026-04-04 16:19:55.435941+00	2026-05-04 16:19:55.435941+00	\N
+1169	3	5202ccd2-0adc-4b1a-b015-8f8be65caf60	\N	\N	2026-04-04 16:25:16.630595+00	2026-05-04 16:25:16.630595+00	\N
+1170	3	dbe05ff4-2e2a-44a3-8fda-2d34690729eb	\N	\N	2026-04-04 16:33:35.445345+00	2026-05-04 16:33:35.445345+00	\N
+1171	3	5ebdc5bb-268e-4219-86d1-a13f9a5ee416	\N	\N	2026-04-04 16:36:19.829264+00	2026-05-04 16:36:19.829264+00	\N
+1172	3	94297975-fddc-4df5-9633-29abb649bda4	\N	\N	2026-04-04 16:47:08.851482+00	2026-05-04 16:47:08.851482+00	\N
+1173	3	b96b93c1-bd0a-4fa4-ab9d-0dbcec225cc3	\N	\N	2026-04-04 17:00:20.560778+00	2026-05-04 17:00:20.560778+00	\N
+1174	3	7d7a06b2-01b5-4013-9a7b-0eea2a66a315	\N	\N	2026-04-04 17:07:22.612853+00	2026-05-04 17:07:22.612853+00	\N
+1175	3	98c972b5-4aeb-4c89-84a9-988e921f897b	\N	\N	2026-04-04 17:11:01.763491+00	2026-05-04 17:11:01.763491+00	\N
+1176	3	ab06613d-2eb5-47ed-b51f-49b09536f2a9	\N	\N	2026-04-04 17:16:33.793894+00	2026-05-04 17:16:33.793894+00	\N
+1177	3	7c656b37-a6aa-4b3f-b2dc-bebdea282629	\N	\N	2026-04-04 17:24:06.005052+00	2026-05-04 17:24:06.005052+00	\N
+1178	3	4d891a89-33c4-43bd-8b49-bd4062aba21b	\N	\N	2026-04-04 17:28:09.033708+00	2026-05-04 17:28:09.033708+00	\N
+1179	3	cdb96eb3-c6c4-48ff-a0fe-d4f5990319ab	\N	\N	2026-04-04 17:29:47.416786+00	2026-05-04 17:29:47.416786+00	\N
+1180	3	bb154f84-5ceb-454f-be72-74d4c0f610cf	\N	\N	2026-04-04 17:33:19.573442+00	2026-05-04 17:33:19.573442+00	\N
+1181	3	96e63a15-5b9e-4872-9287-bacf62bbe537	\N	\N	2026-04-04 17:34:21.764903+00	2026-05-04 17:34:21.764903+00	\N
+1182	3	f7a94596-c3ee-41ec-963d-4c3bb9b3ddab	\N	\N	2026-04-04 17:36:40.534684+00	2026-05-04 17:36:40.534684+00	\N
+1183	3	b1b5da43-0998-4fee-b626-f756de046076	\N	\N	2026-04-04 17:45:44.37009+00	2026-05-04 17:45:44.37009+00	\N
+1184	3	67096301-c673-4e73-bd86-66f77fc43e27	\N	\N	2026-04-04 17:49:14.40116+00	2026-05-04 17:49:14.40116+00	\N
+1185	3	d1fd6d1d-cdd1-4bbb-b549-fb02af5e1b54	\N	\N	2026-04-04 18:05:07.834392+00	2026-05-04 18:05:07.834392+00	\N
+1186	3	ac84f190-237f-4de6-bfea-13d35cbf8def	\N	\N	2026-04-04 18:05:33.605758+00	2026-05-04 18:05:33.605758+00	\N
+1187	3	98fa8e14-2b9b-4d81-8baf-0f833283f223	\N	\N	2026-04-04 18:14:54.797602+00	2026-05-04 18:14:54.797602+00	\N
+1188	3	a4bd03b1-539c-4983-9271-198d65566f3f	\N	\N	2026-04-04 18:27:23.522053+00	2026-05-04 18:27:23.522053+00	\N
+1189	3	ba464ca6-ad70-4ed5-bc69-c14f0e1016ab	\N	\N	2026-04-04 18:27:35.454211+00	2026-05-04 18:27:35.454211+00	\N
+1190	3	10cafafd-cf81-49dd-9f59-c2394c773796	\N	\N	2026-04-04 18:32:29.953568+00	2026-05-04 18:32:29.953568+00	\N
+1191	3	10283c3f-ff9b-412c-b1d4-e47d70720738	\N	\N	2026-04-04 18:41:39.448366+00	2026-05-04 18:41:39.448366+00	\N
+1192	3	1e153d23-110c-4c95-b7ef-aeaac546f2f6	\N	\N	2026-04-04 18:52:57.487876+00	2026-05-04 18:52:57.487876+00	\N
+1193	3	74136c8a-3026-4f9c-b6d7-b480294dfc4d	\N	\N	2026-04-04 18:54:56.507743+00	2026-05-04 18:54:56.507743+00	\N
+1194	3	4c96f124-caa0-45b1-bd61-54e8e3ed1614	\N	\N	2026-04-04 19:02:06.957664+00	2026-05-04 19:02:06.957664+00	\N
+1195	3	ebaf6367-83c4-44a0-9d46-0e7b0a1465cd	\N	\N	2026-04-04 19:10:54.990129+00	2026-05-04 19:10:54.990129+00	\N
+1196	3	11ff97a0-068d-4109-b5e8-1e22cfb9254f	\N	\N	2026-04-04 19:20:36.436241+00	2026-05-04 19:20:36.436241+00	\N
+1197	3	32615d89-9655-4142-945d-21a33f62c984	\N	\N	2026-04-04 19:29:47.55844+00	2026-05-04 19:29:47.55844+00	\N
+1198	4	45205adf-10c2-4410-9f44-9aa01f598b21	\N	\N	2026-04-04 19:41:07.937013+00	2026-05-04 19:41:07.937013+00	\N
+1199	3	3fe76064-c4ac-4dd8-92aa-3d0319c1a5ed	\N	\N	2026-04-04 19:55:30.623612+00	2026-05-04 19:55:30.623612+00	\N
+1200	3	74c6c83e-d79d-4078-bacf-501f860b09b7	\N	\N	2026-04-04 20:13:44.80831+00	2026-05-04 20:13:44.80831+00	\N
+1201	3	c3e36b4c-2004-477e-9f67-4bdb0f6dea14	\N	\N	2026-04-05 07:57:50.417945+00	2026-05-05 07:57:50.417945+00	\N
+1202	3	2f8cd058-bd00-4ad5-8006-60a5eea11afe	\N	\N	2026-04-05 10:25:32.098592+00	2026-05-05 10:25:32.098592+00	\N
+1203	3	fa4be166-80d0-4dc8-96f3-44d941c265e9	\N	\N	2026-04-05 10:26:21.21078+00	2026-05-05 10:26:21.21078+00	\N
+1204	3	48ab718e-f415-4cb0-b79b-2113bc686f49	\N	\N	2026-04-05 10:27:58.583087+00	2026-05-05 10:27:58.583087+00	\N
+1205	3	c75365b7-0be6-4d8c-b3e0-3d69d27c8aea	\N	\N	2026-04-05 10:39:43.994215+00	2026-05-05 10:39:43.994215+00	\N
+1206	3	57015420-6ba0-4987-bbfe-e12dd8d53bfc	\N	\N	2026-04-05 10:44:41.344773+00	2026-05-05 10:44:41.344773+00	\N
+1207	3	529158b4-9fff-4601-834c-3f71febcde05	\N	\N	2026-04-05 10:55:21.21615+00	2026-05-05 10:55:21.21615+00	\N
+1208	3	3d319803-9fb7-4187-bbcb-f790687d6de4	\N	\N	2026-04-05 10:57:32.909838+00	2026-05-05 10:57:32.909838+00	\N
+1209	3	5093f7ef-6e76-4dca-addb-c1c560ce90df	\N	\N	2026-04-05 11:01:05.747397+00	2026-05-05 11:01:05.747397+00	\N
+1210	3	538b3f6e-cca1-44c2-8257-9ff17baf8046	\N	\N	2026-04-05 11:06:10.090589+00	2026-05-05 11:06:10.090589+00	\N
+1211	3	92412b8f-9e6b-40f7-8d28-638dd5fc7858	\N	\N	2026-04-05 11:09:31.036063+00	2026-05-05 11:09:31.036063+00	\N
+1216	3	b3e82044-0414-4bac-bd7b-8f06bb8fd7cc	\N	\N	2026-04-05 11:31:19.45906+00	2026-05-05 11:31:19.45906+00	\N
+1221	3	eb22f371-a5a4-4826-a5c6-e834c4e16376	\N	\N	2026-04-05 11:41:53.547742+00	2026-05-05 11:41:53.547742+00	\N
+1226	3	cc33b8dd-4041-4341-aea5-2fbbd6f84b0d	\N	\N	2026-04-05 12:18:07.073556+00	2026-05-05 12:18:07.073556+00	\N
+1231	3	cafe0850-d290-4193-bedc-39a99c97519e	\N	\N	2026-04-05 13:58:15.756149+00	2026-05-05 13:58:15.756149+00	\N
+1236	3	9a2ef507-9096-4f7e-b35a-40e5d6c51719	\N	\N	2026-04-05 14:18:05.39338+00	2026-05-05 14:18:05.39338+00	\N
+1241	3	c0d41bf1-bd96-4989-8ad2-4ffc347a128a	\N	\N	2026-04-05 14:54:38.069197+00	2026-05-05 14:54:38.069197+00	\N
+1246	3	8f19e2a5-324b-4173-8a56-37d5c4e8272a	\N	\N	2026-04-05 15:22:21.314053+00	2026-05-05 15:22:21.314053+00	\N
+1251	3	73e278ef-60f1-4091-8466-fddf73909eb1	\N	\N	2026-04-05 16:36:13.972561+00	2026-05-05 16:36:13.972561+00	\N
+1256	3	ad80e20e-9723-409c-a4f7-083e52529b9c	\N	\N	2026-04-05 17:50:24.921877+00	2026-05-05 17:50:24.921877+00	\N
+1261	3	0e893a40-f58d-4607-b4d3-91deb6e1ea80	\N	\N	2026-04-05 19:27:10.852344+00	2026-05-05 19:27:10.852344+00	\N
+1212	3	1d5ac984-2480-444c-8cdc-6d4122c57af1	\N	\N	2026-04-05 11:11:44.765776+00	2026-05-05 11:11:44.765776+00	\N
+1217	3	5bb72e75-527f-4ca9-b9ef-46edbb48debb	\N	\N	2026-04-05 11:31:51.58364+00	2026-05-05 11:31:51.58364+00	\N
+1222	3	9ca51540-8ba8-4f8b-a5c2-672c08c92bb1	\N	\N	2026-04-05 11:42:26.659365+00	2026-05-05 11:42:26.659365+00	\N
+1227	3	179b2b0c-d925-4eba-8b4e-4c280ef772d4	\N	\N	2026-04-05 12:20:25.890361+00	2026-05-05 12:20:25.890361+00	\N
+1232	3	544896fc-1518-42c3-9a9b-e835bbfcbcb6	\N	\N	2026-04-05 14:00:28.660135+00	2026-05-05 14:00:28.660135+00	\N
+1237	3	6f5bd4bd-30e1-42b8-9669-594d91cf4ea2	\N	\N	2026-04-05 14:20:59.239121+00	2026-05-05 14:20:59.239121+00	\N
+1242	3	0f937eaa-27bf-4d05-b19e-3ce6dbee7859	\N	\N	2026-04-05 14:58:20.282702+00	2026-05-05 14:58:20.282702+00	\N
+1247	3	9f72fbd9-1d05-47c3-83ed-aba52253ea88	\N	\N	2026-04-05 15:27:05.527305+00	2026-05-05 15:27:05.527305+00	\N
+1252	3	e4c9bccd-a568-4134-ad53-7706d299f428	\N	\N	2026-04-05 16:57:59.666113+00	2026-05-05 16:57:59.666113+00	\N
+1257	3	2ede587d-4a8d-4b29-8c03-bd8a3da9320a	\N	\N	2026-04-05 18:04:23.702218+00	2026-05-05 18:04:23.702218+00	\N
+1213	3	d1dc78f5-b1b3-411f-a576-7d2a1b0b8c82	\N	\N	2026-04-05 11:15:57.974162+00	2026-05-05 11:15:57.974162+00	\N
+1218	4	f3108e5e-6433-4396-8e79-74284f51a500	\N	\N	2026-04-05 11:33:05.502003+00	2026-05-05 11:33:05.502003+00	\N
+1223	3	ea3bb40a-868d-40dc-ba35-b94d0f43b03b	\N	\N	2026-04-05 11:42:57.663779+00	2026-05-05 11:42:57.663779+00	\N
+1228	3	d724da7f-a57d-46a4-b52c-841812ce1bba	\N	\N	2026-04-05 12:23:11.727694+00	2026-05-05 12:23:11.727694+00	\N
+1233	3	458fc799-2ce1-446f-90f7-476c148c00e6	\N	\N	2026-04-05 14:05:11.899088+00	2026-05-05 14:05:11.899088+00	\N
+1238	3	901ef198-bfae-4bf2-ab33-ba272c05607b	\N	\N	2026-04-05 14:23:22.557081+00	2026-05-05 14:23:22.557081+00	\N
+1243	3	2c9d9fae-61e9-4444-ab65-e7291d599e2f	\N	\N	2026-04-05 15:02:43.745176+00	2026-05-05 15:02:43.745176+00	\N
+1248	3	5cb0e6ae-a27a-41c9-b353-31fe6f68336c	\N	\N	2026-04-05 15:37:29.916668+00	2026-05-05 15:37:29.916668+00	\N
+1253	3	cdb16b66-10be-4100-af67-011a8ec6a80a	\N	\N	2026-04-05 17:07:36.250817+00	2026-05-05 17:07:36.250817+00	\N
+1258	3	5b6b0564-01ce-4b69-9fce-ae4c876389e7	\N	\N	2026-04-05 18:10:15.462129+00	2026-05-05 18:10:15.462129+00	\N
+1214	3	3ee2866a-ef37-4fd6-a2b2-6ee6551f5fa8	\N	\N	2026-04-05 11:17:52.110834+00	2026-05-05 11:17:52.110834+00	\N
+1219	3	3c328b07-e83c-4e24-8850-0788c7ceee0f	\N	\N	2026-04-05 11:33:47.507164+00	2026-05-05 11:33:47.507164+00	\N
+1224	3	d468f6c4-ece1-448b-8646-83676bc5b06b	\N	\N	2026-04-05 11:43:28.906465+00	2026-05-05 11:43:28.906465+00	\N
+1229	3	12373484-44f1-44aa-a47a-d6c220d9331f	\N	\N	2026-04-05 13:06:05.429365+00	2026-05-05 13:06:05.429365+00	\N
+1234	3	512a2051-0eef-4b3c-adcc-4aa7b9eaa429	\N	\N	2026-04-05 14:11:04.866268+00	2026-05-05 14:11:04.866268+00	\N
+1239	3	2d225e52-6c38-4404-9afc-4c4fbda620bb	\N	\N	2026-04-05 14:26:47.2579+00	2026-05-05 14:26:47.2579+00	\N
+1244	3	684dfeb5-af2e-4f21-b041-c0c24ac09e2e	\N	\N	2026-04-05 15:14:24.675285+00	2026-05-05 15:14:24.675285+00	\N
+1249	3	a628d17f-17c7-4149-a8cc-555ebbd5f41a	\N	\N	2026-04-05 15:55:16.712658+00	2026-05-05 15:55:16.712658+00	\N
+1254	3	6e1dd570-c074-4b3c-bc55-545b4fb41ed6	\N	\N	2026-04-05 17:16:48.843286+00	2026-05-05 17:16:48.843286+00	\N
+1259	3	edaa6237-6032-4416-b9bc-eecb9bb59a58	\N	\N	2026-04-05 18:40:24.068072+00	2026-05-05 18:40:24.068072+00	\N
+1215	3	86a2191f-e3b2-4aad-b887-6665d40607f8	\N	\N	2026-04-05 11:28:48.359349+00	2026-05-05 11:28:48.359349+00	\N
+1220	4	9ba29002-2275-4f99-8e77-a9e7d503d5b2	\N	\N	2026-04-05 11:34:01.849702+00	2026-05-05 11:34:01.849702+00	\N
+1225	3	379f1cc5-4396-4ace-8d3b-2617a3d22d39	\N	\N	2026-04-05 11:47:38.089706+00	2026-05-05 11:47:38.089706+00	\N
+1230	3	a49cc8c5-f000-4cf8-bb98-d4c0b6bb1bcc	\N	\N	2026-04-05 13:10:36.70808+00	2026-05-05 13:10:36.70808+00	\N
+1235	3	3416e41d-63f6-409a-82bd-8fe200e2efb9	\N	\N	2026-04-05 14:14:20.412345+00	2026-05-05 14:14:20.412345+00	\N
+1240	3	e3bbf1ba-104e-48bb-a174-636dca38d56f	\N	\N	2026-04-05 14:27:50.839669+00	2026-05-05 14:27:50.839669+00	\N
+1245	3	1cc1bbbf-ccf4-47d3-b85d-96e810856d25	\N	\N	2026-04-05 15:19:34.478353+00	2026-05-05 15:19:34.478353+00	\N
+1250	3	ce447375-7294-4474-b4a0-13b65c6bb884	\N	\N	2026-04-05 16:13:44.76846+00	2026-05-05 16:13:44.76846+00	\N
+1255	3	35337c08-a2f6-4b26-83e8-7fd999bccd77	\N	\N	2026-04-05 17:19:18.484184+00	2026-05-05 17:19:18.484184+00	\N
+1260	3	fc974c9c-cd8d-4704-a8a1-1c0f36dd7be9	\N	\N	2026-04-05 19:02:33.623354+00	2026-05-05 19:02:33.623354+00	\N
+1262	3	93e783dc-434b-468c-bf22-e57e7c6485e6	\N	\N	2026-04-06 09:22:42.111222+00	2026-05-06 09:22:42.111222+00	\N
+1263	3	c6d93155-cf59-440b-9f74-57178bac6b3b	\N	\N	2026-04-06 09:23:32.235172+00	2026-05-06 09:23:32.235172+00	\N
+1264	3	32c6011d-3ace-41f3-a689-4df3375956c7	\N	\N	2026-04-06 09:24:44.110552+00	2026-05-06 09:24:44.110552+00	\N
+1265	3	fb5882bf-ef56-4e33-af72-4ec4c61c7431	\N	\N	2026-04-06 14:06:18.659773+00	2026-05-06 14:06:18.659773+00	\N
+1266	3	e475d744-c36f-4b9e-b03b-250b53df4cf3	\N	\N	2026-04-06 14:07:56.945969+00	2026-05-06 14:07:56.945969+00	\N
+1267	3	6fcdddba-09a4-4f78-926a-76bc6163d272	\N	\N	2026-04-06 14:08:37.606176+00	2026-05-06 14:08:37.606176+00	\N
+1268	3	d60d1dc9-9bf6-4c44-b1dc-20ac74570ce3	\N	\N	2026-04-06 14:09:58.899962+00	2026-05-06 14:09:58.899962+00	\N
+1269	3	c693541c-9695-44bc-9bb1-408fe0823971	\N	\N	2026-04-06 16:42:42.949755+00	2026-05-06 16:42:42.949755+00	\N
+1270	3	0a179643-9b33-4ce4-9ff2-d9637a1e893c	\N	\N	2026-04-06 16:44:34.3568+00	2026-05-06 16:44:34.3568+00	\N
+1271	3	0f34d951-1484-4e9c-9f7b-0bb4c0e31cac	\N	\N	2026-04-06 16:47:29.840437+00	2026-05-06 16:47:29.840437+00	\N
+1272	3	3f2a7226-e775-49dc-bddb-23d9d64c28fb	\N	\N	2026-04-06 16:49:17.324707+00	2026-05-06 16:49:17.324707+00	\N
+1273	3	d0add8d6-b08a-4597-9011-52d057069e21	\N	\N	2026-04-06 16:56:04.723511+00	2026-05-06 16:56:04.723511+00	\N
+1274	3	ddd041f9-8e6a-4c6e-90ef-5b29cff8cfd2	\N	\N	2026-04-06 16:56:58.642418+00	2026-05-06 16:56:58.642418+00	\N
+1275	3	b8a3e2d4-554d-4937-96c5-e32f072aede2	\N	\N	2026-04-06 17:00:44.855215+00	2026-05-06 17:00:44.855215+00	\N
+1276	3	fdc5b3dd-f99f-4f27-a5f4-b44e3e53e371	\N	\N	2026-04-06 17:04:21.022601+00	2026-05-06 17:04:21.022601+00	\N
+1277	3	53a03a79-3153-4cbe-9039-0fca1355b596	\N	\N	2026-04-06 17:06:46.764896+00	2026-05-06 17:06:46.764896+00	\N
+1278	3	77be0048-10ef-4fb4-bba0-fb0255ae493a	\N	\N	2026-04-06 17:09:10.086262+00	2026-05-06 17:09:10.086262+00	\N
+1279	3	19c7e0cb-e2de-4582-a734-cf66f020767b	\N	\N	2026-04-06 17:19:06.953029+00	2026-05-06 17:19:06.953029+00	\N
+1280	3	1933ac2f-69e3-47e8-a21f-713b4a799c80	\N	\N	2026-04-06 17:20:38.554413+00	2026-05-06 17:20:38.554413+00	\N
+1281	3	47a3a82a-bd73-478b-8f28-dfb2f9060676	\N	\N	2026-04-06 17:20:50.220947+00	2026-05-06 17:20:50.220947+00	\N
+1282	3	3cdc441d-59f9-4990-b36a-c846d504b347	\N	\N	2026-04-06 17:21:23.979767+00	2026-05-06 17:21:23.979767+00	\N
+1283	3	c2eb7b84-58eb-4a43-98f4-74465271d3d1	\N	\N	2026-04-06 17:22:26.350622+00	2026-05-06 17:22:26.350622+00	\N
+1284	4	0ac2aa1e-b440-4d35-a04b-97d5e9a3b444	\N	\N	2026-04-06 17:22:30.954272+00	2026-05-06 17:22:30.954272+00	\N
+1285	3	77df94af-7209-4bef-aa3b-febbd510a3a9	\N	\N	2026-04-06 17:23:33.360861+00	2026-05-06 17:23:33.360861+00	\N
+1286	3	7d3e3a74-1ff2-436a-882c-f414c3593b3c	\N	\N	2026-04-06 17:24:27.836565+00	2026-05-06 17:24:27.836565+00	\N
+1287	3	df1c917b-b835-4df1-9610-e5326850d544	\N	\N	2026-04-06 17:52:40.875995+00	2026-05-06 17:52:40.875995+00	\N
+1288	3	f881ff7a-000d-4d08-b9d3-0ba5d0ce526e	\N	\N	2026-04-06 17:56:07.454506+00	2026-05-06 17:56:07.454506+00	\N
+1289	3	fe1f80b6-3a9d-481e-9295-e149a868ace6	\N	\N	2026-04-06 18:01:19.257136+00	2026-05-06 18:01:19.257136+00	\N
+1290	3	99fa0f71-5c90-4b8d-8cac-5c1b3a27dc38	\N	\N	2026-04-06 18:11:12.69455+00	2026-05-06 18:11:12.69455+00	\N
+1291	3	3ecdc369-619d-4c0a-bb70-eafa55d80974	\N	\N	2026-04-06 18:12:06.986826+00	2026-05-06 18:12:06.986826+00	\N
+1292	3	b28923d2-ff4d-4a29-9a9c-e8a5364e7481	\N	\N	2026-04-06 18:19:44.897158+00	2026-05-06 18:19:44.897158+00	\N
+1293	3	6f2847cb-6b6b-42a2-ba9b-3db7329247d0	\N	\N	2026-04-06 18:57:29.143926+00	2026-05-06 18:57:29.143926+00	\N
+1294	3	077ef6cb-3394-4079-877c-371fe4baa7ce	\N	\N	2026-04-06 19:33:50.734983+00	2026-05-06 19:33:50.734983+00	\N
+1295	3	c486abb9-b024-4192-a05b-39baba6b4e7f	\N	\N	2026-04-06 19:34:51.89554+00	2026-05-06 19:34:51.89554+00	\N
+1296	3	0395ad42-d9fe-4f75-942d-98c13990d2b5	\N	\N	2026-04-06 19:49:26.97438+00	2026-05-06 19:49:26.97438+00	\N
+1297	4	88040aa6-f681-428b-a4ba-95e3e57ddc8f	\N	\N	2026-04-06 19:55:17.471135+00	2026-05-06 19:55:17.471135+00	\N
+1298	3	c86ca132-d884-409e-bb2b-6122eb0d70dd	\N	\N	2026-04-06 20:01:08.668275+00	2026-05-06 20:01:08.668275+00	\N
+1299	3	b3242aca-39ad-48b1-a9c7-396aa3047506	\N	\N	2026-04-07 10:28:45.258453+00	2026-05-07 10:28:45.258453+00	\N
+1300	3	bbeedcf7-21a6-459b-b390-3aece67299e4	\N	\N	2026-04-07 10:30:56.12146+00	2026-05-07 10:30:56.12146+00	\N
+1301	3	97c2315e-c09c-4f30-8e58-2f1d196ad8dc	\N	\N	2026-04-07 12:12:25.425214+00	2026-05-07 12:12:25.425214+00	\N
+1302	3	c10533ea-c604-4a8f-81c9-795c8cef3fae	\N	\N	2026-04-07 12:45:48.236902+00	2026-05-07 12:45:48.236902+00	\N
+1303	3	7319a180-e7d1-4f9d-ad86-e94dabbfd47b	\N	\N	2026-04-07 12:47:13.19955+00	2026-05-07 12:47:13.19955+00	\N
+1304	3	a4ed9b52-927b-4c53-a2a9-616ef4a55ec8	\N	\N	2026-04-07 12:56:34.130793+00	2026-05-07 12:56:34.130793+00	\N
+1305	3	b41b4f75-d91e-4436-9ca7-5527317c8bec	\N	\N	2026-04-07 13:15:56.411232+00	2026-05-07 13:15:56.411232+00	\N
+1306	3	0d44e2f6-6e6c-42df-bc61-3e5b9155fec2	\N	\N	2026-04-07 13:24:50.727234+00	2026-05-07 13:24:50.727234+00	\N
+1307	3	88af5e6b-d692-4a34-94f5-150b589cda62	\N	\N	2026-04-07 13:26:08.991469+00	2026-05-07 13:26:08.991469+00	\N
+1308	3	da5b69ea-1abc-49ab-926b-0a5990cb782a	\N	\N	2026-04-07 13:38:51.026093+00	2026-05-07 13:38:51.026093+00	\N
+1309	3	a24ea0ee-d310-472f-9d24-91f61941d4e6	\N	\N	2026-04-07 13:47:59.799899+00	2026-05-07 13:47:59.799899+00	\N
+1310	3	447ee0d7-41b2-443c-b8fb-4c5a65fe30c5	\N	\N	2026-04-07 13:56:47.59472+00	2026-05-07 13:56:47.59472+00	\N
+1311	3	f217b8aa-270d-4c50-b438-dce3e5ebf99f	\N	\N	2026-04-07 13:59:59.541378+00	2026-05-07 13:59:59.541378+00	\N
+1312	3	93d7a115-634c-43c7-ae1f-d063b0c27ea1	\N	\N	2026-04-07 14:04:04.207533+00	2026-05-07 14:04:04.207533+00	\N
+1313	3	ef0f5e97-a943-4ef9-869d-b8543e045568	\N	\N	2026-04-07 14:15:16.9071+00	2026-05-07 14:15:16.9071+00	\N
+1314	3	ffa47228-2df7-49d8-96c4-e4f8a5847dfe	\N	\N	2026-04-07 14:16:30.891104+00	2026-05-07 14:16:30.891104+00	\N
+1315	3	9c4fa2f0-7c6b-47d7-ac2e-33f616331611	\N	\N	2026-04-07 14:22:04.392662+00	2026-05-07 14:22:04.392662+00	\N
+1316	3	67e0b30a-1b77-4889-858f-0ac1fbe2e2e6	\N	\N	2026-04-07 14:57:48.491181+00	2026-05-07 14:57:48.491181+00	\N
+1317	3	3096f12c-0adb-4509-ab58-6454aeeb60f1	\N	\N	2026-04-07 14:58:52.909656+00	2026-05-07 14:58:52.909656+00	\N
+1318	3	405f414c-1f75-4522-9fb2-e0cdb3b8150b	\N	\N	2026-04-07 14:59:05.038147+00	2026-05-07 14:59:05.038147+00	\N
+1319	3	99434e70-975d-4c5d-ad9b-e23a8c5ad431	\N	\N	2026-04-07 15:18:56.116046+00	2026-05-07 15:18:56.116046+00	\N
+1320	3	bb38d464-e77f-40c7-a88c-e6150308e238	\N	\N	2026-04-07 15:20:50.689118+00	2026-05-07 15:20:50.689118+00	\N
+1321	3	29df9583-6b4e-4201-bff3-8dc3efda2ccd	\N	\N	2026-04-07 15:22:40.292438+00	2026-05-07 15:22:40.292438+00	\N
+1322	3	8d897045-47d2-4748-a453-934c86493322	\N	\N	2026-04-07 15:27:52.053587+00	2026-05-07 15:27:52.053587+00	\N
+1323	3	83e1b121-6061-4a6b-ab74-7f324f62f600	\N	\N	2026-04-07 15:30:20.135472+00	2026-05-07 15:30:20.135472+00	\N
+1324	3	3e846cb4-edcf-4e90-9ae8-a62298137b6b	\N	\N	2026-04-07 16:01:28.868868+00	2026-05-07 16:01:28.868868+00	\N
+1325	3	dc0b9604-4729-4bbb-aeae-d0905fdfc884	\N	\N	2026-04-07 16:02:09.8541+00	2026-05-07 16:02:09.8541+00	\N
+1326	3	257fd88c-02b6-4b65-831c-7153843f61c2	\N	\N	2026-04-07 16:08:37.409414+00	2026-05-07 16:08:37.409414+00	\N
+1327	3	52034697-e069-4d6f-9944-3c69773a2cab	\N	\N	2026-04-07 16:28:08.522908+00	2026-05-07 16:28:08.522908+00	\N
+1328	3	10fe60a7-1210-49b7-a92f-9bfc9e30c9b1	\N	\N	2026-04-07 16:30:13.699503+00	2026-05-07 16:30:13.699503+00	\N
+1329	3	0e629f20-3ffc-4b29-b734-c70a44ef3d9f	\N	\N	2026-04-07 16:31:30.040354+00	2026-05-07 16:31:30.040354+00	\N
+1330	3	b12a27e7-2ef6-49d6-a189-f1d833e1b201	\N	\N	2026-04-07 16:44:35.614244+00	2026-05-07 16:44:35.614244+00	\N
+1331	3	9a585fd7-f79f-4c1b-a30b-0e050a8d0135	\N	\N	2026-04-07 16:59:12.809189+00	2026-05-07 16:59:12.809189+00	\N
+1332	3	be7dcf42-719f-4646-8f56-10b5e05a6341	\N	\N	2026-04-07 17:03:31.29922+00	2026-05-07 17:03:31.29922+00	\N
+1333	3	897b8bf2-b354-4a76-b6ca-cc99e7d52eb6	\N	\N	2026-04-07 17:04:45.288885+00	2026-05-07 17:04:45.288885+00	\N
+1338	3	811613cc-3fe0-48df-8d95-4afd280d310b	\N	\N	2026-04-07 17:53:13.488495+00	2026-05-07 17:53:13.488495+00	\N
+1343	3	12c84350-fea5-4ddf-90b8-e8eff8342b65	\N	\N	2026-04-07 19:03:54.408672+00	2026-05-07 19:03:54.408672+00	\N
+1334	3	f777f144-968e-4207-a72c-20292d68393e	\N	\N	2026-04-07 17:05:12.492276+00	2026-05-07 17:05:12.492276+00	\N
+1339	3	3b5413c2-4680-40ab-96f8-2a43c91bdc51	\N	\N	2026-04-07 17:56:07.39976+00	2026-05-07 17:56:07.39976+00	\N
+1335	3	f9aa05f9-1c39-4277-9847-6e1363e0a389	\N	\N	2026-04-07 17:09:06.029827+00	2026-05-07 17:09:06.029827+00	\N
+1340	3	be66e395-3096-4d4e-b4a8-a6bd853288fb	\N	\N	2026-04-07 18:42:46.800358+00	2026-05-07 18:42:46.800358+00	\N
+1336	3	272c6b5e-4dc3-4d80-b38e-baf95d7c0f20	\N	\N	2026-04-07 17:16:34.80991+00	2026-05-07 17:16:34.80991+00	\N
+1341	3	9d487071-83c0-4211-9237-a869da8da406	\N	\N	2026-04-07 18:52:35.6055+00	2026-05-07 18:52:35.6055+00	\N
+1337	3	63bcbfc5-a7f7-4745-bd07-14f715ebb9b1	\N	\N	2026-04-07 17:29:54.759279+00	2026-05-07 17:29:54.759279+00	\N
+1342	3	ed5b860b-c1d1-4f4f-9077-be70a9230374	\N	\N	2026-04-07 18:55:37.004991+00	2026-05-07 18:55:37.004991+00	\N
 \.
 
 
@@ -7380,8 +9089,8 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 
 COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
 5	test3	test3	2023-05-04 16:25:31.727922+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	\N	\N	f
-4	test2	test2	2026-03-28 17:42:19.893419+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
-3	test1	test1	2026-03-28 18:04:40.982827+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+3	test1	test1	2026-04-07 19:03:54.404957+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+4	test2	test2	2026-04-06 19:55:17.465266+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
 \.
 
 
@@ -7421,9 +9130,9 @@ COPY public.vendor_npc (id, npc_id, markup_pct) FROM stdin;
 --
 
 COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration_sec, loot_multiplier, spawn_rate_multiplier, mob_speed_multiplier, announce_key, interval_hours, random_chance_per_hour, has_invasion_wave, invasion_mob_template_id, invasion_wave_count, invasion_champion_template_id, invasion_champion_slug) FROM stdin;
-1	wolf_hour	1	random	1200	1.5	1	1.3	event.wolf_hour.announce	0	0.15	f	0	0	0	\N
-2	merchant_convoy	1	scheduled	900	1	1	1	event.merchant_convoy	6	0	f	0	0	0	\N
-3	fog_of_twilight	0	random	1800	1.2	1	0.8	event.fog_of_twilight	0	0.08	f	0	0	0	\N
+1	wolf_hour	1	random	1200	1.5	1	1.3	event.wolf_hour.announce	0	0.15	f	\N	0	\N	\N
+2	merchant_convoy	1	scheduled	900	1	1	1	event.merchant_convoy	6	0	f	\N	0	\N	\N
+3	fog_of_twilight	\N	random	1800	1.2	1	0.8	event.fog_of_twilight	0	0.08	f	\N	0	\N	\N
 \.
 
 
@@ -7462,7 +9171,7 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 52, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 79, true);
 
 
 --
@@ -7476,7 +9185,7 @@ SELECT pg_catalog.setval('public.character_position_id_seq', 3, true);
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 5, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 7, true);
 
 
 --
@@ -7669,6 +9378,13 @@ SELECT pg_catalog.setval('public.npc_skills_id_seq', 2, true);
 
 
 --
+-- Name: npc_trainer_class_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.npc_trainer_class_id_seq', 2, true);
+
+
+--
 -- Name: npc_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -7686,14 +9402,14 @@ SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 1, false);
 -- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_active_effect_id_seq', 400, true);
+SELECT pg_catalog.setval('public.player_active_effect_id_seq', 738, true);
 
 
 --
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 209, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 228, true);
 
 
 --
@@ -7784,7 +9500,7 @@ SELECT pg_catalog.setval('public.skill_school_id_seq', 4, true);
 -- Name: skills_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skills_attributes_mapping_id_seq', 43, true);
+SELECT pg_catalog.setval('public.skills_attributes_mapping_id_seq', 50, true);
 
 
 --
@@ -7837,6 +9553,13 @@ SELECT pg_catalog.setval('public.timed_champion_templates_id_seq', 1, false);
 
 
 --
+-- Name: title_definitions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.title_definitions_id_seq', 4, true);
+
+
+--
 -- Name: user_bans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -7847,7 +9570,7 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 848, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 1343, true);
 
 
 --
@@ -7979,6 +9702,14 @@ ALTER TABLE ONLY public.character_skill_mastery
 
 ALTER TABLE ONLY public.character_skills
     ADD CONSTRAINT character_skills_pkey1 PRIMARY KEY (id);
+
+
+--
+-- Name: character_titles character_titles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_titles
+    ADD CONSTRAINT character_titles_pkey PRIMARY KEY (character_id, title_slug);
 
 
 --
@@ -8342,6 +10073,22 @@ ALTER TABLE ONLY public.npc
 
 
 --
+-- Name: npc_trainer_class npc_trainer_class_npc_id_class_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.npc_trainer_class
+    ADD CONSTRAINT npc_trainer_class_npc_id_class_id_key UNIQUE (npc_id, class_id);
+
+
+--
+-- Name: npc_trainer_class npc_trainer_class_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.npc_trainer_class
+    ADD CONSTRAINT npc_trainer_class_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: npc_type npc_type_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8630,6 +10377,22 @@ ALTER TABLE ONLY public.timed_champion_templates
 
 
 --
+-- Name: title_definitions title_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.title_definitions
+    ADD CONSTRAINT title_definitions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: title_definitions title_definitions_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.title_definitions
+    ADD CONSTRAINT title_definitions_slug_key UNIQUE (slug);
+
+
+--
 -- Name: character_equipment uq_character_equip_slot; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -8780,17 +10543,17 @@ CREATE INDEX idx_char_rep_char ON public.character_reputation USING btree (chara
 
 
 --
+-- Name: idx_char_titles_char; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_char_titles_char ON public.character_titles USING btree (character_id);
+
+
+--
 -- Name: idx_character_bestiary_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_character_bestiary_char ON public.character_bestiary USING btree (character_id);
-
-
---
--- Name: idx_character_equipment_char; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_character_equipment_char ON public.character_equipment USING btree (character_id);
 
 
 --
@@ -9172,6 +10935,27 @@ CREATE INDEX ix_items_item_type ON public.items USING btree (item_type);
 
 
 --
+-- Name: ix_items_mastery_slug; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_items_mastery_slug ON public.items USING btree (mastery_slug) WHERE (mastery_slug IS NOT NULL);
+
+
+--
+-- Name: ix_mob_active_effect_src_player; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_mob_active_effect_src_player ON public.mob_active_effect USING btree (source_player_id) WHERE (source_player_id IS NOT NULL);
+
+
+--
+-- Name: ix_mob_faction_slug; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_mob_faction_slug ON public.mob USING btree (faction_slug) WHERE (faction_slug IS NOT NULL);
+
+
+--
 -- Name: ix_mob_position_zone; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9211,6 +10995,20 @@ CREATE INDEX ix_node_dialogue ON public.dialogue_node USING btree (dialogue_id);
 --
 
 CREATE UNIQUE INDEX ix_npc_attributes_npc_attr ON public.npc_attributes USING btree (npc_id, attribute_id);
+
+
+--
+-- Name: ix_npc_dialogue_cond_gin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_npc_dialogue_cond_gin ON public.npc_dialogue USING gin (condition_group) WHERE (condition_group IS NOT NULL);
+
+
+--
+-- Name: ix_npc_faction_slug; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_npc_faction_slug ON public.npc USING btree (faction_slug) WHERE (faction_slug IS NOT NULL);
 
 
 --
@@ -9277,6 +11075,27 @@ CREATE INDEX ix_quest_step_q ON public.quest_step USING btree (quest_id, step_in
 
 
 --
+-- Name: ix_respawn_zones_default; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_respawn_zones_default ON public.respawn_zones USING btree (zone_id, is_default) WHERE (is_default = true);
+
+
+--
+-- Name: ix_respawn_zones_zone_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_respawn_zones_zone_id ON public.respawn_zones USING btree (zone_id);
+
+
+--
+-- Name: ix_timed_champion_mob_tpl; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_timed_champion_mob_tpl ON public.timed_champion_templates USING btree (mob_template_id);
+
+
+--
 -- Name: ix_user_bans_active; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -9309,6 +11128,27 @@ CREATE INDEX ix_user_sessions_user ON public.user_sessions USING btree (user_id)
 --
 
 CREATE INDEX ix_vendor_inventory_vendor ON public.vendor_inventory USING btree (vendor_npc_id);
+
+
+--
+-- Name: ix_zone_event_game_zone; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_zone_event_game_zone ON public.zone_event_templates USING btree (game_zone_id) WHERE (game_zone_id IS NOT NULL);
+
+
+--
+-- Name: ix_zone_event_invasion_mob; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_zone_event_invasion_mob ON public.zone_event_templates USING btree (invasion_mob_template_id) WHERE (invasion_mob_template_id IS NOT NULL);
+
+
+--
+-- Name: ix_zone_event_trigger_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_zone_event_trigger_type ON public.zone_event_templates USING btree (trigger_type);
 
 
 --
@@ -9534,11 +11374,27 @@ ALTER TABLE ONLY public.character_reputation
 
 
 --
+-- Name: character_reputation character_reputation_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_reputation
+    ADD CONSTRAINT character_reputation_faction_slug_fkey FOREIGN KEY (faction_slug) REFERENCES public.factions(slug);
+
+
+--
 -- Name: character_skill_mastery character_skill_mastery_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skill_mastery
     ADD CONSTRAINT character_skill_mastery_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: character_skill_mastery character_skill_mastery_mastery_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_skill_mastery
+    ADD CONSTRAINT character_skill_mastery_mastery_slug_fkey FOREIGN KEY (mastery_slug) REFERENCES public.mastery_definitions(slug);
 
 
 --
@@ -9555,6 +11411,22 @@ ALTER TABLE ONLY public.character_skills
 
 ALTER TABLE ONLY public.character_skills
     ADD CONSTRAINT character_skills_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES public.skills(id);
+
+
+--
+-- Name: character_titles character_titles_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_titles
+    ADD CONSTRAINT character_titles_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: character_titles character_titles_title_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_titles
+    ADD CONSTRAINT character_titles_title_slug_fkey FOREIGN KEY (title_slug) REFERENCES public.title_definitions(slug) ON DELETE CASCADE;
 
 
 --
@@ -9838,6 +11710,14 @@ ALTER TABLE ONLY public.items
 
 
 --
+-- Name: items items_mastery_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.items
+    ADD CONSTRAINT items_mastery_slug_fkey FOREIGN KEY (mastery_slug) REFERENCES public.mastery_definitions(slug);
+
+
+--
 -- Name: items items_rarity_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9859,6 +11739,22 @@ ALTER TABLE ONLY public.mob_active_effect
 
 ALTER TABLE ONLY public.mob_active_effect
     ADD CONSTRAINT mob_active_effect_effect_id_fkey FOREIGN KEY (effect_id) REFERENCES public.skill_damage_formulas(id) ON DELETE CASCADE;
+
+
+--
+-- Name: mob_active_effect mob_active_effect_source_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob_active_effect
+    ADD CONSTRAINT mob_active_effect_source_player_id_fkey FOREIGN KEY (source_player_id) REFERENCES public.characters(id) ON DELETE SET NULL;
+
+
+--
+-- Name: mob mob_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob
+    ADD CONSTRAINT mob_faction_slug_fkey FOREIGN KEY (faction_slug) REFERENCES public.factions(slug);
 
 
 --
@@ -9990,6 +11886,14 @@ ALTER TABLE ONLY public.npc_dialogue
 
 
 --
+-- Name: npc npc_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.npc
+    ADD CONSTRAINT npc_faction_slug_fkey FOREIGN KEY (faction_slug) REFERENCES public.factions(slug);
+
+
+--
 -- Name: npc npc_npc_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10035,6 +11939,30 @@ ALTER TABLE ONLY public.npc_skills
 
 ALTER TABLE ONLY public.npc_skills
     ADD CONSTRAINT npc_skills_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES public.skills(id);
+
+
+--
+-- Name: npc_trainer_class npc_trainer_class_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.npc_trainer_class
+    ADD CONSTRAINT npc_trainer_class_class_id_fkey FOREIGN KEY (class_id) REFERENCES public.character_class(id) ON DELETE CASCADE;
+
+
+--
+-- Name: npc_trainer_class npc_trainer_class_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.npc_trainer_class
+    ADD CONSTRAINT npc_trainer_class_npc_id_fkey FOREIGN KEY (npc_id) REFERENCES public.npc(id) ON DELETE CASCADE;
+
+
+--
+-- Name: passive_skill_modifiers passive_skill_modifiers_attribute_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.passive_skill_modifiers
+    ADD CONSTRAINT passive_skill_modifiers_attribute_slug_fkey FOREIGN KEY (attribute_slug) REFERENCES public.entity_attributes(slug);
 
 
 --
@@ -10150,6 +12078,14 @@ ALTER TABLE ONLY public.quest
 
 
 --
+-- Name: respawn_zones respawn_zones_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.respawn_zones
+    ADD CONSTRAINT respawn_zones_zone_id_fkey FOREIGN KEY (zone_id) REFERENCES public.zones(id);
+
+
+--
 -- Name: skill_effect_instances skill_effect_instances_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10214,6 +12150,22 @@ ALTER TABLE ONLY public.skill_properties_mapping
 
 
 --
+-- Name: skills skills_scale_stat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skills
+    ADD CONSTRAINT skills_scale_stat_id_fkey FOREIGN KEY (scale_stat_id) REFERENCES public.skill_scale_type(id);
+
+
+--
+-- Name: skills skills_school_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.skills
+    ADD CONSTRAINT skills_school_id_fkey FOREIGN KEY (school_id) REFERENCES public.skill_school(id);
+
+
+--
 -- Name: spawn_zone_mobs spawn_zone_mobs_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10251,6 +12203,14 @@ ALTER TABLE ONLY public.status_effect_modifiers
 
 ALTER TABLE ONLY public.status_effect_modifiers
     ADD CONSTRAINT status_effect_modifiers_status_effect_id_fkey FOREIGN KEY (status_effect_id) REFERENCES public.status_effects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: timed_champion_templates timed_champion_templates_mob_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.timed_champion_templates
+    ADD CONSTRAINT timed_champion_templates_mob_template_id_fkey FOREIGN KEY (mob_template_id) REFERENCES public.mob(id);
 
 
 --
@@ -10307,6 +12267,30 @@ ALTER TABLE ONLY public.vendor_inventory
 
 ALTER TABLE ONLY public.vendor_npc
     ADD CONSTRAINT vendor_npc_npc_id_fkey FOREIGN KEY (npc_id) REFERENCES public.npc(id) ON DELETE CASCADE;
+
+
+--
+-- Name: zone_event_templates zone_event_templates_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.zone_event_templates
+    ADD CONSTRAINT zone_event_templates_game_zone_id_fkey FOREIGN KEY (game_zone_id) REFERENCES public.zones(id);
+
+
+--
+-- Name: zone_event_templates zone_event_templates_invasion_champion_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.zone_event_templates
+    ADD CONSTRAINT zone_event_templates_invasion_champion_id_fkey FOREIGN KEY (invasion_champion_template_id) REFERENCES public.timed_champion_templates(id);
+
+
+--
+-- Name: zone_event_templates zone_event_templates_invasion_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.zone_event_templates
+    ADD CONSTRAINT zone_event_templates_invasion_mob_id_fkey FOREIGN KEY (invasion_mob_template_id) REFERENCES public.mob(id);
 
 
 --
