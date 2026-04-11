@@ -1,3 +1,11 @@
+v0.1.4
+11.04.2026
+================
+Improvements:
+DB dump (mmo_prototype_dump.sql) — добавлены `COMMENT ON TABLE` и `COMMENT ON COLUMN` аннотации для таблиц `character_bestiary` (описание назначения таблицы, полей `character_id`, `mob_template_id`, `kill_count`), `character_pity` (pity-механика редких дропов, поля `character_id`, `item_id`, `kill_count`), `character_reputation` (фракционная репутация, смысл положительных/отрицательных значений).
+
+---
+
 v0.1.3
 08.04.2026
 ================
