@@ -3170,6 +3170,167 @@ COMMENT ON COLUMN public.npc.npc_type IS 'Тип NPC (FK → npc_type): торг
 
 
 --
+-- Name: npc_ambient_speech_configs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.npc_ambient_speech_configs (
+    id integer NOT NULL,
+    npc_id integer NOT NULL,
+    min_interval_sec integer DEFAULT 20 NOT NULL,
+    max_interval_sec integer DEFAULT 60 NOT NULL
+);
+
+
+ALTER TABLE public.npc_ambient_speech_configs OWNER TO postgres;
+
+--
+-- Name: TABLE npc_ambient_speech_configs; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.npc_ambient_speech_configs IS 'Per-NPC ambient speech timing configuration.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_configs.npc_id; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_configs.npc_id IS 'FK to npcs.id. One config per NPC.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_configs.min_interval_sec; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_configs.min_interval_sec IS 'Minimum interval (seconds) between periodic lines on client.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_configs.max_interval_sec; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_configs.max_interval_sec IS 'Maximum interval (seconds) between periodic lines on client.';
+
+
+--
+-- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.npc_ambient_speech_configs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.npc_ambient_speech_configs_id_seq OWNER TO postgres;
+
+--
+-- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.npc_ambient_speech_configs_id_seq OWNED BY public.npc_ambient_speech_configs.id;
+
+
+--
+-- Name: npc_ambient_speech_lines; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.npc_ambient_speech_lines (
+    id integer NOT NULL,
+    npc_id integer NOT NULL,
+    line_key character varying(128) NOT NULL,
+    trigger_type character varying(16) DEFAULT 'periodic'::character varying NOT NULL,
+    trigger_radius integer DEFAULT 400 NOT NULL,
+    priority integer DEFAULT 0 NOT NULL,
+    weight integer DEFAULT 10 NOT NULL,
+    cooldown_sec integer DEFAULT 60 NOT NULL,
+    condition_group jsonb
+);
+
+
+ALTER TABLE public.npc_ambient_speech_lines OWNER TO postgres;
+
+--
+-- Name: TABLE npc_ambient_speech_lines; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.npc_ambient_speech_lines IS 'Individual ambient speech lines for NPCs.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.line_key; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.line_key IS 'Localisation key sent to client, e.g. npc.blacksmith.idle_1';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.trigger_type; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.trigger_type IS '"periodic" = fired by client timer; "proximity" = fired once on player approach.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.trigger_radius; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.trigger_radius IS 'Trigger / display radius in world units (used for proximity trigger and UI culling).';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.priority; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.priority IS 'Highest-priority non-empty pool is used. Within a pool, lines are weighted-random.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.weight; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.weight IS 'Relative weight for weighted-random selection within same priority group.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.cooldown_sec; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.cooldown_sec IS 'Per-client cooldown (seconds) before this specific line may show again.';
+
+
+--
+-- Name: COLUMN npc_ambient_speech_lines.condition_group; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.npc_ambient_speech_lines.condition_group IS 'Optional JSONB condition tree compatible with DialogueConditionEvaluator. NULL = always show.';
+
+
+--
+-- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.npc_ambient_speech_lines_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.npc_ambient_speech_lines_id_seq OWNER TO postgres;
+
+--
+-- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.npc_ambient_speech_lines_id_seq OWNED BY public.npc_ambient_speech_lines.id;
+
+
+--
 -- Name: npc_attributes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3929,6 +4090,7 @@ CREATE TABLE public.quest_reward (
     item_id bigint,
     quantity integer DEFAULT 1 NOT NULL,
     amount bigint DEFAULT 0 NOT NULL,
+    is_hidden boolean DEFAULT false NOT NULL,
     CONSTRAINT quest_reward_type_ck CHECK ((reward_type = ANY (ARRAY['item'::text, 'exp'::text, 'gold'::text])))
 );
 
@@ -3968,6 +4130,13 @@ COMMENT ON COLUMN public.quest_reward.quantity IS 'Количество пред
 --
 
 COMMENT ON COLUMN public.quest_reward.amount IS 'Количество опыта или золота (только если reward_type = exp / gold)';
+
+
+--
+-- Name: COLUMN quest_reward.is_hidden; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.quest_reward.is_hidden IS 'TRUE = client displays "???" instead of item/amount until quest_turned_in. Revealed in the rewardsReceived array of the quest_turned_in notification.';
 
 
 --
@@ -5730,6 +5899,20 @@ ALTER TABLE ONLY public.mob_skills ALTER COLUMN id SET DEFAULT nextval('public.m
 
 
 --
+-- Name: npc_ambient_speech_configs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_configs ALTER COLUMN id SET DEFAULT nextval('public.npc_ambient_speech_configs_id_seq'::regclass);
+
+
+--
+-- Name: npc_ambient_speech_lines id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_lines ALTER COLUMN id SET DEFAULT nextval('public.npc_ambient_speech_lines_id_seq'::regclass);
+
+
+--
 -- Name: npc_placements id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -5917,8 +6100,8 @@ ALTER TABLE ONLY public.zones ALTER COLUMN id SET DEFAULT nextval('public.zones_
 
 COPY public.character_bestiary (character_id, mob_template_id, kill_count) FROM stdin;
 2	1	3
+3	1	380
 3	2	18
-3	1	326
 \.
 
 
@@ -5937,8 +6120,8 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 --
 
 COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-2	207	486	f	2026-04-12 18:05:11.092353+00
-3	365	277	f	2026-04-12 18:05:11.415312+00
+3	365	477	f	2026-04-15 09:29:58.32707+00
+2	207	486	f	2026-04-14 19:37:08.866237+00
 1	197	454	f	2026-03-07 12:41:29.615005+00
 \.
 
@@ -5948,24 +6131,9 @@ COPY public.character_current_state (character_id, current_health, current_mana,
 --
 
 COPY public.character_emotes (id, character_id, emote_slug, unlocked_at) FROM stdin;
-1	1	sit	2026-04-13 08:53:40.211313+00
-2	2	sit	2026-04-13 08:53:40.211313+00
-3	3	sit	2026-04-13 08:53:40.211313+00
 4	1	wave	2026-04-13 08:53:40.211313+00
 5	2	wave	2026-04-13 08:53:40.211313+00
 6	3	wave	2026-04-13 08:53:40.211313+00
-7	1	bow	2026-04-13 08:53:40.211313+00
-8	2	bow	2026-04-13 08:53:40.211313+00
-9	3	bow	2026-04-13 08:53:40.211313+00
-10	1	laugh	2026-04-13 08:53:40.211313+00
-11	2	laugh	2026-04-13 08:53:40.211313+00
-12	3	laugh	2026-04-13 08:53:40.211313+00
-13	1	cry	2026-04-13 08:53:40.211313+00
-14	2	cry	2026-04-13 08:53:40.211313+00
-15	3	cry	2026-04-13 08:53:40.211313+00
-16	1	point	2026-04-13 08:53:40.211313+00
-17	2	point	2026-04-13 08:53:40.211313+00
-18	3	point	2026-04-13 08:53:40.211313+00
 \.
 
 
@@ -6070,8 +6238,8 @@ COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
 
 COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
 1	1	-2000.00	4000.00	300.00	2	0
-2	2	1573.23	1189.17	87.15	2	10.109907
-3	3	3490.72	3154.45	87.15	1	11.908313
+2	2	-204.10	-557.02	87.15	2	-130.249863
+3	3	407.97	-246.30	87.15	1	-58.636513
 \.
 
 
@@ -6091,6 +6259,8 @@ COPY public.character_reputation (character_id, faction_slug, value) FROM stdin;
 --
 
 COPY public.character_skill_bar (character_id, slot_index, skill_slug) FROM stdin;
+3	0	basic_attack
+3	1	fireball
 \.
 
 
@@ -6113,6 +6283,7 @@ COPY public.character_skills (id, character_id, skill_id, current_level) FROM st
 6	3	2	1
 7	3	3	1
 8	3	8	1
+18	3	11	1
 \.
 
 
@@ -6132,8 +6303,8 @@ COPY public.character_titles (character_id, title_slug, equipped, earned_at) FRO
 
 COPY public.characters (id, name, owner_id, class_id, race_id, experience_points, level, radius, free_skill_points, gender, account_slot, created_at, last_online_at, deleted_at, play_time_sec, bind_zone_id, bind_x, bind_y, bind_z, appearance, experience_debt) FROM stdin;
 1	TetsMage1Player	5	1	1	57	2	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	0
-2	TetsMage2Player	4	1	1	1460	3	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	1606
-3	TetsWarrior1Player	3	2	1	5730	5	100	49	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	3886
+3	TetsWarrior1Player	3	2	1	5730	5	100	39	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	3616
+2	TetsMage2Player	4	1	1	1460	3	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	1752
 \.
 
 
@@ -6448,12 +6619,6 @@ COPY public.dialogue_node (id, dialogue_id, type, speaker_npc_id, client_node_ke
 --
 
 COPY public.emote_definitions (id, slug, display_name, animation_name, category, is_default, sort_order, created_at) FROM stdin;
-1	sit	Сесть	emote_sit	basic	t	1	2026-04-13 08:53:40.207308+00
-2	wave	Помахать рукой	emote_wave	basic	t	2	2026-04-13 08:53:40.207308+00
-3	bow	Поклониться	emote_bow	basic	t	3	2026-04-13 08:53:40.207308+00
-4	laugh	Смеяться	emote_laugh	social	t	4	2026-04-13 08:53:40.207308+00
-5	cry	Плакать	emote_cry	social	t	5	2026-04-13 08:53:40.207308+00
-6	point	Указать	emote_point	basic	t	6	2026-04-13 08:53:40.207308+00
 7	salute	Козырять	emote_salute	social	f	10	2026-04-13 08:53:40.207308+00
 8	clap	Аплодировать	emote_clap	social	f	11	2026-04-13 08:53:40.207308+00
 9	shrug	Пожать плечами	emote_shrug	social	f	12	2026-04-13 08:53:40.207308+00
@@ -6461,6 +6626,12 @@ COPY public.emote_definitions (id, slug, display_name, animation_name, category,
 11	dance_basic	Танцевать	emote_dance_basic	dance	f	20	2026-04-13 08:53:40.207308+00
 12	dance_wild	Дикий танец	emote_dance_wild	dance	f	21	2026-04-13 08:53:40.207308+00
 13	dance_slow	Медленный танец	emote_dance_slow	dance	f	22	2026-04-13 08:53:40.207308+00
+1	sit	Сесть	emote_sit	basic	f	1	2026-04-13 08:53:40.207308+00
+2	wave	Помахать рукой	emote_wave	basic	t	2	2026-04-13 08:53:40.207308+00
+3	bow	Поклониться	emote_bow	basic	f	3	2026-04-13 08:53:40.207308+00
+4	laugh	Смеяться	emote_laugh	social	f	4	2026-04-13 08:53:40.207308+00
+5	cry	Плакать	emote_cry	social	f	5	2026-04-13 08:53:40.207308+00
+6	point	Указать	emote_point	basic	f	6	2026-04-13 08:53:40.207308+00
 \.
 
 
@@ -6999,6 +7170,22 @@ COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead
 2	Milaya	1	1	100	50	f	milaya	100	t	3	\N
 4	Theron	1	5	500	100	f	theron	100	t	6	\N
 5	Sylara	1	5	400	250	f	sylara	100	t	6	\N
+\.
+
+
+--
+-- Data for Name: npc_ambient_speech_configs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.npc_ambient_speech_configs (id, npc_id, min_interval_sec, max_interval_sec) FROM stdin;
+\.
+
+
+--
+-- Data for Name: npc_ambient_speech_lines; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.npc_ambient_speech_lines (id, npc_id, line_key, trigger_type, trigger_radius, priority, weight, cooldown_sec, condition_group) FROM stdin;
 \.
 
 
@@ -8251,6 +8438,24 @@ COPY public.player_active_effect (id, player_id, status_effect_id, source_type, 
 1132	2	1	death	\N	-2.000000	2026-04-12 16:55:50.211129+00	2026-04-12 16:57:50+00	18	0	\N
 1133	2	1	death	\N	-2.000000	2026-04-12 16:55:50.213815+00	2026-04-12 16:57:50+00	19	0	\N
 1134	2	1	death	\N	-3.000000	2026-04-12 16:55:50.216468+00	2026-04-12 16:57:50+00	20	0	\N
+1135	2	1	death	\N	-41.000000	2026-04-14 19:10:19.985397+00	2026-04-14 19:12:19+00	1	0	\N
+1136	2	1	death	\N	-97.000000	2026-04-14 19:10:19.993202+00	2026-04-14 19:12:19+00	2	0	\N
+1137	2	1	death	\N	-2.000000	2026-04-14 19:10:19.996645+00	2026-04-14 19:12:19+00	3	0	\N
+1138	2	1	death	\N	-8.000000	2026-04-14 19:10:19.999731+00	2026-04-14 19:12:19+00	4	0	\N
+1139	2	1	death	\N	-2.000000	2026-04-14 19:10:20.003189+00	2026-04-14 19:12:19+00	5	0	\N
+1140	2	1	death	\N	-3.000000	2026-04-14 19:10:20.00633+00	2026-04-14 19:12:19+00	6	0	\N
+1141	2	1	death	\N	-4.000000	2026-04-14 19:10:20.010233+00	2026-04-14 19:12:19+00	7	0	\N
+1142	2	1	death	\N	-6.000000	2026-04-14 19:10:20.013358+00	2026-04-14 19:12:19+00	8	0	\N
+1143	2	1	death	\N	-1.000000	2026-04-14 19:10:20.016619+00	2026-04-14 19:12:19+00	9	0	\N
+1144	2	1	death	\N	-1.000000	2026-04-14 19:10:20.01952+00	2026-04-14 19:12:19+00	10	0	\N
+1145	2	1	death	\N	-1.000000	2026-04-14 19:10:20.02232+00	2026-04-14 19:12:19+00	11	0	\N
+1146	2	1	death	\N	-1.000000	2026-04-14 19:10:20.026185+00	2026-04-14 19:12:19+00	12	0	\N
+1147	2	1	death	\N	-3.000000	2026-04-14 19:10:20.02906+00	2026-04-14 19:12:19+00	13	0	\N
+1148	2	1	death	\N	-2.000000	2026-04-14 19:10:20.03202+00	2026-04-14 19:12:19+00	14	0	\N
+1149	2	1	death	\N	-2.000000	2026-04-14 19:10:20.035021+00	2026-04-14 19:12:19+00	15	0	\N
+1150	2	1	death	\N	-2.000000	2026-04-14 19:10:20.037977+00	2026-04-14 19:12:19+00	18	0	\N
+1151	2	1	death	\N	-2.000000	2026-04-14 19:10:20.041012+00	2026-04-14 19:12:19+00	19	0	\N
+1152	2	1	death	\N	-3.000000	2026-04-14 19:10:20.044378+00	2026-04-14 19:12:19+00	20	0	\N
 \.
 
 
@@ -8273,15 +8478,12 @@ COPY public.player_flag (player_id, flag_key, int_value, bool_value, updated_at)
 
 COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, durability_current, kill_count) FROM stdin;
 3	1	3	5	\N	\N	0
-169	3	16	695	\N	\N	0
-232	3	9	1	\N	\N	0
-229	3	10	2	\N	\N	0
-228	3	11	4	\N	\N	0
-165	3	3	97	\N	\N	0
-176	3	15	1	\N	30	0
-230	2	3	4	\N	\N	0
-221	3	1	1	\N	80	0
-231	3	12	1	\N	\N	0
+234	3	10	1	\N	\N	0
+221	3	1	1	\N	100	0
+169	3	16	9600	\N	\N	0
+230	2	3	6	\N	\N	0
+165	3	3	93	\N	\N	0
+176	3	15	1	\N	36	42
 18	3	17	8	\N	\N	0
 \.
 
@@ -8291,7 +8493,7 @@ COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, d
 --
 
 COPY public.player_quest (player_id, quest_id, state, current_step, progress, updated_at) FROM stdin;
-3	1	active	1	{}	2026-04-12 18:05:11.419255+00
+3	1	completed	2	{"have": 2}	2026-04-15 09:29:58.329509+00
 \.
 
 
@@ -8308,9 +8510,9 @@ COPY public.quest (id, slug, min_level, repeatable, cooldown_sec, giver_npc_id, 
 -- Data for Name: quest_reward; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount) FROM stdin;
-2	1	exp	\N	0	300
-1	1	item	3	5	5
+COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount, is_hidden) FROM stdin;
+2	1	exp	\N	0	300	f
+1	1	item	3	5	5	f
 \.
 
 
@@ -10137,6 +10339,102 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 1508	3	2fc28965-dca6-42ee-9479-13be23c28333	\N	\N	2026-04-11 18:53:20.986469+00	2026-05-11 18:53:20.986469+00	\N
 1509	3	88239012-e094-43cc-b7db-807ef31a770a	\N	\N	2026-04-12 16:48:47.770778+00	2026-05-12 16:48:47.770778+00	\N
 1510	4	20a247ec-ec7c-4d9e-ad7a-41b913ecaf9f	\N	\N	2026-04-12 16:49:40.333107+00	2026-05-12 16:49:40.333107+00	\N
+1511	3	80b5a8be-45f3-4868-8dca-dc479c6aa7d9	\N	\N	2026-04-13 09:00:40.917398+00	2026-05-13 09:00:40.917398+00	\N
+1512	3	8434fe98-e75f-490c-90b6-97b3f8dc9b77	\N	\N	2026-04-13 09:22:15.074532+00	2026-05-13 09:22:15.074532+00	\N
+1513	3	175c56da-2977-4bae-8775-5ffd9f3940c4	\N	\N	2026-04-13 09:22:32.268228+00	2026-05-13 09:22:32.268228+00	\N
+1514	3	85afb0ae-8383-4466-a7d3-8264a38e2fd9	\N	\N	2026-04-13 10:52:34.164947+00	2026-05-13 10:52:34.164947+00	\N
+1515	3	0e2b38d2-d75b-4552-b7dd-7f8a79225d84	\N	\N	2026-04-13 10:55:30.243688+00	2026-05-13 10:55:30.243688+00	\N
+1516	4	0834c334-f4e5-4ad3-8c3b-cff35438e8dc	\N	\N	2026-04-13 10:56:00.3407+00	2026-05-13 10:56:00.3407+00	\N
+1517	3	931afae8-1b0f-4cd9-9d7a-6745094dc792	\N	\N	2026-04-13 12:35:42.576293+00	2026-05-13 12:35:42.576293+00	\N
+1518	4	a08292fc-f6a2-44ae-b743-0b62c2225907	\N	\N	2026-04-13 12:35:47.972771+00	2026-05-13 12:35:47.972771+00	\N
+1519	3	eda246ee-715f-454e-95d7-64bc36f079f9	\N	\N	2026-04-13 12:59:51.430696+00	2026-05-13 12:59:51.430696+00	\N
+1520	4	18672e6c-5e4f-498b-a625-e08f3e04d004	\N	\N	2026-04-13 13:00:00.565253+00	2026-05-13 13:00:00.565253+00	\N
+1521	3	609e94b4-4367-4721-b963-ed5d19ff5a03	\N	\N	2026-04-13 13:15:52.705905+00	2026-05-13 13:15:52.705905+00	\N
+1522	4	edd1a4fb-3730-412c-8802-43f99021b634	\N	\N	2026-04-13 13:16:00.463817+00	2026-05-13 13:16:00.463817+00	\N
+1523	3	cbd02463-8624-4510-9855-ba688d78a531	\N	\N	2026-04-13 13:59:27.677334+00	2026-05-13 13:59:27.677334+00	\N
+1524	4	58e82962-ebca-45e9-91bd-27a588de64ee	\N	\N	2026-04-13 13:59:32.033435+00	2026-05-13 13:59:32.033435+00	\N
+1525	3	5897710d-0f08-411b-b83b-2978e43f4ee2	\N	\N	2026-04-13 14:00:44.893955+00	2026-05-13 14:00:44.893955+00	\N
+1526	4	0f38ce60-61f2-49c7-84f5-d334af219d8e	\N	\N	2026-04-13 14:00:48.886656+00	2026-05-13 14:00:48.886656+00	\N
+1527	3	da633e64-34f4-48fd-8c99-f2bd06fb6b88	\N	\N	2026-04-13 14:01:41.500738+00	2026-05-13 14:01:41.500738+00	\N
+1528	4	66287e69-58ca-4c35-8eec-961b1bf1404a	\N	\N	2026-04-13 14:01:46.254552+00	2026-05-13 14:01:46.254552+00	\N
+1529	3	8c9bdf7d-8aae-4814-855f-3e09645c2b80	\N	\N	2026-04-13 14:02:58.562638+00	2026-05-13 14:02:58.562638+00	\N
+1530	3	2fbc54b2-5c91-4f39-9a0d-dcb877e774c0	\N	\N	2026-04-13 14:04:33.185128+00	2026-05-13 14:04:33.185128+00	\N
+1531	3	c5d89f74-0621-4a9a-9cf4-efa4c4e407da	\N	\N	2026-04-13 14:25:49.584818+00	2026-05-13 14:25:49.584818+00	\N
+1532	4	ec6470ba-ee79-4f49-90c4-be160f82db4e	\N	\N	2026-04-13 14:26:10.516317+00	2026-05-13 14:26:10.516317+00	\N
+1533	3	5ab87b00-e49b-4d91-82c8-07ef7a8305b0	\N	\N	2026-04-13 14:26:38.464542+00	2026-05-13 14:26:38.464542+00	\N
+1538	4	810dc182-cdc7-40ca-a539-764aa5fc54c9	\N	\N	2026-04-13 15:59:01.383429+00	2026-05-13 15:59:01.383429+00	\N
+1543	3	ff4173c8-3108-4091-a8f2-664276bf945b	\N	\N	2026-04-13 20:12:04.406647+00	2026-05-13 20:12:04.406647+00	\N
+1534	3	0334fc18-2816-45a3-a1b8-9a297f7d1810	\N	\N	2026-04-13 14:58:55.062481+00	2026-05-13 14:58:55.062481+00	\N
+1539	3	089d3c4a-b9f9-45bf-a4a6-816e567d069c	\N	\N	2026-04-13 16:09:40.129914+00	2026-05-13 16:09:40.129914+00	\N
+1535	4	faad10e8-0288-49d0-8d1f-2cf60dda3e4c	\N	\N	2026-04-13 14:59:30.105604+00	2026-05-13 14:59:30.105604+00	\N
+1540	3	c360bdb8-9fcb-44bd-baa3-690f325c601c	\N	\N	2026-04-13 19:59:07.206915+00	2026-05-13 19:59:07.206915+00	\N
+1536	3	1ea5719f-6fa0-4d44-9d68-1237bcdc4a38	\N	\N	2026-04-13 15:55:19.100611+00	2026-05-13 15:55:19.100611+00	\N
+1541	4	18a7df93-55d5-4185-a5f0-95dbdb7c7364	\N	\N	2026-04-13 19:59:17.612232+00	2026-05-13 19:59:17.612232+00	\N
+1537	3	b249a3a7-7ab5-45f9-b5a4-74efe81539c8	\N	\N	2026-04-13 15:58:56.813379+00	2026-05-13 15:58:56.813379+00	\N
+1542	3	7abe8d03-2470-4f43-8401-9f0287f5d545	\N	\N	2026-04-13 20:06:01.943356+00	2026-05-13 20:06:01.943356+00	\N
+1544	3	13ca1858-1113-4153-b5ed-f701cc2c8adf	\N	\N	2026-04-14 08:14:36.424886+00	2026-05-14 08:14:36.424886+00	\N
+1545	4	870f980e-54f9-47ab-959d-4a4e03aa8027	\N	\N	2026-04-14 08:14:49.553518+00	2026-05-14 08:14:49.553518+00	\N
+1546	3	328f1048-2bef-49d1-9c3b-a0f4b3a254af	\N	\N	2026-04-14 08:20:15.549172+00	2026-05-14 08:20:15.549172+00	\N
+1547	3	7db107d3-6bf7-4635-aa76-54576095eeb0	\N	\N	2026-04-14 08:21:37.632939+00	2026-05-14 08:21:37.632939+00	\N
+1548	3	79fc3bcc-d020-48bc-b7b5-14f6baccddd8	\N	\N	2026-04-14 08:24:02.124634+00	2026-05-14 08:24:02.124634+00	\N
+1549	3	36d0591f-2319-4466-bd2a-19d12615f65f	\N	\N	2026-04-14 08:59:48.927517+00	2026-05-14 08:59:48.927517+00	\N
+1550	4	ab9d4509-38fe-4006-a582-19d82cb4dbae	\N	\N	2026-04-14 08:59:55.28595+00	2026-05-14 08:59:55.28595+00	\N
+1551	3	9e6fddb2-e26b-4598-a62a-74e224cb8157	\N	\N	2026-04-14 09:56:08.049759+00	2026-05-14 09:56:08.049759+00	\N
+1552	3	4b2af53a-4900-46eb-9290-1c34d963564e	\N	\N	2026-04-14 09:57:55.013985+00	2026-05-14 09:57:55.013985+00	\N
+1553	3	35c4a5bf-e38d-4a95-85eb-267e4425778e	\N	\N	2026-04-14 10:04:28.342861+00	2026-05-14 10:04:28.342861+00	\N
+1554	3	4e444234-2fdb-4a28-bbf1-c0457ed521ab	\N	\N	2026-04-14 10:13:50.360138+00	2026-05-14 10:13:50.360138+00	\N
+1555	3	769c155a-6cc2-47dd-8ef2-54396358f386	\N	\N	2026-04-14 10:14:53.920571+00	2026-05-14 10:14:53.920571+00	\N
+1556	3	4aee26ca-4f94-462c-8219-e4cf9801541f	\N	\N	2026-04-14 10:23:47.090996+00	2026-05-14 10:23:47.090996+00	\N
+1557	3	8daad134-e824-4d69-a437-42900d20cf0f	\N	\N	2026-04-14 10:25:07.0274+00	2026-05-14 10:25:07.0274+00	\N
+1558	3	0626e78c-85ea-49fd-a842-ab3dc755baf8	\N	\N	2026-04-14 10:25:57.743714+00	2026-05-14 10:25:57.743714+00	\N
+1559	3	e4bae336-5d59-4b73-9d2c-9e8fb3c2d0a7	\N	\N	2026-04-14 10:31:17.493843+00	2026-05-14 10:31:17.493843+00	\N
+1560	3	18bcf65d-ee8e-4b32-8e14-9150b453904a	\N	\N	2026-04-14 10:44:55.397249+00	2026-05-14 10:44:55.397249+00	\N
+1561	3	26de192e-0ec0-4166-bb89-8d6925cb8332	\N	\N	2026-04-14 10:45:50.571914+00	2026-05-14 10:45:50.571914+00	\N
+1562	3	d77ac252-6703-4cd8-8b57-5230fb23d348	\N	\N	2026-04-14 11:20:58.50767+00	2026-05-14 11:20:58.50767+00	\N
+1563	3	98623625-2d75-495e-b4ba-cfa3be3efac8	\N	\N	2026-04-14 11:29:07.323428+00	2026-05-14 11:29:07.323428+00	\N
+1564	3	e123b1e5-4d76-4aa0-886a-70e84379dbe8	\N	\N	2026-04-14 11:32:35.537198+00	2026-05-14 11:32:35.537198+00	\N
+1565	3	faa53274-6182-41a0-9381-2583611315b9	\N	\N	2026-04-14 11:36:36.724014+00	2026-05-14 11:36:36.724014+00	\N
+1566	3	69d79e21-96e5-4ae9-b130-13d6c128e85f	\N	\N	2026-04-14 12:01:21.416854+00	2026-05-14 12:01:21.416854+00	\N
+1567	3	4a2cfde4-61d3-4553-bb86-a3ca59c6d568	\N	\N	2026-04-14 12:03:39.669629+00	2026-05-14 12:03:39.669629+00	\N
+1568	3	051f6065-1ce8-4bb5-adc1-3f9c9241521a	\N	\N	2026-04-14 12:11:30.982646+00	2026-05-14 12:11:30.982646+00	\N
+1569	3	997b414d-07ba-4692-bf29-b38ddafa395a	\N	\N	2026-04-14 12:12:46.496553+00	2026-05-14 12:12:46.496553+00	\N
+1570	3	0cacc373-1525-470c-909c-8796b58a8e09	\N	\N	2026-04-14 12:29:55.054426+00	2026-05-14 12:29:55.054426+00	\N
+1571	3	2179c97d-439a-4f92-98b8-787280b59be5	\N	\N	2026-04-14 12:34:32.042481+00	2026-05-14 12:34:32.042481+00	\N
+1572	3	03209f60-fd81-49b9-a7f2-50a584585cfb	\N	\N	2026-04-14 12:37:49.044032+00	2026-05-14 12:37:49.044032+00	\N
+1573	3	46b24da9-6f8a-43fd-bdfc-ad2c4c627321	\N	\N	2026-04-14 12:44:05.484089+00	2026-05-14 12:44:05.484089+00	\N
+1574	3	32d5acf8-4dc7-42bb-818a-d155f6f13bd7	\N	\N	2026-04-14 12:45:22.647977+00	2026-05-14 12:45:22.647977+00	\N
+1575	3	186097ce-9261-4694-b66b-b78c2f954539	\N	\N	2026-04-14 12:46:48.481672+00	2026-05-14 12:46:48.481672+00	\N
+1576	3	5df1f240-57c2-44fb-9a16-b7d2f65f75bb	\N	\N	2026-04-14 13:01:46.434857+00	2026-05-14 13:01:46.434857+00	\N
+1577	3	42ec2eb8-2d86-46af-a9a3-d8f0c9c7e882	\N	\N	2026-04-14 13:16:59.903414+00	2026-05-14 13:16:59.903414+00	\N
+1578	3	bf091470-2baf-4e8e-ab97-a434e420c2fa	\N	\N	2026-04-14 13:39:57.777751+00	2026-05-14 13:39:57.777751+00	\N
+1579	3	3c9b10b6-98d4-49aa-a31c-28991c099ee2	\N	\N	2026-04-14 13:55:13.808524+00	2026-05-14 13:55:13.808524+00	\N
+1580	3	c029d3fc-ec2f-4bdb-951f-0da2c41c1c5f	\N	\N	2026-04-14 13:56:45.267922+00	2026-05-14 13:56:45.267922+00	\N
+1581	3	73313947-0e7c-41b0-a489-22964f188d40	\N	\N	2026-04-14 13:57:11.14852+00	2026-05-14 13:57:11.14852+00	\N
+1582	3	62ced631-eddd-4a37-9dfc-b18a310bc93e	\N	\N	2026-04-14 13:59:09.544184+00	2026-05-14 13:59:09.544184+00	\N
+1583	3	c746bb8c-92a7-4864-bbe2-a32ea162b7b7	\N	\N	2026-04-14 14:00:19.393583+00	2026-05-14 14:00:19.393583+00	\N
+1584	3	504a9f1d-5630-46ab-bc80-40cb6e42124c	\N	\N	2026-04-14 15:09:34.182248+00	2026-05-14 15:09:34.182248+00	\N
+1585	3	bcdcc8eb-037e-4806-901b-55630ff1a40f	\N	\N	2026-04-14 15:10:01.746486+00	2026-05-14 15:10:01.746486+00	\N
+1586	3	7d5e03ff-816b-42c7-8f7c-aa24da33e2dc	\N	\N	2026-04-14 15:10:31.3028+00	2026-05-14 15:10:31.3028+00	\N
+1587	3	a223011d-2089-4f49-be29-631b3c16a1c5	\N	\N	2026-04-14 15:15:30.344164+00	2026-05-14 15:15:30.344164+00	\N
+1588	3	e6bc591e-de84-4a6d-87d3-dd5af393e8cf	\N	\N	2026-04-14 15:24:42.187706+00	2026-05-14 15:24:42.187706+00	\N
+1589	3	2785d58a-da22-4b3b-b36c-45c32600af99	\N	\N	2026-04-14 15:27:15.432849+00	2026-05-14 15:27:15.432849+00	\N
+1590	3	2fa994b2-913d-4b52-b869-2d88e59d283e	\N	\N	2026-04-14 15:57:56.394955+00	2026-05-14 15:57:56.394955+00	\N
+1591	3	e3de8925-bf04-4763-b334-62426b6778e3	\N	\N	2026-04-14 15:59:39.285849+00	2026-05-14 15:59:39.285849+00	\N
+1592	3	dcc6a282-93fe-4072-89ca-b36096c5df1b	\N	\N	2026-04-14 16:36:25.393665+00	2026-05-14 16:36:25.393665+00	\N
+1593	4	f1d2cec0-7c2e-489c-b0c7-8c2e4487df53	\N	\N	2026-04-14 16:38:11.315516+00	2026-05-14 16:38:11.315516+00	\N
+1594	3	2464745d-3af7-4be4-bd71-bc30c5e498aa	\N	\N	2026-04-14 16:41:20.69426+00	2026-05-14 16:41:20.69426+00	\N
+1595	3	8a1991ae-4f7f-4439-8f69-8af40f883dbe	\N	\N	2026-04-14 16:46:36.75523+00	2026-05-14 16:46:36.75523+00	\N
+1596	3	38047769-3e1c-449b-ac05-d6019b421ca3	\N	\N	2026-04-14 19:01:19.153426+00	2026-05-14 19:01:19.153426+00	\N
+1597	4	8e679707-a0ec-4127-9bb2-e1fd26f321c8	\N	\N	2026-04-14 19:02:09.860098+00	2026-05-14 19:02:09.860098+00	\N
+1598	4	8f4b59f0-5394-4070-9c2d-5bf347349921	\N	\N	2026-04-14 19:06:22.014356+00	2026-05-14 19:06:22.014356+00	\N
+1599	3	cd236329-39ad-48ac-b359-c7d1070a2884	\N	\N	2026-04-14 19:06:37.57513+00	2026-05-14 19:06:37.57513+00	\N
+1600	3	b7ce85a1-d424-4b79-af92-934895a60a96	\N	\N	2026-04-14 19:11:40.518632+00	2026-05-14 19:11:40.518632+00	\N
+1601	4	eac3baaf-85ca-44a8-b388-bc3e6f312a9c	\N	\N	2026-04-14 19:18:50.520584+00	2026-05-14 19:18:50.520584+00	\N
+1602	3	2ba87607-420b-4e95-8c69-7a1370d53209	\N	\N	2026-04-15 08:55:05.933317+00	2026-05-15 08:55:05.933317+00	\N
+1603	3	0df78ce1-d785-445d-90e9-682bc7fa95e5	\N	\N	2026-04-15 08:58:53.872387+00	2026-05-15 08:58:53.872387+00	\N
+1604	3	3b2d492a-fa2f-493e-baac-7a0ae99c47a5	\N	\N	2026-04-15 09:21:14.770126+00	2026-05-15 09:21:14.770126+00	\N
+1605	3	9183b2b3-4e66-4be9-8152-92988cbe9df3	\N	\N	2026-04-15 09:23:33.524241+00	2026-05-15 09:23:33.524241+00	\N
+1606	3	e02c77cd-4267-426f-a5ff-b0e516634c02	\N	\N	2026-04-15 09:29:26.905198+00	2026-05-15 09:29:26.905198+00	\N
 \.
 
 
@@ -10146,8 +10444,8 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 
 COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
 5	test3	test3	2023-05-04 16:25:31.727922+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	\N	\N	f
-3	test1	test1	2026-04-12 16:48:47.762334+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
-4	test2	test2	2026-04-12 16:49:40.328712+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+4	test2	test2	2026-04-14 19:18:50.516743+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+3	test1	test1	2026-04-15 09:29:26.896356+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
 \.
 
 
@@ -10228,14 +10526,14 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 18, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 143, true);
 
 
 --
 -- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 88, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 92, true);
 
 
 --
@@ -10249,7 +10547,7 @@ SELECT pg_catalog.setval('public.character_position_id_seq', 3, true);
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 8, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 18, true);
 
 
 --
@@ -10414,6 +10712,20 @@ SELECT pg_catalog.setval('public.mob_stat_id_seq', 106, true);
 
 
 --
+-- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.npc_ambient_speech_configs_id_seq', 1, false);
+
+
+--
+-- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.npc_ambient_speech_lines_id_seq', 1, false);
+
+
+--
 -- Name: npc_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -10473,14 +10785,14 @@ SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 1, false);
 -- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1134, true);
+SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1152, true);
 
 
 --
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 232, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 234, true);
 
 
 --
@@ -10641,7 +10953,7 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 1510, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 1606, true);
 
 
 --
@@ -11120,6 +11432,22 @@ ALTER TABLE ONLY public.mob_weaknesses
 
 
 --
+-- Name: npc_ambient_speech_configs npc_ambient_speech_configs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_configs
+    ADD CONSTRAINT npc_ambient_speech_configs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: npc_ambient_speech_lines npc_ambient_speech_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_lines
+    ADD CONSTRAINT npc_ambient_speech_lines_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: npc_attributes npc_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -11520,6 +11848,14 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
+-- Name: npc_ambient_speech_configs uq_npc_ambient_config; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_configs
+    ADD CONSTRAINT uq_npc_ambient_config UNIQUE (npc_id);
+
+
+--
 -- Name: passive_skill_modifiers uq_psm_skill_attr; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -11637,6 +11973,13 @@ ALTER TABLE ONLY public.zones
 
 ALTER TABLE ONLY public.zones
     ADD CONSTRAINT zones_slug_key UNIQUE (slug);
+
+
+--
+-- Name: idx_ambient_lines_npc_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_ambient_lines_npc_id ON public.npc_ambient_speech_lines USING btree (npc_id);
 
 
 --
@@ -13000,6 +13343,22 @@ ALTER TABLE ONLY public.mob_weaknesses
 
 ALTER TABLE ONLY public.mob_weaknesses
     ADD CONSTRAINT mob_weaknesses_mob_id_fkey FOREIGN KEY (mob_id) REFERENCES public.mob(id) ON DELETE CASCADE;
+
+
+--
+-- Name: npc_ambient_speech_configs npc_ambient_speech_configs_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_configs
+    ADD CONSTRAINT npc_ambient_speech_configs_npc_id_fkey FOREIGN KEY (npc_id) REFERENCES public.npc(id) ON DELETE CASCADE;
+
+
+--
+-- Name: npc_ambient_speech_lines npc_ambient_speech_lines_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.npc_ambient_speech_lines
+    ADD CONSTRAINT npc_ambient_speech_lines_npc_id_fkey FOREIGN KEY (npc_id) REFERENCES public.npc(id) ON DELETE CASCADE;
 
 
 --
