@@ -6120,7 +6120,7 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 --
 
 COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-3	365	477	f	2026-04-15 09:29:58.32707+00
+3	365	477	f	2026-04-15 15:31:56.270858+00
 2	207	486	f	2026-04-14 19:37:08.866237+00
 1	197	454	f	2026-03-07 12:41:29.615005+00
 \.
@@ -6239,7 +6239,7 @@ COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
 COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
 1	1	-2000.00	4000.00	300.00	2	0
 2	2	-204.10	-557.02	87.15	2	-130.249863
-3	3	407.97	-246.30	87.15	1	-58.636513
+3	3	19631.88	-18132.14	1540.90	1	106.519737
 \.
 
 
@@ -6410,6 +6410,7 @@ COPY public.dialogue (id, slug, version, start_node_id) FROM stdin;
 3	edrik_main	1	301
 4	theron_main	1	400
 5	sylara_main	1	500
+6	ruins_dying_stranger_main	1	600
 \.
 
 
@@ -6531,6 +6532,12 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 132	551	552	0	sylara.choice.continue	\N	\N	f
 133	552	501	0	sylara.choice.continue	\N	\N	f
 107	501	599	6	sylara.choice.open_shop	\N	{"actions": [{"type": "open_skill_shop"}]}	f
+134	600	601	0	ruins_dying_stranger.choice.continue	\N	\N	f
+135	601	602	0	ruins_dying_stranger.choice.continue	\N	\N	f
+136	602	603	0	ruins_dying_stranger.choice.continue	\N	\N	f
+138	603	605	1	ruins_dying_stranger.choice.decline	\N	\N	f
+140	605	609	0	ruins_dying_stranger.choice.farewell	\N	\N	f
+137	603	605	0	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]	[{"type": "give_item", "item_id": 1, "quantity": 1}, {"type": "give_item", "item_id": 3, "quantity": 2}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
 \.
 
 
@@ -6611,6 +6618,12 @@ COPY public.dialogue_node (id, dialogue_id, type, speaker_npc_id, client_node_ke
 551	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 300, "skill_slug": "elemental_mastery", "book_item_id": 0, "requires_book": false}]}	\N
 552	5	line	5	sylara.dialogue.learned_elemental_mastery	\N	\N	\N
 599	5	end	5	\N	\N	\N	\N
+600	6	line	6	npc.ruins_dying_stranger.place_wont_let_go	\N	\N	\N
+601	6	line	6	npc.ruins_dying_stranger.if_survive_go_exit	\N	\N	\N
+602	6	line	6	npc.ruins_dying_stranger.wont_escape_but_you_can	\N	\N	\N
+603	6	choice_hub	6	\N	\N	\N	\N
+605	6	line	6	npc.ruins_dying_stranger.farewell	\N	\N	\N
+609	6	end	6	\N	\N	\N	\N
 \.
 
 
@@ -7170,6 +7183,7 @@ COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead
 2	Milaya	1	1	100	50	f	milaya	100	t	3	\N
 4	Theron	1	5	500	100	f	theron	100	t	6	\N
 5	Sylara	1	5	400	250	f	sylara	100	t	6	\N
+6	ruins_dying_stranger	1	1	1	0	f	ruins_dying_stranger	300	t	1	\N
 \.
 
 
@@ -7178,6 +7192,7 @@ COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead
 --
 
 COPY public.npc_ambient_speech_configs (id, npc_id, min_interval_sec, max_interval_sec) FROM stdin;
+1	6	10	30
 \.
 
 
@@ -7186,6 +7201,9 @@ COPY public.npc_ambient_speech_configs (id, npc_id, min_interval_sec, max_interv
 --
 
 COPY public.npc_ambient_speech_lines (id, npc_id, line_key, trigger_type, trigger_radius, priority, weight, cooldown_sec, condition_group) FROM stdin;
+1	6	npc.ruins_dying_stranger.ambient.another_one	periodic	400	0	10	15	\N
+2	6	npc.ruins_dying_stranger.ambient.keep_coming	periodic	400	0	10	15	\N
+3	6	npc.ruins_dying_stranger.ambient.come_closer	periodic	400	0	15	10	\N
 \.
 
 
@@ -7204,6 +7222,8 @@ COPY public.npc_attributes (id, npc_id, attribute_id, value) FROM stdin;
 9	4	2	100
 10	5	1	400
 11	5	2	250
+12	6	1	50
+13	6	2	0
 \.
 
 
@@ -7217,6 +7237,7 @@ COPY public.npc_dialogue (npc_id, dialogue_id, priority, condition_group) FROM s
 3	3	0	\N
 4	4	0	\N
 5	5	0	\N
+6	6	0	\N
 \.
 
 
@@ -7236,6 +7257,7 @@ COPY public.npc_placements (id, npc_id, zone_id, x, y, z, rot_z) FROM stdin;
 9	5	1	-400	1600	200	-90
 10	4	1	1200	-2800	200	90
 11	5	1	-400	1600	200	-90
+12	6	\N	18870	-15430	1490	180
 \.
 
 
@@ -7249,6 +7271,7 @@ COPY public.npc_position (id, npc_id, x, y, z, rot_z, zone_id) FROM stdin;
 1	1	585.00	-3300.00	200.00	-40.00	\N
 6	4	1200.00	-2800.00	200.00	90.00	\N
 7	5	-400.00	1600.00	200.00	-90.00	\N
+8	6	18870.00	-15430.00	1490.00	180.00	\N
 \.
 
 
@@ -8478,12 +8501,12 @@ COPY public.player_flag (player_id, flag_key, int_value, bool_value, updated_at)
 
 COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, durability_current, kill_count) FROM stdin;
 3	1	3	5	\N	\N	0
+221	3	1	3	\N	100	0
+165	3	3	97	\N	\N	0
+176	3	15	1	\N	36	42
 234	3	10	1	\N	\N	0
-221	3	1	1	\N	100	0
 169	3	16	9600	\N	\N	0
 230	2	3	6	\N	\N	0
-165	3	3	93	\N	\N	0
-176	3	15	1	\N	36	42
 18	3	17	8	\N	\N	0
 \.
 
@@ -8493,7 +8516,7 @@ COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, d
 --
 
 COPY public.player_quest (player_id, quest_id, state, current_step, progress, updated_at) FROM stdin;
-3	1	completed	2	{"have": 2}	2026-04-15 09:29:58.329509+00
+3	1	completed	2	{"have": 2}	2026-04-15 15:31:56.27318+00
 \.
 
 
@@ -10435,6 +10458,20 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 1604	3	3b2d492a-fa2f-493e-baac-7a0ae99c47a5	\N	\N	2026-04-15 09:21:14.770126+00	2026-05-15 09:21:14.770126+00	\N
 1605	3	9183b2b3-4e66-4be9-8152-92988cbe9df3	\N	\N	2026-04-15 09:23:33.524241+00	2026-05-15 09:23:33.524241+00	\N
 1606	3	e02c77cd-4267-426f-a5ff-b0e516634c02	\N	\N	2026-04-15 09:29:26.905198+00	2026-05-15 09:29:26.905198+00	\N
+1607	3	bf55efbd-5cb7-4435-af73-57612d110d63	\N	\N	2026-04-15 13:44:52.601703+00	2026-05-15 13:44:52.601703+00	\N
+1608	3	a932b397-448f-471a-ab2e-0cd5f8df2eb1	\N	\N	2026-04-15 13:47:22.699274+00	2026-05-15 13:47:22.699274+00	\N
+1609	3	92973fcd-2c63-4b0d-bae9-b750963821ab	\N	\N	2026-04-15 14:48:41.13658+00	2026-05-15 14:48:41.13658+00	\N
+1610	3	376310cb-8daf-4afa-b58a-dd0c25e05c6d	\N	\N	2026-04-15 14:51:52.481254+00	2026-05-15 14:51:52.481254+00	\N
+1611	3	6e6cf76f-4c47-478b-a1a6-f86a988e421c	\N	\N	2026-04-15 14:53:46.038057+00	2026-05-15 14:53:46.038057+00	\N
+1612	3	a707490c-dc73-4af2-b5e1-dfdf41bef9a9	\N	\N	2026-04-15 14:55:12.256077+00	2026-05-15 14:55:12.256077+00	\N
+1613	3	812f585c-dd7f-4f0a-8a0a-718db5583900	\N	\N	2026-04-15 14:58:24.944791+00	2026-05-15 14:58:24.944791+00	\N
+1614	3	c9a9315b-a679-4158-b6d6-fd2b1777ae1a	\N	\N	2026-04-15 15:03:01.82258+00	2026-05-15 15:03:01.82258+00	\N
+1615	3	5fef7dd8-5854-47db-9496-379373d035c4	\N	\N	2026-04-15 15:09:56.919618+00	2026-05-15 15:09:56.919618+00	\N
+1616	3	7ddc87e3-cc52-4cde-b38e-d9b61cf6b6f1	\N	\N	2026-04-15 15:19:01.598533+00	2026-05-15 15:19:01.598533+00	\N
+1617	3	77aa2870-2eee-4a2a-811e-55d43227f18a	\N	\N	2026-04-15 15:21:23.017435+00	2026-05-15 15:21:23.017435+00	\N
+1618	3	84e3ee11-ade5-4161-ac93-ae9578b2c5b4	\N	\N	2026-04-15 15:23:40.511549+00	2026-05-15 15:23:40.511549+00	\N
+1619	3	86f5ea84-35d8-4835-bc47-875296e54ff2	\N	\N	2026-04-15 15:25:28.418701+00	2026-05-15 15:25:28.418701+00	\N
+1620	3	398584fb-f330-478b-b150-b1153bcceb29	\N	\N	2026-04-15 15:30:31.51706+00	2026-05-15 15:30:31.51706+00	\N
 \.
 
 
@@ -10445,7 +10482,7 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
 5	test3	test3	2023-05-04 16:25:31.727922+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	\N	\N	f
 4	test2	test2	2026-04-14 19:18:50.516743+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
-3	test1	test1	2026-04-15 09:29:26.896356+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+3	test1	test1	2026-04-15 15:30:31.513252+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
 \.
 
 
@@ -10526,7 +10563,7 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 143, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 156, true);
 
 
 --
@@ -10575,21 +10612,21 @@ SELECT pg_catalog.setval('public.currency_transactions_id_seq', 1, false);
 -- Name: dialogue_edge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 69, true);
+SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 140, true);
 
 
 --
 -- Name: dialogue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dialogue_id_seq', 3, true);
+SELECT pg_catalog.setval('public.dialogue_id_seq', 6, true);
 
 
 --
 -- Name: dialogue_node_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dialogue_node_id_seq', 399, true);
+SELECT pg_catalog.setval('public.dialogue_node_id_seq', 609, true);
 
 
 --
@@ -10715,42 +10752,42 @@ SELECT pg_catalog.setval('public.mob_stat_id_seq', 106, true);
 -- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_ambient_speech_configs_id_seq', 1, false);
+SELECT pg_catalog.setval('public.npc_ambient_speech_configs_id_seq', 1, true);
 
 
 --
 -- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_ambient_speech_lines_id_seq', 1, false);
+SELECT pg_catalog.setval('public.npc_ambient_speech_lines_id_seq', 3, true);
 
 
 --
 -- Name: npc_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_attributes_id_seq', 11, true);
+SELECT pg_catalog.setval('public.npc_attributes_id_seq', 13, true);
 
 
 --
 -- Name: npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_id_seq', 5, true);
+SELECT pg_catalog.setval('public.npc_id_seq', 6, true);
 
 
 --
 -- Name: npc_placements_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_placements_id_seq', 11, true);
+SELECT pg_catalog.setval('public.npc_placements_id_seq', 12, true);
 
 
 --
 -- Name: npc_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_position_id_seq', 5, true);
+SELECT pg_catalog.setval('public.npc_position_id_seq', 8, true);
 
 
 --
@@ -10953,7 +10990,7 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 1606, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 1620, true);
 
 
 --
