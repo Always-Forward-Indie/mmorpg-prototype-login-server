@@ -1,3 +1,15 @@
+v0.1.5
+17.04.2026
+================
+New:
+
+**Migration 042 — Data-driven система выдачи титулов.**
+- `title_definitions` — добавлена колонка `condition_params JSONB NOT NULL DEFAULT '{}'`. Структура JSONB зависит от `earn_condition`: `bestiary`, `mastery`, `reputation`, `level`, `quest`.
+- 4 плацехолдерных титула заменены 12 настоящими дата-драйвен титулами (3 bestiary + 3 mastery + 3 reputation + 2 level + 1 quest).
+- DB dump актуализирован: `title_definitions` содержит новую колонку, `setval` обновлён до 12.
+
+---
+
 v0.1.4
 11.04.2026
 ================
