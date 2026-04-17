@@ -1,3 +1,17 @@
+v0.1.6
+16.04.2026
+================
+New:
+
+**Migration 043 — World Interactive Objects.**
+- Таблица `world_objects` — статические определения объектов: `id`, `slug` (UNIQUE), `name_key`, `object_type` (CHECK: examine/search/activate/use_with_item/channeled), `scope` (CHECK: per_player/global), `pos_x/y/z`, `rot_z`, `zone_id` (FK → zones), `dialogue_id` (FK → dialogue), `loot_table_id` (INT, no FK — synthetic mob_id для loot engine), `required_item_id` (FK → items), `interaction_radius`, `channel_time_sec`, `respawn_sec`, `is_active_by_default`, `min_level`, `condition_group` (JSONB, same schema as dialogue conditions). Колонки `mesh_id` и `notes` в таблицу не включены: mesh binding выполняется в UE5 по `slug`, notes — dev-поле без runtime-значения.
+- Таблица `world_object_states` — персистированное runtime-состояние глобальных объектов: `object_id` (PK + FK → world_objects CASCADE DELETE), `state` (CHECK: active/depleted/disabled), `depleted_at` (TIMESTAMPTZ). Per-player состояние хранится в `player_flags` по ключу `wio_interacted_<objectId>`.
+- Индексы: `idx_world_objects_zone` (zone_id), `idx_world_object_states_state` (state WHERE state != 'active').
+- Полные `COMMENT ON TABLE` и `COMMENT ON COLUMN` аннотации для обеих таблиц (19 комментариев).
+- DB dump актуализирован.
+
+---
+
 v0.1.5
 17.04.2026
 ================

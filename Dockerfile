@@ -2,7 +2,8 @@
 FROM ubuntu:22.04 AS build
 
 # Install required dependencies
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list \
+    && apt-get update && apt-get install -y \
     build-essential \
     cmake \
     libpqxx-dev \
@@ -38,7 +39,8 @@ RUN ls -lh /usr/src/app/docker_includes/pqxx
 FROM ubuntu:22.04
 
 # Install runtime dependencies
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list \
+    && apt-get update && apt-get install -y \
     libpqxx-dev \
     libpq5 \
     libasan6 \
