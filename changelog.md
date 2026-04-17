@@ -1,3 +1,15 @@
+v0.1.7
+17.04.2026
+================
+New:
+
+**Migration 058 — таблица игровой аналитики.**
+- Таблица `game_analytics` — лог игровых событий для анализа плейтеста: `id` (BIGSERIAL PK), `event_type` (VARCHAR 64, NOT NULL), `character_id` (INT, FK → characters ON DELETE SET NULL), `session_id` (VARCHAR 64), `level` (SMALLINT), `zone_id` (INT), `payload` (JSONB DEFAULT '{}'), `created_at` (TIMESTAMPTZ DEFAULT now()).
+- Индексы: `idx_game_analytics_type_time` (event_type, created_at DESC), `idx_game_analytics_char_time` (character_id, created_at DESC), `idx_game_analytics_session` (session_id), `idx_game_analytics_created` (created_at DESC), `idx_game_analytics_payload` (GIN on payload).
+- DB dump актуализирован.
+
+---
+
 v0.1.6
 16.04.2026
 ================

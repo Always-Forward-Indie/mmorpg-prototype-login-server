@@ -14247,6 +14247,96 @@ ALTER TABLE ONLY public.zone_event_templates
 
 
 --
+-- Name: game_analytics; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.game_analytics (
+    id           bigint                   NOT NULL,
+    event_type   character varying(64)    NOT NULL,
+    character_id bigint,
+    session_id   character varying(128)   NOT NULL DEFAULT ''::character varying,
+    level        smallint                 NOT NULL DEFAULT 0,
+    zone_id      integer                  NOT NULL DEFAULT 0,
+    payload      jsonb                    NOT NULL DEFAULT '{}'::jsonb,
+    created_at   timestamp with time zone NOT NULL DEFAULT now()
+);
+
+
+ALTER TABLE public.game_analytics OWNER TO postgres;
+
+--
+-- Name: TABLE game_analytics; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.game_analytics IS 'Append-only event log for playtest analytics. Written by Game Server; never updated or deleted manually.';
+
+COMMENT ON COLUMN public.game_analytics.event_type   IS 'Type of event: session_start, session_end, level_up, player_death, quest_accept, quest_complete, quest_abandon, mob_killed, item_acquired, gold_change, skill_used, etc.';
+COMMENT ON COLUMN public.game_analytics.character_id IS 'FK → characters.id. SET NULL on character deletion so historic rows are preserved.';
+COMMENT ON COLUMN public.game_analytics.session_id   IS 'Server-generated session token "sess_{characterId}_{unix_ms}". Generated once on joinGameCharacter and reused for every event in that play session.';
+COMMENT ON COLUMN public.game_analytics.level        IS 'Character level at the moment the event occurred. Direct column (not in payload) for fast GROUP BY / filter queries.';
+COMMENT ON COLUMN public.game_analytics.zone_id      IS 'Zone/chunk where the event occurred. 0 = unknown/global.';
+COMMENT ON COLUMN public.game_analytics.payload      IS 'Event-specific JSONB. Schema varies by event_type — see analytics-system-plan.md.';
+COMMENT ON COLUMN public.game_analytics.created_at   IS 'Server-side UTC timestamp when the row was inserted.';
+
+--
+-- Name: game_analytics_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.game_analytics ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.game_analytics_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+--
+-- Name: game_analytics game_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.game_analytics
+    ADD CONSTRAINT game_analytics_pkey PRIMARY KEY (id);
+
+--
+-- Name: idx_ga_event_type; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_ga_event_type ON public.game_analytics (event_type, created_at DESC);
+
+--
+-- Name: idx_ga_character; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_ga_character ON public.game_analytics (character_id, created_at DESC);
+
+--
+-- Name: idx_ga_session; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_ga_session ON public.game_analytics (session_id);
+
+--
+-- Name: idx_ga_created_at; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_ga_created_at ON public.game_analytics (created_at DESC);
+
+--
+-- Name: idx_ga_payload; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_ga_payload ON public.game_analytics USING gin (payload);
+
+--
+-- Name: game_analytics game_analytics_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.game_analytics
+    ADD CONSTRAINT game_analytics_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE SET NULL;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
