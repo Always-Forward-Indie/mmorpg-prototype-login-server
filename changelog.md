@@ -1,3 +1,25 @@
+v0.1.8
+18.04.2026
+================
+New:
+
+**Migration 059 — Stats System Overhaul.**
+- Добавлены новые `entity_attributes`: `constitution` (id=27), `wisdom` (id=28), `agility` (id=29) — primary stats; `fire_resistance` (30), `ice_resistance` (31), `nature_resistance` (32), `arcane_resistance` (33), `holy_resistance` (34), `shadow_resistance` (35) — элементальные резисты.
+- Удалены dead/некорректные атрибуты с каскадной очисткой всех FK таблиц (`class_stat_formula`, `character_permanent_modifiers`, `mob_stat`, `item_attributes_mapping`, `item_set_bonuses`, `status_effect_modifiers`, `player_active_effect`, `mob_active_effect`, `npc_attributes`, `skill_effects_mapping`): `luck` (id=5), `heal_on_use` (21), `hunger_restore` (22), `physical_resistance` (23), `magical_resistance` (24), `parry_chance` (26).
+- `class_stat_formula` — полный пересчёт для Mage (class_id=1) и Warrior (class_id=2) по новой системе статов с учётом `constitution`, `wisdom`, `agility` и всех elemental resistances. Формула: `stat = base_value + multiplier × level^exponent`.
+- `character_permanent_modifiers` — удалены строки для удалённых атрибутов.
+- `mob_stat` — удалены строки для удалённых атрибутов.
+- `crit_multiplier` унифицирован: значение теперь хранится как % (`200 = x2.0`) во всех таблицах.
+- `game_config` — добавлены ключи: `combat.default_crit_multiplier=200` (% семантика), `combat.crit_chance_cap=75`, `combat.block_chance_cap=75`, `combat.attack_speed_base_divisor=100`, `combat.cast_speed_base_divisor=100`.
+
+**Migration 060 — Clean permanent modifiers, prune mobs, rebalance mob_stat.**
+- `character_permanent_modifiers` — `TRUNCATE`: игроки теперь получают базовые статы исключительно из `class_stat_formula`; перманентные модификаторы не используются для базовых значений.
+- Удалены мобы `id IN (6, 7, 8)` (WolfPackLeader, OldWolf, ForestGoblin) и все их FK данные: `mob_stat`, `mob_skills`, `mob_loot_info`, `mob_position`, `mob_resistances`, `mob_weaknesses`, `spawn_zone_mobs`, `mob_active_effect`, `character_bestiary`, `timed_champion_templates`, `zone_event_templates`.
+- `mob_stat` для SmallFox (id=1, lvl1) и GreyWolf (id=2, lvl1) — полный перебаланс: Fox ~40 HP / 6 phys_atk, Wolf ~80 HP / 10 phys_atk. `crit_multiplier=200` (новая % семантика). Все ссылки на удалённые атрибуты очищены.
+- DB dump актуализирован.
+
+---
+
 v0.1.7
 17.04.2026
 ================
