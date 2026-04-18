@@ -4716,6 +4716,8 @@ ALTER SEQUENCE public.spawn_zone_mobs_id_seq OWNED BY public.spawn_zone_mobs.id;
 -- Name: spawn_zones; Type: TABLE; Schema: public; Owner: -
 --
 
+CREATE TYPE public.spawn_zone_shape AS ENUM ('RECT', 'CIRCLE', 'ANNULUS');
+
 CREATE TABLE public.spawn_zones (
     zone_id integer NOT NULL,
     zone_name character varying(100) NOT NULL,
@@ -4725,7 +4727,13 @@ CREATE TABLE public.spawn_zones (
     max_spawn_x double precision DEFAULT 0 NOT NULL,
     max_spawn_y double precision DEFAULT 0 NOT NULL,
     max_spawn_z double precision DEFAULT 0 NOT NULL,
-    game_zone_id integer
+    game_zone_id integer,
+    shape_type public.spawn_zone_shape NOT NULL DEFAULT 'RECT',
+    center_x double precision NOT NULL DEFAULT 0,
+    center_y double precision NOT NULL DEFAULT 0,
+    inner_radius double precision NOT NULL DEFAULT 0,
+    outer_radius double precision NOT NULL DEFAULT 0,
+    exclusion_game_zone_id integer
 );
 
 
@@ -4733,7 +4741,14 @@ CREATE TABLE public.spawn_zones (
 -- Name: TABLE spawn_zones; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.spawn_zones IS 'Геометрия зоны спавна (прямоугольник координат). Принадлежит игровому региону (zones). Мобы настраиваются в spawn_zone_mobs.';
+COMMENT ON TABLE public.spawn_zones IS 'Геометрия зон спавна. Три варианта: RECT (AABB), CIRCLE (диск), ANNULUS (кольцо). Квоты мобов — в spawn_zone_mobs.';
+
+COMMENT ON COLUMN public.spawn_zones.shape_type IS 'RECT = AABB (min/max corners); CIRCLE = filled disc (center_x/y + outer_radius); ANNULUS = ring (center_x/y + inner_radius + outer_radius).';
+COMMENT ON COLUMN public.spawn_zones.center_x IS 'Центр зоны X. Обязателен для CIRCLE и ANNULUS. Для RECT вычисляется как (min+max)/2.';
+COMMENT ON COLUMN public.spawn_zones.center_y IS 'Центр зоны Y.';
+COMMENT ON COLUMN public.spawn_zones.inner_radius IS 'ANNULUS: внутренний радиус исключения. Спавн внутри этого радиуса запрещён.';
+COMMENT ON COLUMN public.spawn_zones.outer_radius IS 'CIRCLE/ANNULUS: внешний радиус зоны спавна.';
+COMMENT ON COLUMN public.spawn_zones.exclusion_game_zone_id IS 'FK → zones.id. Кандидаты на спавн внутри этой игровой зоны отклоняются (напр. безопасный центр деревни).';
 
 
 --
@@ -5822,7 +5837,12 @@ CREATE TABLE public.zones (
     min_y double precision DEFAULT 0 NOT NULL,
     max_y double precision DEFAULT 0 NOT NULL,
     exploration_xp_reward integer DEFAULT 100 NOT NULL,
-    champion_threshold_kills integer DEFAULT 100 NOT NULL
+    champion_threshold_kills integer DEFAULT 100 NOT NULL,
+    shape_type public.spawn_zone_shape NOT NULL DEFAULT 'RECT',
+    center_x double precision NOT NULL DEFAULT 0,
+    center_y double precision NOT NULL DEFAULT 0,
+    inner_radius double precision NOT NULL DEFAULT 0,
+    outer_radius double precision NOT NULL DEFAULT 0
 );
 
 
@@ -5830,7 +5850,7 @@ CREATE TABLE public.zones (
 -- Name: TABLE zones; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.zones IS 'Игровые зоны/карты. Без zone_id координаты позиций теряют смысл';
+COMMENT ON TABLE public.zones IS 'Игровые зоны/карты. Поддерживаются формы RECT, CIRCLE, ANNULUS. Без zone_id координаты позиций теряют смысл';
 
 
 --
@@ -7453,11 +7473,12 @@ INSERT INTO public.spawn_zone_mobs VALUES (2, 2, 2, 5, '00:01:00');
 -- Data for Name: spawn_zones; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.spawn_zones VALUES (2, 'Wolf Place', -1500, 3500, 100, 0, 5000, 500, 2);
-INSERT INTO public.spawn_zones VALUES (3, 'Wolf Pack Zone', -4000, 5500, 100, -2000, 7000, 500, 2);
-INSERT INTO public.spawn_zones VALUES (4, 'Old Wolf Territory', -6500, 3000, 100, -4500, 5000, 500, 2);
-INSERT INTO public.spawn_zones VALUES (5, 'Goblin Area', -8000, 2000, 100, -5500, 4500, 500, 2);
-INSERT INTO public.spawn_zones VALUES (1, 'Foxes Nest', 773.2522063107463, 3443.7282472654915, 100, 3773.2522063107463, 4943.7282472654915, 500, 2);
+-- zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn_z, max_spawn_x, max_spawn_y, max_spawn_z, game_zone_id, shape_type, center_x, center_y, inner_radius, outer_radius, exclusion_game_zone_id
+INSERT INTO public.spawn_zones VALUES (1, 'Foxes Nest',        773.2522063107463, 3443.7282472654915, 100, 3773.2522063107463, 4943.7282472654915, 500, 2, 'RECT',    2273.252, 4193.728, 0, 0, NULL);
+INSERT INTO public.spawn_zones VALUES (2, 'Wolf Place',        -1500, 3500, 100, 0, 5000, 500, 2, 'RECT',   -750,  4250, 0, 0, NULL);
+INSERT INTO public.spawn_zones VALUES (3, 'Wolf Pack Zone',    -4000, 5500, 100, -2000, 7000, 500, 2, 'RECT', -3000,  6250, 0, 0, NULL);
+INSERT INTO public.spawn_zones VALUES (4, 'Old Wolf Territory',-6500, 3000, 100, -4500, 5000, 500, 2, 'RECT', -5500,  4000, 0, 0, NULL);
+INSERT INTO public.spawn_zones VALUES (5, 'Goblin Area',       -8000, 2000, 100, -5500, 4500, 500, 2, 'RECT', -6750,  3250, 0, 0, NULL);
 
 
 --
@@ -9245,8 +9266,8 @@ INSERT INTO public.zone_event_templates VALUES (3, 'fog_of_twilight', NULL, 'ran
 -- Data for Name: zones; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.zones VALUES (1, 'village', 'Village', 1, 10, false, true, -5394.954042227455, 4568.621024817196, -5471.3412259071965, 3002.10848639096, 100, 100);
-INSERT INTO public.zones VALUES (2, 'fields', 'Fields', 1, 20, false, false, -5438.206711468296, 4555.443380622781, 3054.1359757361442, 7954.135975736144, 100, 100);
+INSERT INTO public.zones VALUES (1, 'village', 'Village', 1, 10, false, true,  -5394.954042227455, 4568.621024817196, -5471.3412259071965, 3002.10848639096, 100, 100, 'RECT', -413.1665087051295, -1234.6163697581183, 0, 0);
+INSERT INTO public.zones VALUES (2, 'fields',  'Fields',  1, 20, false, false, -5438.206711468296, 4555.443380622781,  3054.1359757361442, 7954.135975736144, 100, 100, 'RECT', -441.3816654227575,  5504.135975736144,  0, 0);
 
 
 --

@@ -1,3 +1,21 @@
+v0.1.9
+18.04.2026
+================
+New:
+
+**Migration 061 — Spawn Zone Shapes.**
+- Тип `public.spawn_zone_shape` (ENUM: `'RECT'`, `'CIRCLE'`, `'ANNULUS'`) — создан на уровне БД, используется в обеих таблицах зон.
+- Таблица `spawn_zones` — добавлены колонки: `shape_type spawn_zone_shape DEFAULT 'RECT'`, `center_x`, `center_y`, `inner_radius`, `outer_radius`. Существующие строки получили `center_x/y` из среднего AABB, `inner_radius=0`.
+- Колонки `mob_id`, `max_mob_count`, `respawn_time_sec` вынесены в отдельную таблицу `spawn_zone_mobs` (нормализация: одна зона может содержать несколько видов мобов с разными настройками респауна).
+- `COMMENT ON COLUMN` — полная документация всех новых колонок.
+
+**Migration 062 — Game Zone Shapes.**
+- Таблица `zones` — добавлены колонки: `shape_type spawn_zone_shape DEFAULT 'RECT'`, `center_x`, `center_y`, `inner_radius`, `outer_radius`. Существующие строки (village, fields) получили `center_x/y` из среднего AABB, `inner_radius=0`.
+- `COMMENT ON COLUMN` — документация новых колонок.
+- DB dump актуализирован: CREATE TABLE `zones` + `spawn_zones` содержат новые колонки; INSERT-строки обновлены.
+
+---
+
 v0.1.8
 18.04.2026
 ================
