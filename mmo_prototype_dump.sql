@@ -3408,56 +3408,6 @@ ALTER SEQUENCE public.npc_placements_id_seq OWNED BY public.npc_placements.id;
 
 
 --
--- Name: npc_position; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.npc_position (
-    id bigint NOT NULL,
-    npc_id integer NOT NULL,
-    x numeric(11,2) NOT NULL,
-    y numeric(11,2) NOT NULL,
-    z numeric(11,2) NOT NULL,
-    rot_z numeric(11,2) DEFAULT 0 NOT NULL,
-    zone_id integer
-);
-
-
---
--- Name: TABLE npc_position; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON TABLE public.npc_position IS 'Статические позиции размещения NPC в зонах. FK: npc_id → npc';
-
-
---
--- Name: COLUMN npc_position.rot_z; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.npc_position.rot_z IS 'Начальный угол поворота NPC (в радианах)';
-
-
---
--- Name: COLUMN npc_position.zone_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.npc_position.zone_id IS 'Зона, в которой размещён NPC. NULL = не привязан к зоне';
-
-
---
--- Name: npc_position_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.npc_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.npc_position_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    MAXVALUE 99999999
-    CACHE 1
-);
-
-
---
 -- Name: npc_skills; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -7162,18 +7112,6 @@ INSERT INTO public.npc_placements VALUES (12, 6, NULL, 19227.884269950428, -1904
 
 
 --
--- Data for Name: npc_position; Type: TABLE DATA; Schema: public; Owner: -
---
-
-INSERT INTO public.npc_position OVERRIDING SYSTEM VALUE VALUES (2, 3, -720.00, 2250.00, 200.00, -135.00, NULL);
-INSERT INTO public.npc_position OVERRIDING SYSTEM VALUE VALUES (3, 2, 2200.00, 1120.00, 200.00, 145.00, NULL);
-INSERT INTO public.npc_position OVERRIDING SYSTEM VALUE VALUES (1, 1, 585.00, -3300.00, 200.00, -40.00, NULL);
-INSERT INTO public.npc_position OVERRIDING SYSTEM VALUE VALUES (6, 4, 1200.00, -2800.00, 200.00, 90.00, NULL);
-INSERT INTO public.npc_position OVERRIDING SYSTEM VALUE VALUES (7, 5, -400.00, 1600.00, 200.00, -90.00, NULL);
-INSERT INTO public.npc_position OVERRIDING SYSTEM VALUE VALUES (8, 6, 18870.00, -15430.00, 1490.00, 180.00, NULL);
-
-
---
 -- Data for Name: npc_skills; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -9523,13 +9461,6 @@ SELECT pg_catalog.setval('public.npc_placements_id_seq', 12, true);
 
 
 --
--- Name: npc_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.npc_position_id_seq', 8, true);
-
-
---
 -- Name: npc_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -10271,14 +10202,6 @@ ALTER TABLE ONLY public.npc_placements
 
 
 --
--- Name: npc_position npc_position_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.npc_position
-    ADD CONSTRAINT npc_position_pkey PRIMARY KEY (id);
-
-
---
 -- Name: npc_skills npc_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10980,13 +10903,6 @@ CREATE INDEX idx_npc_placements_zone ON public.npc_placements USING btree (zone_
 
 
 --
--- Name: idx_npc_position_npc; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_npc_position_npc ON public.npc_position USING btree (npc_id);
-
-
---
 -- Name: idx_player_active_effect_expires; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -11348,13 +11264,6 @@ CREATE INDEX ix_npc_dialogue_cond_gin ON public.npc_dialogue USING gin (conditio
 --
 
 CREATE INDEX ix_npc_faction_slug ON public.npc USING btree (faction_slug) WHERE (faction_slug IS NOT NULL);
-
-
---
--- Name: ix_npc_position_zone; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX ix_npc_position_zone ON public.npc_position USING btree (zone_id);
 
 
 --
@@ -11950,22 +11859,6 @@ ALTER TABLE ONLY public.mob_position
 
 ALTER TABLE ONLY public.mob_position
     ADD CONSTRAINT fk_mob_position_zone FOREIGN KEY (zone_id) REFERENCES public.zones(id) ON DELETE SET NULL;
-
-
---
--- Name: npc_position fk_npc_position_npc; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.npc_position
-    ADD CONSTRAINT fk_npc_position_npc FOREIGN KEY (npc_id) REFERENCES public.npc(id) ON DELETE CASCADE;
-
-
---
--- Name: npc_position fk_npc_position_zone; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.npc_position
-    ADD CONSTRAINT fk_npc_position_zone FOREIGN KEY (zone_id) REFERENCES public.zones(id) ON DELETE SET NULL;
 
 
 --

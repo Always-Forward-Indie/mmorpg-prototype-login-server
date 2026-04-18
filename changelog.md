@@ -1,3 +1,14 @@
+v0.1.10
+18.04.2026
+================
+Fixes:
+
+**DB — удалена устаревшая таблица `npc_position`.**
+- `migrations/063_drop_npc_position.sql` — `DROP TABLE IF EXISTS public.npc_position`. `npc_placements` (migration 047) является единственным источником позиций NPC.
+- `mmo_prototype_dump.sql` — удалены все секции `npc_position` (см. game-server changelog v0.2.5).
+
+---
+
 v0.1.9
 18.04.2026
 ================
