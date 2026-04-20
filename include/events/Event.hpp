@@ -9,7 +9,7 @@
 #include "data/DataStructs.hpp"
 
 // Define the types of data that can be sent in an event
-using EventData = std::variant<int, float, std::string, nlohmann::json, PositionStruct, CharacterDataStruct, ClientDataStruct /* other types */>;
+using EventData = std::variant<int, float, std::string, nlohmann::json, PositionStruct, CharacterDataStruct, ClientDataStruct, RegistrationDataStruct /* other types */>;
 
 class Event
 {
@@ -21,7 +21,9 @@ public:
         DISCONNECT_CLIENT,
         GET_CHARACTERS_LIST,
         CREATE_CHARACTER,
-        DELETE_CHARACTER
+        DELETE_CHARACTER,
+        REGISTER_ACCOUNT,
+        GET_CHARACTER_CREATION_OPTIONS
     }; // Define more event types as needed
     Event() = default; // Default constructor
     Event(EventType type, int clientID, const EventData data, std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);

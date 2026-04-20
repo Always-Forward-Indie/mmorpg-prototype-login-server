@@ -97,7 +97,9 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "INSERT INTO user_sessions (user_id, token_hash, created_at, expires_at) "
                  "VALUES ($1, $2, now(), now() + interval '30 days') "
                  "ON CONFLICT (token_hash) DO NOTHING;");
-    ;
+    conn.prepare("cleanup_expired_sessions",
+                 "DELETE FROM user_sessions "
+                 "WHERE expires_at < NOW() AND revoked_at IS NULL;");
 
     conn.prepare("get_characters_list",
                  "SELECT c.id AS character_id, c.level AS character_lvl, "
@@ -142,6 +144,70 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "INSERT INTO character_position (character_id, x, y, z, zone_id) "
                  "VALUES ($1, 0, 0, 200, 1) "
                  "ON CONFLICT DO NOTHING;");
+
+    // init_character_default_skills — grants all is_default=true skills for the character's class
+    // Params: $1=character_id, $2=class_id
+    conn.prepare("init_character_default_skills",
+                 "INSERT INTO character_skills (character_id, skill_id, current_level) "
+                 "SELECT $1::bigint, skill_id, 1 "
+                 "FROM class_skill_tree "
+                 "WHERE class_id = $2::int AND is_default = true "
+                 "ON CONFLICT DO NOTHING;");
+
+    // get_class_id_by_name — resolve class name → class_id for use in skill/item init
+    conn.prepare("get_class_id_by_name",
+                 "SELECT id FROM character_class WHERE name = $1 LIMIT 1;");
+
+    // init_character_starter_items — grants class starter items from class_starter_items table
+    // Params: $1=character_id, $2=class_id
+    conn.prepare("init_character_starter_items",
+                 "INSERT INTO player_inventory (character_id, item_id, quantity, slot_index, durability_current) "
+                 "SELECT $1::bigint, csi.item_id, csi.quantity, csi.slot_index, "
+                 "  COALESCE(csi.durability_current, i.durability_max) "
+                 "FROM class_starter_items csi "
+                 "JOIN items i ON i.id = csi.item_id "
+                 "WHERE csi.class_id = $2::int;");
+
+    // check_character_name_exists — uniqueness check (case-insensitive), excludes soft-deleted
+    conn.prepare("check_character_name_exists",
+                 "SELECT 1 FROM characters "
+                 "WHERE lower(name) = lower($1) AND deleted_at IS NULL "
+                 "LIMIT 1;");
+
+    // get_character_slot_count — current number of alive characters per account
+    conn.prepare("get_character_slot_count",
+                 "SELECT COUNT(*) FROM characters "
+                 "WHERE owner_id = $1::int AND deleted_at IS NULL;");
+
+    // delete_character — soft-delete; only the owning account may delete
+    // Params: $1=character_id, $2=account_id (owner guard)
+    conn.prepare("delete_character",
+                 "UPDATE characters SET deleted_at = now() "
+                 "WHERE id = $1::bigint AND owner_id = $2::int AND deleted_at IS NULL "
+                 "RETURNING id;");
+
+    // get_character_classes — full list of playable classes for character creation screen
+    conn.prepare("get_character_classes",
+                 "SELECT id, name, slug, description FROM character_class ORDER BY id;");
+
+    // get_character_races — full list of playable races
+    conn.prepare("get_character_races",
+                 "SELECT id, name, slug FROM race ORDER BY id;");
+
+    // get_character_genders — full list of gender options
+    conn.prepare("get_character_genders",
+                 "SELECT id, name, label FROM character_genders ORDER BY id;");
+
+    // check_login_available — case-insensitive uniqueness check for registration
+    conn.prepare("check_login_available",
+                 "SELECT 1 FROM users WHERE lower(login) = lower($1) LIMIT 1;");
+
+    // register_user — create a new account (password must already be hashed by the application)
+    // Params: $1=login, $2=password_hash, $3=email (may be empty), $4=registration_ip
+    conn.prepare("register_user",
+                 "INSERT INTO users (login, password, email, registration_ip, is_active) "
+                 "VALUES ($1, $2, NULLIF($3, ''), $4::inet, true) "
+                 "RETURNING id;");
 }
 
 pqxx::connection &Database::getConnection()

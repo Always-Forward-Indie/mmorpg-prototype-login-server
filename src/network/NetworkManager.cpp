@@ -204,11 +204,6 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
         // Check if the type of request is disconnectClient
         if (eventType == "disconnectClient" && clientData.hash != "" && clientData.clientId != 0)
         {
-            // Set the client data
-            // characterData.characterPosition = positionData;
-            // clientData.characterData = characterData;
-            // clientData.socket = clientSocket;
-
             // Create a new event where disconnect the client and push it to the queue
             Event disconnectClientEvent(Event::DISCONNECT_CLIENT, clientData.clientId, clientData, clientSocket);
             disconnectClientEvent.setTimestamps(timestamps); // Add timestamps
@@ -218,15 +213,63 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
         // Check if the type of request is pingClient
         if (eventType == "pingClient")
         {
-            // Set the client data
-            // characterData.characterPosition = positionData;
-            // clientData.characterData = characterData;
             clientData.socket = clientSocket;
 
             // Create a new event where ping the client and push it to the queue
             Event pingClientEvent(Event::PING_CLIENT, clientData.clientId, clientData, clientSocket);
             pingClientEvent.setTimestamps(timestamps); // Add timestamps
             eventQueue_.push(pingClientEvent);
+        }
+
+        // registerAccount — no auth required; supply registration IP from socket
+        if (eventType == "registerAccount")
+        {
+            RegistrationDataStruct reg;
+            reg.socket = clientSocket;
+            reg.registrationIp = clientSocket->remote_endpoint().address().to_string();
+
+            // Parse login/password/email from body (re-use already-parsed JSON)
+            try
+            {
+                nlohmann::json parsed = nlohmann::json::parse(
+                    std::string(messageBuffer.data(), messageBuffer.data() + messageLength));
+                if (parsed.contains("body") && parsed["body"].is_object())
+                {
+                    const auto &body = parsed["body"];
+                    if (body.contains("login") && body["login"].is_string())
+                        reg.login = body["login"].get<std::string>();
+                    if (body.contains("password") && body["password"].is_string())
+                        reg.password = body["password"].get<std::string>();
+                    if (body.contains("email") && body["email"].is_string())
+                        reg.email = body["email"].get<std::string>();
+                }
+            }
+            catch (...)
+            {
+            }
+
+            Event registerEvent(Event::REGISTER_ACCOUNT, 0, reg, clientSocket);
+            registerEvent.setTimestamps(timestamps);
+            eventQueue_.push(registerEvent);
+        }
+
+        // getCharacterCreationOptions — requires valid session
+        if (eventType == "getCharacterCreationOptions" && clientData.hash != "" && clientData.clientId != 0)
+        {
+            clientData.socket = clientSocket;
+            Event optionsEvent(Event::GET_CHARACTER_CREATION_OPTIONS, clientData.clientId, clientData, clientSocket);
+            optionsEvent.setTimestamps(timestamps);
+            eventQueue_.push(optionsEvent);
+        }
+
+        // deleteCharacter — requires valid session + characterId
+        if (eventType == "deleteCharacter" && clientData.hash != "" && clientData.clientId != 0)
+        {
+            clientData.characterData = characterData; // carries characterId
+            clientData.socket = clientSocket;
+            Event deleteCharEvent(Event::DELETE_CHARACTER, clientData.clientId, clientData, clientSocket);
+            deleteCharEvent.setTimestamps(timestamps);
+            eventQueue_.push(deleteCharEvent);
         }
     }
     catch (const nlohmann::json::parse_error &e)

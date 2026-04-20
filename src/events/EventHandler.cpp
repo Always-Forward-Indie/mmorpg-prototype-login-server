@@ -9,7 +9,8 @@ EventHandler::EventHandler(NetworkManager &networkManager,
     : networkManager_(networkManager),
       pool_(pool),
       logger_(logger),
-      characterManager_(characterManager)
+      characterManager_(characterManager),
+      accountManager_(logger)
 {
     log_ = logger.getSystem("events");
 }
@@ -202,7 +203,7 @@ void EventHandler::handleCreateCharacterEvent(const Event &event, ClientData &cl
             const CharacterDataStruct &charData = passedClientData.characterData;
 
             auto poolGuard = pool_.acquire();
-            int newId = characterManager_.createCharacter(
+            int result = characterManager_.createCharacter(
                 poolGuard.get(),
                 passedClientData.clientId,
                 charData.characterName,
@@ -210,10 +211,29 @@ void EventHandler::handleCreateCharacterEvent(const Event &event, ClientData &cl
                 charData.characterRace,
                 charData.characterGender);
 
-            if (newId == 0)
+            if (result <= 0)
             {
+                std::string errorMsg;
+                switch (static_cast<CharacterCreateResult>(result))
+                {
+                case CharacterCreateResult::ERR_NAME_TAKEN:
+                    errorMsg = "ERR_CHAR_NAME_TAKEN";
+                    break;
+                case CharacterCreateResult::ERR_NAME_INVALID:
+                    errorMsg = "ERR_CHAR_NAME_INVALID";
+                    break;
+                case CharacterCreateResult::ERR_SLOT_FULL:
+                    errorMsg = "ERR_CHAR_SLOT_FULL";
+                    break;
+                case CharacterCreateResult::ERR_MISSING_FIELD:
+                    errorMsg = "ERR_CHAR_MISSING_FIELD";
+                    break;
+                default:
+                    errorMsg = "ERR_CHAR_CREATE_FAILED";
+                    break;
+                }
                 response = builder
-                               .setHeader("message", "Character creation failed")
+                               .setHeader("message", errorMsg)
                                .setHeader("hash", passedClientData.hash)
                                .setHeader("clientId", passedClientData.clientId)
                                .setHeader("eventType", "createCharacter")
@@ -229,7 +249,7 @@ void EventHandler::handleCreateCharacterEvent(const Event &event, ClientData &cl
                            .setHeader("hash", passedClientData.hash)
                            .setHeader("clientId", passedClientData.clientId)
                            .setHeader("eventType", "createCharacter")
-                           .setBody("characterId", newId)
+                           .setBody("characterId", result)
                            .build();
             networkManager_.sendResponse(passedClientData.socket,
                                          networkManager_.generateResponseMessage("success", response));
@@ -360,6 +380,259 @@ void EventHandler::handlePingClientEvent(const Event &event, ClientData &clientD
     }
 }
 
+// ---------------------------------------------------------------------------
+// handleRegisterAccountEvent
+// ---------------------------------------------------------------------------
+void EventHandler::handleRegisterAccountEvent(const Event &event, ClientData &clientData)
+{
+    const auto data = event.getData();
+    try
+    {
+        if (!std::holds_alternative<RegistrationDataStruct>(data))
+        {
+            log_->info("handleRegisterAccountEvent: unexpected event data type");
+            return;
+        }
+
+        RegistrationDataStruct reg = std::get<RegistrationDataStruct>(data);
+        nlohmann::json response;
+        ResponseBuilder builder;
+
+        int userId = 0;
+        std::string sessionHash;
+
+        auto poolGuard = pool_.acquire();
+        AccountRegisterResult result = accountManager_.registerAccount(
+            poolGuard.get(), clientData,
+            reg.login, reg.password, reg.email, reg.registrationIp,
+            userId, sessionHash);
+
+        if (result != AccountRegisterResult::OK)
+        {
+            std::string errorMsg;
+            switch (result)
+            {
+            case AccountRegisterResult::ERR_LOGIN_TAKEN:
+                errorMsg = "ERR_LOGIN_TAKEN";
+                break;
+            case AccountRegisterResult::ERR_LOGIN_INVALID:
+                errorMsg = "ERR_LOGIN_INVALID";
+                break;
+            case AccountRegisterResult::ERR_PASSWORD_SHORT:
+                errorMsg = "ERR_PASSWORD_TOO_SHORT";
+                break;
+            case AccountRegisterResult::ERR_PASSWORD_LONG:
+                errorMsg = "ERR_PASSWORD_TOO_LONG";
+                break;
+            case AccountRegisterResult::ERR_EMAIL_INVALID:
+                errorMsg = "ERR_EMAIL_INVALID";
+                break;
+            default:
+                errorMsg = "ERR_REGISTER_FAILED";
+                break;
+            }
+            response = builder
+                           .setHeader("message", errorMsg)
+                           .setHeader("hash", "")
+                           .setHeader("clientId", 0)
+                           .setHeader("eventType", "registerAccount")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(reg.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+
+        response = builder
+                       .setHeader("message", "Registration successful")
+                       .setHeader("hash", sessionHash)
+                       .setHeader("clientId", userId)
+                       .setHeader("login", reg.login)
+                       .setHeader("eventType", "registerAccount")
+                       .setBody("", "")
+                       .build();
+        networkManager_.sendResponse(reg.socket,
+                                     networkManager_.generateResponseMessage("success", response));
+    }
+    catch (const std::bad_variant_access &ex)
+    {
+        logger_.log("handleRegisterAccountEvent error: " + std::string(ex.what()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// handleGetCharacterCreationOptionsEvent
+// ---------------------------------------------------------------------------
+void EventHandler::handleGetCharacterCreationOptionsEvent(const Event &event, ClientData &clientData)
+{
+    const auto data = event.getData();
+    try
+    {
+        if (!std::holds_alternative<ClientDataStruct>(data))
+        {
+            log_->info("handleGetCharacterCreationOptionsEvent: unexpected event data type");
+            return;
+        }
+
+        ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
+        nlohmann::json response;
+        ResponseBuilder builder;
+
+        // Auth guard
+        if (passedClientData.clientId == 0 || passedClientData.hash.empty())
+        {
+            response = builder
+                           .setHeader("message", "Unauthorized")
+                           .setHeader("hash", "")
+                           .setHeader("clientId", 0)
+                           .setHeader("eventType", "getCharacterCreationOptions")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+
+        auto poolGuard = pool_.acquire();
+        pqxx::work txn(poolGuard.get());
+
+        pqxx::result classRows = txn.exec_prepared("get_character_classes");
+        pqxx::result raceRows = txn.exec_prepared("get_character_races");
+        pqxx::result genderRows = txn.exec_prepared("get_character_genders");
+        txn.commit();
+
+        nlohmann::json classes = nlohmann::json::array();
+        nlohmann::json races = nlohmann::json::array();
+        nlohmann::json genders = nlohmann::json::array();
+
+        for (const auto &row : classRows)
+        {
+            nlohmann::json entry;
+            entry["id"] = row["id"].as<int>();
+            entry["name"] = row["name"].as<std::string>();
+            entry["slug"] = row["slug"].is_null() ? "" : row["slug"].as<std::string>();
+            entry["description"] = row["description"].is_null() ? "" : row["description"].as<std::string>();
+            classes.push_back(entry);
+        }
+
+        for (const auto &row : raceRows)
+        {
+            nlohmann::json entry;
+            entry["id"] = row["id"].as<int>();
+            entry["name"] = row["name"].as<std::string>();
+            entry["slug"] = row["slug"].as<std::string>();
+            races.push_back(entry);
+        }
+
+        for (const auto &row : genderRows)
+        {
+            nlohmann::json entry;
+            entry["id"] = row["id"].as<int>();
+            entry["name"] = row["name"].as<std::string>();
+            entry["label"] = row["label"].as<std::string>();
+            genders.push_back(entry);
+        }
+
+        response = builder
+                       .setHeader("message", "Options retrieved successfully")
+                       .setHeader("hash", passedClientData.hash)
+                       .setHeader("clientId", passedClientData.clientId)
+                       .setHeader("eventType", "getCharacterCreationOptions")
+                       .setBody("classes", classes)
+                       .setBody("races", races)
+                       .setBody("genders", genders)
+                       .build();
+        networkManager_.sendResponse(passedClientData.socket,
+                                     networkManager_.generateResponseMessage("success", response));
+    }
+    catch (const std::exception &ex)
+    {
+        logger_.log("handleGetCharacterCreationOptionsEvent error: " + std::string(ex.what()));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// handleDeleteCharacterEvent
+// ---------------------------------------------------------------------------
+void EventHandler::handleDeleteCharacterEvent(const Event &event, ClientData &clientData)
+{
+    const auto data = event.getData();
+    try
+    {
+        if (!std::holds_alternative<ClientDataStruct>(data))
+        {
+            log_->info("handleDeleteCharacterEvent: unexpected event data type");
+            return;
+        }
+
+        ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
+        nlohmann::json response;
+        ResponseBuilder builder;
+
+        // Auth guard
+        if (passedClientData.clientId == 0 || passedClientData.hash.empty())
+        {
+            response = builder
+                           .setHeader("message", "Unauthorized")
+                           .setHeader("hash", "")
+                           .setHeader("clientId", 0)
+                           .setHeader("eventType", "deleteCharacter")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+
+        int characterId = passedClientData.characterData.characterId;
+        if (characterId <= 0)
+        {
+            response = builder
+                           .setHeader("message", "ERR_INVALID_CHARACTER_ID")
+                           .setHeader("hash", passedClientData.hash)
+                           .setHeader("clientId", passedClientData.clientId)
+                           .setHeader("eventType", "deleteCharacter")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+
+        auto poolGuard = pool_.acquire();
+        bool deleted = characterManager_.deleteCharacter(
+            poolGuard.get(), passedClientData.clientId, characterId);
+
+        if (!deleted)
+        {
+            response = builder
+                           .setHeader("message", "ERR_CHARACTER_NOT_FOUND")
+                           .setHeader("hash", passedClientData.hash)
+                           .setHeader("clientId", passedClientData.clientId)
+                           .setHeader("eventType", "deleteCharacter")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+
+        response = builder
+                       .setHeader("message", "Character deleted successfully")
+                       .setHeader("hash", passedClientData.hash)
+                       .setHeader("clientId", passedClientData.clientId)
+                       .setHeader("eventType", "deleteCharacter")
+                       .setBody("characterId", characterId)
+                       .build();
+        networkManager_.sendResponse(passedClientData.socket,
+                                     networkManager_.generateResponseMessage("success", response));
+    }
+    catch (const std::bad_variant_access &ex)
+    {
+        logger_.log("handleDeleteCharacterEvent error: " + std::string(ex.what()));
+    }
+}
+
 void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
 {
     switch (event.getType())
@@ -370,11 +643,20 @@ void EventHandler::dispatchEvent(const Event &event, ClientData &clientData)
     case Event::AUTH_CLIENT:
         handleAuthentificateClientEvent(event, clientData);
         break;
+    case Event::REGISTER_ACCOUNT:
+        handleRegisterAccountEvent(event, clientData);
+        break;
     case Event::GET_CHARACTERS_LIST:
         handleGetCharactersListEvent(event, clientData);
         break;
     case Event::CREATE_CHARACTER:
         handleCreateCharacterEvent(event, clientData);
+        break;
+    case Event::DELETE_CHARACTER:
+        handleDeleteCharacterEvent(event, clientData);
+        break;
+    case Event::GET_CHARACTER_CREATION_OPTIONS:
+        handleGetCharacterCreationOptionsEvent(event, clientData);
         break;
     case Event::DISCONNECT_CLIENT:
         handleDisconnectClientEvent(event, clientData);

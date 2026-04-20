@@ -44,6 +44,8 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         std::string uniqueHash = boost::uuids::to_string(uuid);
 
         pqxx::work sessionTxn(conn);
+        // Clean up expired sessions before creating a new one to prevent unbounded growth.
+        sessionTxn.exec_prepared("cleanup_expired_sessions");
         sessionTxn.exec_prepared("create_user_session", userID, uniqueHash);
         sessionTxn.commit();
 

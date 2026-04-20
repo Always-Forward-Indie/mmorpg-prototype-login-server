@@ -1,3 +1,69 @@
+v0.1.11
+20.04.2026
+================
+New:
+
+**Система регистрации аккаунта и полный цикл создания/удаления персонажа.**
+
+**AccountManager — новый сервис регистрации аккаунтов.**
+- `include/services/AccountManager.hpp` + `src/services/AccountManager.cpp` — метод `registerAccount(conn, clientData, login, password, email, ip, &outUserId, &outHash)`.
+- Валидация: login `[A-Za-z0-9_]{3,20}`, password 8–100 символов, email (проверка на `@`).
+- Хеширование пароля через OpenSSL EVP SHA-256 (TODO: migrate to argon2id перед продакшном).
+- Дедупликация через `check_login_available` (case-insensitive).
+- Создание сессии сразу после регистрации — клиент получает `clientId` + `hash` в одном ответе.
+- Enum `AccountRegisterResult` с детализированными кодами ошибок.
+
+**CharacterManager — усиленный `createCharacter`.**
+- Валидация имени в C++ (regex `[A-Za-z ]{2,20}`, no double-spaces) до обращения к БД.
+- Проверка лимита слотов (`MAX_CHARS_PER_ACCOUNT = 4`) через `get_character_slot_count`.
+- Проверка уникальности имени через `check_character_name_exists` (case-insensitive).
+- Выдача дефолтных скилов класса через `init_character_default_skills` (по `class_skill_tree.is_default = true`).
+- Выдача стартовых предметов через `init_character_starter_items`.
+- Enum `CharacterCreateResult` — конкретные коды ошибок вместо одного `0`.
+- `deleteCharacter` — реализован: soft-delete с owner guard (UPDATE WHERE owner_id = accountId).
+
+**Event System — новые типы событий.**
+- `Event::REGISTER_ACCOUNT` — регистрация нового аккаунта.
+- `Event::GET_CHARACTER_CREATION_OPTIONS` — получение списков классов/рас/полов.
+- `EventData` variant расширен: добавлен `RegistrationDataStruct`.
+
+**EventHandler — три новых обработчика.**
+- `handleRegisterAccountEvent` — делегирует в `AccountManager`, возвращает `clientId` + `hash`.
+- `handleGetCharacterCreationOptionsEvent` — три SQL-запроса в одной транзакции, возвращает массивы `classes`, `races`, `genders`.
+- `handleDeleteCharacterEvent` — soft-delete с auth guard + owner guard.
+- `handleCreateCharacterEvent` — обновлён: детализированные error-коды из `CharacterCreateResult`.
+
+**NetworkManager — маршрутизация новых пакетов.**
+- `registerAccount` → `Event::REGISTER_ACCOUNT` (без auth, IP берётся из socket).
+- `getCharacterCreationOptions` → `Event::GET_CHARACTER_CREATION_OPTIONS` (требует hash).
+- `deleteCharacter` → `Event::DELETE_CHARACTER` (требует hash + characterId).
+
+**DB — Migration 068 — `class_starter_items`.**
+- Таблица `class_starter_items`: `id`, `class_id` (FK → character_class), `item_id` (FK → items), `quantity`, `slot_index`, `durability_current` (NULL = из items.durability_max).
+- Индекс `idx_class_starter_items_class`.
+- Starter data: Mage → Wooden Staff + 50 Gold; Warrior → Iron Sword + Wooden Shield + 50 Gold.
+
+**DB — новые prepared statements.**
+- `check_login_available`, `register_user` — для регистрации аккаунта.
+- `init_character_default_skills($char_id, $class_id)` — выдача дефолтных скилов.
+- `init_character_starter_items($char_id, $class_id)` — выдача стартовых предметов.
+- `check_character_name_exists`, `get_character_slot_count` — валидация при создании персонажа.
+- `get_class_id_by_name` — разрешение class_id по имени.
+- `delete_character($char_id, $account_id)` — soft-delete с owner guard.
+- `get_character_classes`, `get_character_races`, `get_character_genders` — справочники для экрана создания.
+
+**CMakeLists.txt.**
+- Добавлен `src/services/AccountManager.cpp` в SOURCE_FILES.
+- Добавлен `include/services/AccountManager.hpp` в HEADER_FILES.
+- Подключён `OpenSSL::Crypto` для хеширования паролей.
+
+**Документация.**
+- `docs/login-server-api.md` — полная API-документация для разработчика клиента: все 7 endpoint'ов с примерами пакетов, таблицами полей, error-кодами и типовым flow.
+
+**mmo_prototype_dump.sql** — обновлён (включает таблицу `class_starter_items`).
+
+---
+
 v0.1.10
 18.04.2026
 ================

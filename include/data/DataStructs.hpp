@@ -53,3 +53,23 @@ struct MessageStruct
     std::string status = "";
     std::string message = "";
 };
+
+/// Payload carried by the REGISTER_ACCOUNT event.
+struct RegistrationDataStruct
+{
+    std::string login = "";
+    std::string password = "";
+    std::string email = ""; // optional
+    std::string registrationIp = "";
+    std::shared_ptr<boost::asio::ip::tcp::socket> socket;
+};
+
+/// Single entry for character-creation option lists (class / race / gender).
+struct CreationOptionStruct
+{
+    int id = 0;
+    std::string name = "";
+    std::string slug = "";        // empty for genders (use name)
+    std::string label = "";       // display label, used by gender entries
+    std::string description = ""; // optional, classes only
+};

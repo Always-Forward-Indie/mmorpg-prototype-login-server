@@ -20,6 +20,7 @@ set(SOURCE_FILES
     src/network/NetworkManager.cpp
     src/services/Authenticator.cpp
     src/services/CharacterManager.cpp
+    src/services/AccountManager.cpp
     src/data/ClientData.cpp
     src/utils/ThreadPool.cpp
     src/utils/Database.cpp
@@ -40,6 +41,7 @@ set(HEADER_FILES
     include/network/NetworkManager.hpp
     include/services/Authenticator.hpp
     include/services/CharacterManager.hpp
+    include/services/AccountManager.hpp
     include/data/ClientData.hpp
     include/data/DataStructs.hpp
     include/data/SpecialStructs.hpp
@@ -67,8 +69,11 @@ pkg_check_modules(libpqxx REQUIRED IMPORTED_TARGET libpqxx)
 # spdlog
 find_package(spdlog REQUIRED)
 
+# OpenSSL (used for SHA-256 password hashing in AccountManager)
+find_package(OpenSSL REQUIRED)
+
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
 # Link against libpqxx and PostgreSQL
-target_link_libraries(${PROJECT_NAME} PkgConfig::libpqxx pq spdlog::spdlog_header_only)
+target_link_libraries(${PROJECT_NAME} PkgConfig::libpqxx pq spdlog::spdlog_header_only OpenSSL::Crypto)

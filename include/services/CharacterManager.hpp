@@ -6,6 +6,19 @@
 #include <data/ClientData.hpp>
 #include <utils/Logger.hpp>
 
+/// Error codes returned by createCharacter.
+/// Negative values indicate failure; positive = new character id.
+enum class CharacterCreateResult : int
+{
+    ERR_MISSING_FIELD = -1, ///< One or more required fields are empty
+    ERR_NAME_INVALID = -2,  ///< Name format check failed
+    ERR_NAME_TAKEN = -3,    ///< Name already in use
+    ERR_SLOT_FULL = -4,     ///< Account has reached max character limit
+    ERR_DB = -5,            ///< Database / internal error
+};
+
+static constexpr int MAX_CHARS_PER_ACCOUNT = 4;
+
 class CharacterManager
 {
 public:
@@ -18,16 +31,17 @@ public:
     // Method to select a character
     CharacterDataStruct selectCharacter(pqxx::connection &conn, ClientData &clientData, int accountId, int characterId);
 
-    // Method to create a character
-    // Returns the new character id on success, 0 on failure.
+    /// Create a new character.
+    /// On success returns the new character id (> 0).
+    /// On failure returns one of the CharacterCreateResult negative codes.
     int createCharacter(pqxx::connection &conn, int accountId,
                         const std::string &characterName,
                         const std::string &characterClass,
                         const std::string &characterRace,
                         const std::string &characterGender);
 
-    // Method to delete a character
-    void deleteCharacter(pqxx::connection &conn, int accountId, int characterId);
+    /// Soft-delete a character. Returns true on success, false if not found or owner mismatch.
+    bool deleteCharacter(pqxx::connection &conn, int accountId, int characterId);
 
 private:
     Logger &logger_;

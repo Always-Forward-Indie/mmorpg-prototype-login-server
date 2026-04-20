@@ -1,6 +1,7 @@
 #include "services/CharacterManager.hpp"
 #include <pqxx/pqxx>
 #include <iostream>
+#include <regex>
 #include <vector>
 #include <spdlog/logger.h>
 
@@ -105,20 +106,60 @@ CharacterDataStruct CharacterManager::selectCharacter(pqxx::connection &conn, Cl
 }
 
 // Method to create a character
-// Returns the new character id on success, 0 on failure.
+// Returns the new character id (> 0) on success, or a negative CharacterCreateResult code on failure.
 int CharacterManager::createCharacter(pqxx::connection &conn, int accountId,
                                       const std::string &characterName, const std::string &characterClass,
                                       const std::string &characterRace, const std::string &characterGender)
 {
+    // --- Field presence check -----------------------------------------------
     if (characterName.empty() || characterClass.empty() || characterRace.empty() || characterGender.empty())
     {
         log_->info("createCharacter: missing required field");
-        return 0;
+        return static_cast<int>(CharacterCreateResult::ERR_MISSING_FIELD);
+    }
+
+    // --- Name format validation (C++ side, before hitting DB) ---------------
+    // Allowed: letters (A-Z a-z), spaces, apostrophes; 2-20 chars; no leading/trailing spaces; no double spaces
+    static const std::regex nameRegex("^[A-Za-z][A-Za-z ']{0,18}[A-Za-z]$|^[A-Za-z]{1,20}$");
+    if (!std::regex_match(characterName, nameRegex))
+    {
+        log_->info("createCharacter: invalid name format: " + characterName);
+        return static_cast<int>(CharacterCreateResult::ERR_NAME_INVALID);
+    }
+    // Extra: no double spaces
+    if (characterName.find("  ") != std::string::npos)
+    {
+        log_->info("createCharacter: double-space in name: " + characterName);
+        return static_cast<int>(CharacterCreateResult::ERR_NAME_INVALID);
     }
 
     try
     {
-        pqxx::work transaction(conn); // Step 1: insert character row (class/race/gender resolved by name inside the query)
+        pqxx::work transaction(conn);
+
+        // --- Slot limit check -----------------------------------------------
+        pqxx::result slotResult = transaction.exec_prepared("get_character_slot_count", accountId);
+        if (!slotResult.empty())
+        {
+            int slotCount = slotResult[0][0].as<int>();
+            if (slotCount >= MAX_CHARS_PER_ACCOUNT)
+            {
+                transaction.abort();
+                log_->info("createCharacter: slot limit reached for account=" + std::to_string(accountId));
+                return static_cast<int>(CharacterCreateResult::ERR_SLOT_FULL);
+            }
+        }
+
+        // --- Name uniqueness check ------------------------------------------
+        pqxx::result nameCheck = transaction.exec_prepared("check_character_name_exists", characterName);
+        if (!nameCheck.empty())
+        {
+            transaction.abort();
+            log_->info("createCharacter: name already taken: " + characterName);
+            return static_cast<int>(CharacterCreateResult::ERR_NAME_TAKEN);
+        }
+
+        // --- Insert character row -------------------------------------------
         pqxx::result createResult = transaction.exec_prepared(
             "create_character",
             accountId,
@@ -131,25 +172,63 @@ int CharacterManager::createCharacter(pqxx::connection &conn, int accountId,
         {
             transaction.abort();
             log_->info("createCharacter: insert returned no row (class/race/gender name not found?)");
-            return 0;
+            return static_cast<int>(CharacterCreateResult::ERR_DB);
         }
 
         int newCharacterId = createResult[0]["id"].as<int>();
 
-        // Step 2: initialise health/mana state
+        // --- Resolve class_id (needed for skills + starter items) -----------
+        pqxx::result classResult = transaction.exec_prepared("get_class_id_by_name", characterClass);
+        int classId = classResult.empty() ? 0 : classResult[0]["id"].as<int>();
+
+        // --- Init health/mana state -----------------------------------------
         transaction.exec_prepared("init_character_state", newCharacterId);
 
-        // Step 3: initialise starting position (0,0,200 in zone 1 — village)
+        // --- Init starting position -----------------------------------------
         transaction.exec_prepared("init_character_position", newCharacterId);
+
+        // --- Grant default skills -------------------------------------------
+        if (classId > 0)
+            transaction.exec_prepared("init_character_default_skills", newCharacterId, classId);
+
+        // --- Grant starter items --------------------------------------------
+        if (classId > 0)
+            transaction.exec_prepared("init_character_starter_items", newCharacterId, classId);
 
         transaction.commit();
 
-        log_->info("createCharacter: created character id=" + std::to_string(newCharacterId) + " name=" + characterName);
+        log_->info("createCharacter: created id=" + std::to_string(newCharacterId) + " name=" + characterName + " class=" + characterClass);
         return newCharacterId;
     }
     catch (const std::exception &e)
     {
         logger_.log("createCharacter error: " + std::string(e.what()));
-        return 0;
+        return static_cast<int>(CharacterCreateResult::ERR_DB);
+    }
+}
+
+// Soft-delete a character.
+// Returns true if the character was found and belongs to accountId; false otherwise.
+bool CharacterManager::deleteCharacter(pqxx::connection &conn, int accountId, int characterId)
+{
+    try
+    {
+        pqxx::work transaction(conn);
+        pqxx::result result = transaction.exec_prepared("delete_character", characterId, accountId);
+        transaction.commit();
+
+        if (result.empty())
+        {
+            log_->info("deleteCharacter: not found or owner mismatch — charId=" + std::to_string(characterId) + " accountId=" + std::to_string(accountId));
+            return false;
+        }
+
+        log_->info("deleteCharacter: soft-deleted charId=" + std::to_string(characterId));
+        return true;
+    }
+    catch (const std::exception &e)
+    {
+        logger_.log("deleteCharacter error: " + std::string(e.what()));
+        return false;
     }
 }
