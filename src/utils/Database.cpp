@@ -103,8 +103,11 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
 
     conn.prepare("get_characters_list",
                  "SELECT c.id AS character_id, c.level AS character_lvl, "
-                 "c.name AS character_name, cc.name AS character_class, r.name AS race_name, "
-                 "c.experience_points, c.account_slot, cg.name AS gender_name, "
+                 "c.name AS character_name, "
+                 "cc.slug AS class_slug, "
+                 "r.slug AS race_slug, "
+                 "cg.name AS gender_slug, "
+                 "c.experience_points, c.account_slot, "
                  "COALESCE(ccs.current_health, 1) AS current_health, "
                  "COALESCE(ccs.current_mana, 1) AS current_mana "
                  "FROM characters c "
@@ -114,6 +117,16 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "LEFT JOIN character_current_state ccs ON ccs.character_id = c.id "
                  "WHERE c.owner_id = $1 AND c.deleted_at IS NULL "
                  "ORDER BY c.account_slot;");
+    // get_character_equipment_preview — returns equipped items (slotId + itemSlug) for a single character.
+    // Used to build the character-selection preview on the client.
+    // Param: $1=character_id
+    conn.prepare("get_character_equipment_preview",
+                 "SELECT ce.equip_slot_id AS slot_id, i.slug AS item_slug "
+                 "FROM character_equipment ce "
+                 "JOIN player_inventory pi ON pi.id = ce.inventory_item_id "
+                 "JOIN items i ON i.id = pi.item_id "
+                 "WHERE ce.character_id = $1 "
+                 "ORDER BY ce.equip_slot_id;");
     conn.prepare("select_character",
                  "SELECT c.id AS character_id, c.level AS character_lvl, "
                  "c.name AS character_name, cc.name AS character_class, r.name AS race_name, "
@@ -123,16 +136,16 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "JOIN race r ON c.race_id = r.id "
                  "WHERE c.owner_id = $1 AND c.id = $2 AND c.deleted_at IS NULL "
                  "LIMIT 1;");
-    // create_character — inserts base record; resolves class/race/gender by name.
-    // Params: $1=owner_id(int), $2=character_name, $3=class_name, $4=race_name, $5=gender_name
+    // create_character — inserts base record; resolves class/race/gender by slug.
+    // Params: $1=owner_id(int), $2=character_name, $3=class_slug, $4=race_slug, $5=gender_slug (= gender name)
     conn.prepare("create_character",
                  "INSERT INTO characters (owner_id, name, class_id, race_id, gender, account_slot) "
                  "SELECT $1::int, $2, cc.id, r.id, cg.id, "
                  "  COALESCE((SELECT MAX(account_slot) + 1 FROM characters WHERE owner_id = $1::int AND deleted_at IS NULL), 1) "
                  "FROM character_class cc "
-                 "JOIN race r ON r.name = $4 "
+                 "JOIN race r ON r.slug = $4 "
                  "JOIN character_genders cg ON cg.name = $5 "
-                 "WHERE cc.name = $3 "
+                 "WHERE cc.slug = $3 "
                  "RETURNING id;");
     // init_character_state — called after create_character to set up health/mana state row
     conn.prepare("init_character_state",

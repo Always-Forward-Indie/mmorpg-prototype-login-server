@@ -39,8 +39,9 @@ std::vector<CharacterDataStruct> CharacterManager::getCharactersList(pqxx::conne
             characterDataStruct.characterId = row["character_id"].as<int>();
             characterDataStruct.characterLevel = row["character_lvl"].as<int>();
             characterDataStruct.characterName = row["character_name"].as<std::string>();
-            characterDataStruct.characterClass = row["character_class"].as<std::string>();
-            characterDataStruct.characterRace = row["race_name"].as<std::string>();
+            characterDataStruct.characterClass = row["class_slug"].as<std::string>();
+            characterDataStruct.characterRace = row["race_slug"].as<std::string>();
+            characterDataStruct.characterGender = row["gender_slug"].is_null() ? "" : row["gender_slug"].as<std::string>();
             characterDataStruct.characterExperiencePoints = row["experience_points"].as<int>();
             characterDataStruct.characterCurrentHealth = row["current_health"].as<int>();
             characterDataStruct.characterCurrentMana = row["current_mana"].as<int>();
@@ -231,4 +232,29 @@ bool CharacterManager::deleteCharacter(pqxx::connection &conn, int accountId, in
         logger_.log("deleteCharacter error: " + std::string(e.what()));
         return false;
     }
+}
+
+std::vector<EquipmentPreviewItemStruct> CharacterManager::getCharacterEquipmentPreview(pqxx::connection &conn, int characterId)
+{
+    std::vector<EquipmentPreviewItemStruct> equipment;
+    try
+    {
+        pqxx::work txn(conn);
+        pqxx::result rows = txn.exec_prepared("get_character_equipment_preview", characterId);
+        txn.commit();
+
+        equipment.reserve(rows.size());
+        for (const auto &row : rows)
+        {
+            EquipmentPreviewItemStruct item;
+            item.slotId = row["slot_id"].as<int>();
+            item.itemSlug = row["item_slug"].as<std::string>();
+            equipment.push_back(item);
+        }
+    }
+    catch (const std::exception &e)
+    {
+        logger_.log("getCharacterEquipmentPreview error: " + std::string(e.what()));
+    }
+    return equipment;
 }

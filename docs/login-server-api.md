@@ -174,14 +174,14 @@ Returns available classes, races and genders for the character creation screen. 
       { "id": 1, "name": "Human", "slug": "human" }
     ],
     "genders": [
-      { "id": 0, "name": "male",   "label": "Male"   },
-      { "id": 1, "name": "female", "label": "Female" }
+      { "id": 0, "slug": "male",   "label": "Male"   },
+      { "id": 1, "slug": "female", "label": "Female" }
     ]
   }
 }
 ```
 
-Use `name` field values directly in the `createCharacter` request.
+Use the `slug` field values in the `createCharacter` request.
 
 ---
 
@@ -217,15 +217,22 @@ Use `name` field values directly in the `createCharacter` request.
       {
         "characterId":    7,
         "characterName":  "Gandalf",
-        "characterClass": "Mage",
-        "characterLevel": 5
+        "classSlug":      "mage",
+        "raceSlug":       "human",
+        "genderSlug":     "male",
+        "characterLevel": 5,
+        "equipment": [
+          { "slotId": 1, "itemSlug": "wooden_staff" },
+          { "slotId": 5, "itemSlug": "leather_boots" }
+        ]
       }
     ]
   }
 }
 ```
 
-Empty `charactersList` array `[]` means the account has no characters yet.
+Empty `charactersList` array `[]` means the account has no characters yet.  
+Empty `equipment` array `[]` means the character has no equipped items (new character).
 
 ---
 
@@ -255,9 +262,9 @@ Empty `charactersList` array `[]` means the account has no characters yet.
 | Field             | Type   | Required | Source                          |
 |-------------------|--------|----------|---------------------------------|
 | `characterName`   | string | Yes      | 2–20 chars, letters and spaces  |
-| `characterClass`  | string | Yes      | `name` from `getCharacterCreationOptions` → `classes` |
-| `characterRace`   | string | Yes      | `name` from `getCharacterCreationOptions` → `races`   |
-| `characterGender` | string | Yes      | `name` from `getCharacterCreationOptions` → `genders` |
+| `characterClass`  | string | Yes      | `slug` from `getCharacterCreationOptions` → `classes` |
+| `characterRace`   | string | Yes      | `slug` from `getCharacterCreationOptions` → `races`   |
+| `characterGender` | string | Yes      | `slug` from `getCharacterCreationOptions` → `genders` |
 
 The server automatically:
 - Grants default skills for the chosen class

@@ -139,6 +139,14 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
 
 void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message)
 {
+    // Guard: prevent buffer overflow when copying into the fixed-size messageBuffer.
+    if (message.length() >= max_length)
+    {
+        logger_.logError("processMessage: message too large (" + std::to_string(message.length()) +
+                         " bytes), max is " + std::to_string(max_length - 1) + ". Dropping.");
+        return;
+    }
+
     // Convert the message string to a buffer array for parsing
     std::array<char, max_length> messageBuffer;
     std::copy(message.begin(), message.end(), messageBuffer.begin());
@@ -272,9 +280,9 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
             eventQueue_.push(deleteCharEvent);
         }
     }
-    catch (const nlohmann::json::parse_error &e)
+    catch (const std::exception &e)
     {
-        logger_.logError("JSON parsing error: " + std::string(e.what()), RED);
+        logger_.logError("processMessage error: " + std::string(e.what()), RED);
     }
 }
 
@@ -305,12 +313,7 @@ void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> 
                                      // Handle error
                                  }
 
-                                 if (!error)
-                                 {
-                                     // Response sent successfully, now start listening for the client's next message
-                                     startReadingFromClient(clientSocket);
-                                 }
-                                 else
+                                 if (error)
                                  {
                                      log_->error("Error during async_write: " + error.message());
                                  }
@@ -346,9 +349,11 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                       {
                                           // Data has been read successfully, handle it
                                           handleClientData(clientSocket, *dataBufferClient, bytes_transferred);
-                                          // NOTE: do NOT call startReadingFromClient here.
-                                          // sendResponse's completion handler continues the read loop
-                                          // after the response is written, preventing two concurrent reads.
+                                          // Immediately reschedule the next read. Read and write are fully
+                                          // decoupled: sendResponse fires async_write independently.
+                                          // This prevents the socket from stalling when no response is sent
+                                          // (e.g. unknown event type, early-exit error path).
+                                          startReadingFromClient(clientSocket);
                                       }
                                       else if (error == boost::asio::error::eof)
                                       {

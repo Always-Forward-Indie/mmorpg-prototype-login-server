@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <boost/asio.hpp>
 
 /**
@@ -22,6 +23,13 @@ struct PositionStruct
     bool needDBUpdate = false;
 };
 
+/// One equipped item returned as part of the character-selection preview.
+struct EquipmentPreviewItemStruct
+{
+    int slotId = 0;            ///< equip_slot_id from character_equipment
+    std::string itemSlug = ""; ///< items.slug — used by client to load asset/icon
+};
+
 struct CharacterDataStruct
 {
     int characterId = 0;
@@ -30,11 +38,12 @@ struct CharacterDataStruct
     int characterCurrentHealth = 0;
     int characterCurrentMana = 0;
     std::string characterName = "";
-    std::string characterClass = "";
-    std::string characterRace = "";
-    std::string characterGender = "";
+    std::string characterClass = "";  ///< slug (machine-readable)
+    std::string characterRace = "";   ///< slug (machine-readable)
+    std::string characterGender = ""; ///< slug (machine-readable, e.g. "male" / "female")
     PositionStruct characterPosition;
     bool needDBUpdate = false;
+    std::vector<EquipmentPreviewItemStruct> equipment; ///< equipped items for character-select preview
 };
 
 struct ClientDataStruct

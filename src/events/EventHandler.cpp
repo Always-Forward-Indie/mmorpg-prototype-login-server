@@ -142,8 +142,24 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
                 nlohmann::json characterJson;
                 characterJson["characterId"] = character.characterId;
                 characterJson["characterName"] = character.characterName;
-                characterJson["characterClass"] = character.characterClass;
+                characterJson["classSlug"] = character.characterClass;
+                characterJson["raceSlug"] = character.characterRace;
+                characterJson["genderSlug"] = character.characterGender;
                 characterJson["characterLevel"] = character.characterLevel;
+
+                // Fetch equipment preview for this character (for character-selection screen)
+                std::vector<EquipmentPreviewItemStruct> equip =
+                    characterManager_.getCharacterEquipmentPreview(poolGuard.get(), character.characterId);
+                nlohmann::json equipJson = nlohmann::json::array();
+                for (const auto &item : equip)
+                {
+                    nlohmann::json itemJson;
+                    itemJson["slotId"] = item.slotId;
+                    itemJson["itemSlug"] = item.itemSlug;
+                    equipJson.push_back(itemJson);
+                }
+                characterJson["equipment"] = equipJson;
+
                 charactersListJson.push_back(characterJson);
             }
 
@@ -390,7 +406,8 @@ void EventHandler::handleRegisterAccountEvent(const Event &event, ClientData &cl
     {
         if (!std::holds_alternative<RegistrationDataStruct>(data))
         {
-            log_->info("handleRegisterAccountEvent: unexpected event data type");
+            log_->warn("handleRegisterAccountEvent: unexpected event data type");
+            // Cannot send a response without a valid socket; nothing to do.
             return;
         }
 
@@ -454,9 +471,35 @@ void EventHandler::handleRegisterAccountEvent(const Event &event, ClientData &cl
         networkManager_.sendResponse(reg.socket,
                                      networkManager_.generateResponseMessage("success", response));
     }
-    catch (const std::bad_variant_access &ex)
+    catch (const std::exception &ex)
     {
-        logger_.log("handleRegisterAccountEvent error: " + std::string(ex.what()));
+        logger_.logError("handleRegisterAccountEvent error: " + std::string(ex.what()));
+        // Best-effort: try to extract socket and send an error response so the client
+        // doesn't hang waiting indefinitely.
+        try
+        {
+            if (std::holds_alternative<RegistrationDataStruct>(data))
+            {
+                const auto &reg = std::get<RegistrationDataStruct>(data);
+                if (reg.socket)
+                {
+                    nlohmann::json errResponse;
+                    ResponseBuilder builder;
+                    errResponse = builder
+                                      .setHeader("message", "ERR_INTERNAL")
+                                      .setHeader("hash", "")
+                                      .setHeader("clientId", 0)
+                                      .setHeader("eventType", "registerAccount")
+                                      .setBody("", "")
+                                      .build();
+                    networkManager_.sendResponse(reg.socket,
+                                                 networkManager_.generateResponseMessage("error", errResponse));
+                }
+            }
+        }
+        catch (...)
+        {
+        }
     }
 }
 
@@ -528,7 +571,7 @@ void EventHandler::handleGetCharacterCreationOptionsEvent(const Event &event, Cl
         {
             nlohmann::json entry;
             entry["id"] = row["id"].as<int>();
-            entry["name"] = row["name"].as<std::string>();
+            entry["slug"] = row["name"].as<std::string>(); // name IS the slug ("male"/"female")
             entry["label"] = row["label"].as<std::string>();
             genders.push_back(entry);
         }

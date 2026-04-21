@@ -1,3 +1,45 @@
+v0.1.12
+21.04.2026
+================
+New:
+
+**getCharactersList — слаги, пол и экипировка для превью.**
+- Ответ теперь содержит `classSlug`, `raceSlug`, `genderSlug` вместо имён — локализация на стороне клиента.
+- Поле `equipment` — массив `[{ "slotId": N, "itemSlug": "..." }]` с текущим снаряжением персонажа для отображения в экране выбора.
+- `CharacterManager::getCharacterEquipmentPreview` — новый метод, получает экипировку через `character_equipment → player_inventory → items`.
+
+**getCharacterCreationOptions — `slug` у гендеров.**
+- Массив `genders` теперь возвращает поле `slug` (`"male"` / `"female"`) вместо `name`.
+
+**createCharacter — джойн по slug.**
+- SQL-запрос теперь находит класс/расу по `slug`, а не по `name` — клиент передаёт slug из `getCharacterCreationOptions`.
+
+**DB — новый prepared statement.**
+- `get_character_equipment_preview($char_id)` — `SELECT slot_id, item_slug FROM character_equipment JOIN player_inventory JOIN items WHERE character_id = $1`.
+
+**DataStructs.hpp.**
+- Добавлен `EquipmentPreviewItemStruct { slotId, itemSlug }`.
+- `CharacterDataStruct` дополнен полем `characterGender` (slug) и вектором `equipment`.
+- Порядок объявлений исправлен: `EquipmentPreviewItemStruct` объявлен до `CharacterDataStruct`.
+
+Fixes:
+
+**NetworkManager — критические баги чтения/записи.**
+- Read loop больше не блокируется при неизвестном типе пакета: `startReadingFromClient` вызывается сразу после обработки сообщения, независимо от `sendResponse`.
+- Защита от переполнения буфера: ранний выход если `message.length() >= max_length`.
+- `catch` расширен с `nlohmann::json::parse_error` до `std::exception` — ASIO-поток больше не падает на `type_error` / `runtime_error`.
+
+**EventHandler — зависание клиента на ошибке.**
+- `handleRegisterAccountEvent` теперь отправляет `ERR_INTERNAL` клиенту при любом исключении вместо тихого выхода.
+
+**AccountManager — ошибка компиляции.**
+- Добавлен `#include <spdlog/logger.h>` (был forward-declared в `Logger.hpp`, вызывал ошибку при использовании в .cpp).
+
+**Документация.**
+- `docs/login-server-api.md` обновлена: `getCharactersList` — новые поля и `equipment`; `getCharacterCreationOptions` — `slug` у гендеров; `createCharacter` — поля теперь принимают slug.
+
+---
+
 v0.1.11
 20.04.2026
 ================

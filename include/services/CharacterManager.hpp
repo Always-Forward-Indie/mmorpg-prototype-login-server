@@ -28,6 +28,9 @@ public:
     // Method to get characters list
     std::vector<CharacterDataStruct> getCharactersList(pqxx::connection &conn, ClientData &clientData, int accountId);
 
+    /// Fetch equipped items for a single character for the character-selection preview.
+    std::vector<EquipmentPreviewItemStruct> getCharacterEquipmentPreview(pqxx::connection &conn, int characterId);
+
     // Method to select a character
     CharacterDataStruct selectCharacter(pqxx::connection &conn, ClientData &clientData, int accountId, int characterId);
 
