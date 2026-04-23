@@ -44,11 +44,11 @@ public:
                                           int &outUserId,
                                           std::string &outHash);
 
-private:
-    /// Minimal password hashing: SHA-256 hex digest via OpenSSL.
+    /// SHA-256 hex digest of plaintext. Used for both registration and login verification.
     /// TODO: migrate to bcrypt/argon2 for production security.
     static std::string hashPassword(const std::string &plaintext);
 
+private:
     Logger &logger_;
     std::shared_ptr<spdlog::logger> log_;
 };

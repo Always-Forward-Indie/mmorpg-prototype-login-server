@@ -179,7 +179,7 @@ int CharacterManager::createCharacter(pqxx::connection &conn, int accountId,
         int newCharacterId = createResult[0]["id"].as<int>();
 
         // --- Resolve class_id (needed for skills + starter items) -----------
-        pqxx::result classResult = transaction.exec_prepared("get_class_id_by_name", characterClass);
+        pqxx::result classResult = transaction.exec_prepared("get_class_id_by_slug", characterClass);
         int classId = classResult.empty() ? 0 : classResult[0]["id"].as<int>();
 
         // --- Init health/mana state -----------------------------------------

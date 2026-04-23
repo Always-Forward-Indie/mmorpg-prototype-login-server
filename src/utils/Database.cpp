@@ -138,10 +138,12 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "LIMIT 1;");
     // create_character — inserts base record; resolves class/race/gender by slug.
     // Params: $1=owner_id(int), $2=character_name, $3=class_slug, $4=race_slug, $5=gender_slug (= gender name)
+    // level is always set to 1 (default was 0 which is invalid).
     conn.prepare("create_character",
-                 "INSERT INTO characters (owner_id, name, class_id, race_id, gender, account_slot) "
+                 "INSERT INTO characters (owner_id, name, class_id, race_id, gender, account_slot, level) "
                  "SELECT $1::int, $2, cc.id, r.id, cg.id, "
-                 "  COALESCE((SELECT MAX(account_slot) + 1 FROM characters WHERE owner_id = $1::int AND deleted_at IS NULL), 1) "
+                 "  COALESCE((SELECT MAX(account_slot) + 1 FROM characters WHERE owner_id = $1::int AND deleted_at IS NULL), 1), "
+                 "  1 "
                  "FROM character_class cc "
                  "JOIN race r ON r.slug = $4 "
                  "JOIN character_genders cg ON cg.name = $5 "
@@ -167,9 +169,9 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "WHERE class_id = $2::int AND is_default = true "
                  "ON CONFLICT DO NOTHING;");
 
-    // get_class_id_by_name — resolve class name → class_id for use in skill/item init
-    conn.prepare("get_class_id_by_name",
-                 "SELECT id FROM character_class WHERE name = $1 LIMIT 1;");
+    // get_class_id_by_slug — resolve class slug → class_id for use in skill/item init
+    conn.prepare("get_class_id_by_slug",
+                 "SELECT id FROM character_class WHERE slug = $1 LIMIT 1;");
 
     // init_character_starter_items — grants class starter items from class_starter_items table
     // Params: $1=character_id, $2=class_id

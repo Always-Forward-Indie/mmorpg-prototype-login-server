@@ -1,3 +1,21 @@
+v0.1.13
+23.04.2026
+================
+Fixes:
+
+**CharacterManager / Database — новые персонажи создаются с уровнем 1.**
+- `create_character` prepared statement — добавлено явное поле `level` со значением `1` в INSERT. Ранее `level` не передавался → брался DB default `0` → персонаж входил в игру нулевого уровня. Фиксирует баг "созданные новые игроки имеют 0 уровень".
+
+**Database — разрешение класса по slug вместо name.**
+- `get_class_id_by_name` переименован в `get_class_id_by_slug`; SQL изменён с `WHERE name = $1` на `WHERE slug = $1`. Клиент передаёт slug из `getCharacterCreationOptions` — поиск по `name` вызывал сбой поиска класса при создании персонажа.
+- `CharacterManager::createCharacter` — обновлён на `exec_prepared("get_class_id_by_slug", ...)`.
+
+**Authenticator — верификация пароля через SHA-256 хэш.**
+- `Authenticator::authenticate` — при проверке пароля входящий plaintext теперь хэшируется через `AccountManager::hashPassword()` (SHA-256 hex) перед сравнением с хранимым значением. Ранее сравнение велось с исходным plaintext (legacy-заглушка) → login всегда проваливался для аккаунтов созданных через `registerAccount` (который хранит хэш).
+- `AccountManager::hashPassword` — метод переведён из `private` в `public` для использования в `Authenticator`.
+
+---
+
 v0.1.12
 21.04.2026
 ================

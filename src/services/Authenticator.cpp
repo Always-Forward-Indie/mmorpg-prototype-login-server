@@ -1,4 +1,5 @@
 #include "services/Authenticator.hpp"
+#include "services/AccountManager.hpp"
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -24,10 +25,9 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         int userID = row["id"].as<int>();
         std::string storedPassword = row["password"].as<std::string>();
 
-        // Step 2: verify password.
-        // NOTE: The stored password is currently a plain string (legacy).
-        // TODO: migrate to bcrypt/argon2 hashing and update this comparison.
-        if (storedPassword != password)
+        // Step 2: verify password (stored as SHA-256 hex, must hash the incoming plaintext).
+        const std::string hashedInput = AccountManager::hashPassword(password);
+        if (storedPassword != hashedInput)
         {
             // Increment failed login counter (may lock the account after 5 attempts)
             transaction.exec_prepared("increment_failed_logins", login);

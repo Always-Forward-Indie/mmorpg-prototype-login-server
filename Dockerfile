@@ -1,74 +1,68 @@
-# Stage 1: Build
-FROM ubuntu:22.04 AS build
+# Single Container: Build & Run
+FROM ubuntu:22.04
 
 # Install required dependencies
 RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list \
-    && apt-get update && apt-get install -y \
+    && apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
+    make \
     libpqxx-dev \
     libspdlog-dev \
     pkg-config \
-    gdb
+    gdb \
+    ccache \
+    curl \
+    ca-certificates \
+    cargo \
+    && rm -rf /var/lib/apt/lists/*
+
+# ✅ Install Rust (required for watchexec)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:$PATH"
+
+# ✅ Ensure Rust is up-to-date
+RUN rustup update stable && rustup default stable
+
+# ✅ Install `watchexec` with `--locked`
+RUN cargo install watchexec-cli --locked
 
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy source code
-COPY . .
+# ✅ Copy necessary project files
+COPY CMakeLists.txt ./
+COPY src ./src
+COPY include ./include
+COPY config.json ./config.json
 
 # Create build directory
 RUN mkdir -p build
+
+# ✅ Set working directory for build
 WORKDIR /usr/src/app/build
 
-# Run CMake and compile
-RUN cmake .. && make
+# ✅ Build the project
+RUN cmake .. && make -j$(nproc)
 
-# Debugging: Ensure the binary exists
-RUN ls -lh /usr/src/app/build/MMOLoginServer
+# ✅ Debug: Ensure the binary exists before running
+RUN ls -lh /usr/src/app/build/MMOLoginServer || (echo "❌ ERROR: Binary not built!" && exit 1)
 
-# ✅ Copy pqxx headers to a temporary folder in the build stage
-RUN mkdir -p /usr/src/app/docker_includes && cp -r /usr/include/pqxx /usr/src/app/docker_includes/
+# ✅ Copy watchexec binary to system path
+RUN cp /root/.cargo/bin/watchexec /usr/local/bin/watchexec && chmod +x /usr/local/bin/watchexec
 
-# Debugging: Ensure pqxx headers exist in build stage
-RUN ls -lh /usr/src/app/docker_includes/pqxx
+# ✅ Ensure the binary is executable
+RUN chmod +x /usr/src/app/build/MMOLoginServer
 
-
-
-# Stage 2: Runtime (smaller final image)
-FROM ubuntu:22.04
-
-# Install runtime dependencies
-RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|http://ua.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list \
-    && apt-get update && apt-get install -y \
-    libpqxx-dev \
-    libpq5 \
-    libasan6 \
-    libubsan1 \
-    libstdc++6 \
-    libfmt8 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
+# ✅ Set working directory for execution
 WORKDIR /usr/src/app
 
-# ✅ Ensure /usr/include/pqxx exists before copying
-RUN mkdir -p /usr/include/pqxx
+# ✅ Copy the watcher script
+COPY watch_and_run.sh /usr/src/app/watch_and_run.sh
+RUN chmod +x /usr/src/app/watch_and_run.sh
 
-# Copy only the compiled executable from the build stage
-COPY --from=build /usr/src/app/build/MMOLoginServer /usr/src/app/MMOLoginServer
-
-# ✅ Fix: Copy pqxx headers correctly by making sure the target directory exists
-COPY --from=build /usr/src/app/docker_includes/pqxx /usr/include/pqxx
-
-# Copy config file
-COPY --from=build /usr/src/app/config.json /usr/src/app/config.json
-
-# Ensure the binary is executable
-RUN chmod +x /usr/src/app/MMOLoginServer
-
-# Expose the application port
+# ✅ Expose the application port
 EXPOSE 27014
 
-# Run the application
-CMD ["/usr/src/app/MMOLoginServer"]
+# ✅ Run the script that rebuilds & restarts automatically
+CMD ["/bin/bash", "/usr/src/app/watch_and_run.sh"]

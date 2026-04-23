@@ -29,7 +29,9 @@ services:
     ports:
       - "27014:27014"
     volumes:
-      - /usr/src/app/build
+      - ./src:/usr/src/app/src  # ✅ Mount only the `src` folder
+      - ./include:/usr/src/app/include  # ✅ Mount only the `include` folder
+      - ./CMakeLists.txt:/usr/src/app/CMakeLists.txt  # ✅ Mount CMakeLists.txt so new source files are picked up without image rebuilds
     environment:
       - ENV=development
       - LOG_LEVEL=info
@@ -39,7 +41,6 @@ services:
     restart: unless-stopped
     security_opt:
       - seccomp=unconfined
-    command: ["/usr/src/app/MMOLoginServer"]
     depends_on:
       db:
         condition: service_healthy
