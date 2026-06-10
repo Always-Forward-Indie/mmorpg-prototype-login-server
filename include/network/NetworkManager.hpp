@@ -2,6 +2,7 @@
 #include <array>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <mutex>
 #include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
@@ -40,4 +41,6 @@ private:
     JSONParser jsonParser_;
     std::mutex socketBufferMutex_;
     std::unordered_map<boost::asio::ip::tcp::socket *, std::string> socketBuffers_;
+    std::mutex activeSocketsMutex_;
+    std::unordered_set<boost::asio::ip::tcp::socket *> activeSockets_;
 };

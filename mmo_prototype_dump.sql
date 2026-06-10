@@ -1077,6 +1077,80 @@ ALTER SEQUENCE public.class_skill_tree_id_seq OWNED BY public.class_skill_tree.i
 
 
 --
+-- Name: class_spawn_zones; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.class_spawn_zones (
+    id integer NOT NULL,
+    class_id integer NOT NULL,
+    zone_id integer,
+    min_x real DEFAULT 0 NOT NULL,
+    max_x real DEFAULT 0 NOT NULL,
+    min_y real DEFAULT 0 NOT NULL,
+    max_y real DEFAULT 0 NOT NULL,
+    min_z real DEFAULT 0 NOT NULL,
+    max_z real DEFAULT 0 NOT NULL,
+    shape_type character varying(10) DEFAULT 'RECT'::character varying NOT NULL,
+    center_x real DEFAULT 0 NOT NULL,
+    center_y real DEFAULT 0 NOT NULL,
+    inner_radius real DEFAULT 0 NOT NULL,
+    outer_radius real DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.class_spawn_zones OWNER TO postgres;
+
+--
+-- Name: TABLE class_spawn_zones; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.class_spawn_zones IS 'Стартовые спавн-зоны для классов. Когда персонаж создаётся и впервые входит в игру, он появляется в случайной точке внутри зоны своего класса.';
+
+
+--
+-- Name: COLUMN class_spawn_zones.class_id; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.class_spawn_zones.class_id IS 'FK → character_class.id. Класс которому принадлежит зона спавна.';
+
+
+--
+-- Name: COLUMN class_spawn_zones.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.class_spawn_zones.zone_id IS 'FK → zones.id. Игровая зона, в которой находится спавн.';
+
+
+--
+-- Name: COLUMN class_spawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.class_spawn_zones.shape_type IS 'Форма зоны: RECT (прямоугольник), CIRCLE (круг), ANNULUS (кольцо).';
+
+
+--
+-- Name: class_spawn_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.class_spawn_zones_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.class_spawn_zones_id_seq OWNER TO postgres;
+
+--
+-- Name: class_spawn_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.class_spawn_zones_id_seq OWNED BY public.class_spawn_zones.id;
+
+
+--
 -- Name: class_starter_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -4433,7 +4507,18 @@ CREATE TABLE public.respawn_zones (
     y double precision DEFAULT 0 NOT NULL,
     z double precision DEFAULT 0 NOT NULL,
     zone_id integer DEFAULT 1 NOT NULL,
-    is_default boolean DEFAULT false NOT NULL
+    is_default boolean DEFAULT false NOT NULL,
+    min_x real DEFAULT 0 NOT NULL,
+    max_x real DEFAULT 0 NOT NULL,
+    min_y real DEFAULT 0 NOT NULL,
+    max_y real DEFAULT 0 NOT NULL,
+    min_z real DEFAULT 0 NOT NULL,
+    max_z real DEFAULT 0 NOT NULL,
+    shape_type character varying(10) DEFAULT 'RECT'::character varying NOT NULL,
+    center_x real DEFAULT 0 NOT NULL,
+    center_y real DEFAULT 0 NOT NULL,
+    inner_radius real DEFAULT 0 NOT NULL,
+    outer_radius real DEFAULT 0 NOT NULL
 );
 
 
@@ -4493,6 +4578,83 @@ COMMENT ON COLUMN public.respawn_zones.zone_id IS 'FK → zones.id. Зона, к
 --
 
 COMMENT ON COLUMN public.respawn_zones.is_default IS 'TRUE = эта точка используется по умолчанию при первом входе или смерти без явно выбранной точки.';
+
+
+--
+-- Name: COLUMN respawn_zones.min_x; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.min_x IS 'Минимальная X-координата для случайной точки респавна (0 = bounds не заданы, используется фиксированная точка x).';
+
+
+--
+-- Name: COLUMN respawn_zones.max_x; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.max_x IS 'Максимальная X-координата для случайной точки респавна.';
+
+
+--
+-- Name: COLUMN respawn_zones.min_y; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.min_y IS 'Минимальная Y-координата для случайной точки респавна.';
+
+
+--
+-- Name: COLUMN respawn_zones.max_y; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.max_y IS 'Максимальная Y-координата для случайной точки респавна.';
+
+
+--
+-- Name: COLUMN respawn_zones.min_z; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.min_z IS 'Минимальная Z-координата для случайной точки респавна.';
+
+
+--
+-- Name: COLUMN respawn_zones.max_z; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.max_z IS 'Максимальная Z-координата для случайной точки респавна.';
+
+
+--
+-- Name: COLUMN respawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.shape_type IS 'Форма зоны: RECT (прямоугольник), CIRCLE (круг), ANNULUS (кольцо). По умолчанию RECT.';
+
+
+--
+-- Name: COLUMN respawn_zones.center_x; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.center_x IS 'X-центр для круглых/кольцевых зон.';
+
+
+--
+-- Name: COLUMN respawn_zones.center_y; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.center_y IS 'Y-центр для круглых/кольцевых зон.';
+
+
+--
+-- Name: COLUMN respawn_zones.inner_radius; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.inner_radius IS 'Внутренний радиус для ANNULUS (0 для CIRCLE).';
+
+
+--
+-- Name: COLUMN respawn_zones.outer_radius; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.respawn_zones.outer_radius IS 'Внешний радиус для CIRCLE/ANNULUS.';
 
 
 --
@@ -6414,6 +6576,13 @@ ALTER TABLE ONLY public.class_skill_tree ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
+-- Name: class_spawn_zones id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.class_spawn_zones ALTER COLUMN id SET DEFAULT nextval('public.class_spawn_zones_id_seq'::regclass);
+
+
+--
 -- Name: class_starter_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -6719,9 +6888,6 @@ ALTER TABLE ONLY public.zones ALTER COLUMN id SET DEFAULT nextval('public.zones_
 --
 
 COPY public.character_bestiary (character_id, mob_template_id, kill_count) FROM stdin;
-3	1	380
-2	1	8
-3	2	18
 \.
 
 
@@ -6730,8 +6896,8 @@ COPY public.character_bestiary (character_id, mob_template_id, kill_count) FROM 
 --
 
 COPY public.character_class (id, name, slug, description) FROM stdin;
-1	Mage	\N	\N
-2	Warrior	\N	\N
+1	Mage	mage	\N
+2	Warrior	warrior	\N
 \.
 
 
@@ -6740,9 +6906,20 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 --
 
 COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-3	265	477	f	2026-04-19 19:35:47.704094+00
+8	168	55	f	2026-06-06 08:35:20.841162+00
+5	88	225	f	2026-06-06 10:16:19.958343+00
+14	88	225	f	2026-06-05 08:44:57.782403+00
+9	25	49	f	2026-04-22 16:25:27.623586+00
+11	88	225	f	2026-04-23 08:20:14.113581+00
+10	88	225	f	2026-04-23 07:38:36.621915+00
+6	88	225	f	2026-06-05 10:52:56.812007+00
 2	107	286	f	2026-04-20 16:06:57.389983+00
+4	29	57	f	2026-04-21 12:00:13.041395+00
 1	197	454	f	2026-03-07 12:41:29.615005+00
+12	1	1	f	2026-04-23 19:41:15.793931+00
+7	105	55	f	2026-04-23 08:01:16.756742+00
+13	99	39	f	2026-06-05 08:31:21.326937+00
+3	265	477	f	2026-06-05 10:49:17.273501+00
 \.
 
 
@@ -6754,6 +6931,16 @@ COPY public.character_emotes (id, character_id, emote_slug, unlocked_at) FROM st
 4	1	wave	2026-04-13 08:53:40.211313+00
 5	2	wave	2026-04-13 08:53:40.211313+00
 6	3	wave	2026-04-13 08:53:40.211313+00
+263	4	wave	2026-04-21 11:59:47.172907+00
+264	5	wave	2026-04-21 17:01:01.080152+00
+265	6	wave	2026-04-21 17:01:56.636059+00
+268	7	wave	2026-04-21 17:04:07.509519+00
+271	8	wave	2026-04-21 18:38:44.641837+00
+278	9	wave	2026-04-22 16:25:00.894357+00
+280	10	wave	2026-04-23 07:37:38.586258+00
+282	11	wave	2026-04-23 08:16:35.296698+00
+307	13	wave	2026-06-05 08:31:09.479623+00
+309	14	wave	2026-06-05 08:43:56.843852+00
 \.
 
 
@@ -6762,7 +6949,6 @@ COPY public.character_emotes (id, character_id, emote_slug, unlocked_at) FROM st
 --
 
 COPY public.character_equipment (id, character_id, equip_slot_id, inventory_item_id, equipped_at) FROM stdin;
-80	3	6	176	2026-04-08 18:25:58.153336+00
 \.
 
 
@@ -6773,7 +6959,6 @@ COPY public.character_equipment (id, character_id, equip_slot_id, inventory_item
 COPY public.character_genders (id, name, label) FROM stdin;
 0	male	Male
 1	female	Female
-2	unknown	Unknown
 \.
 
 
@@ -6790,9 +6975,6 @@ COPY public.character_permanent_modifiers (id, character_id, attribute_id, value
 --
 
 COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
-3	6	0
-3	17	0
-3	3	0
 \.
 
 
@@ -6801,9 +6983,20 @@ COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
 --
 
 COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
+14	14	19381.39	-19034.45	1558.39	1	176.774994
 1	1	-2000.00	4000.00	300.00	2	0
-3	3	19318.04	-19033.01	1541.01	1	179.910675
+11	11	332.05	86.28	104.53	1	85.698265
+12	12	0.00	0.00	200.00	1	0
+3	3	19278.42	-18998.22	1558.39	1	175.363602
 2	2	873.44	-912.04	94.27	2	134.452255
+4	4	198.00	214.80	87.15	1	65.77169
+5	5	5215.24	2150.07	107.18	1	-119.452248
+6	6	343.87	-1999.71	104.53	1	16.676176
+9	9	262.57	306.81	104.74	1	90.125
+10	10	230.82	5468.51	104.53	1	-45.564575
+8	8	340.12	961.13	104.53	1	76.515297
+7	7	210.73	16.14	104.53	1	92.393158
+13	13	20378.17	-18879.81	-23336.57	1	0
 \.
 
 
@@ -6827,6 +7020,9 @@ COPY public.character_skill_bar (character_id, slot_index, skill_slug) FROM stdi
 3	1	fireball
 3	2	blink_home
 2	1	blink_home
+5	0	basic_attack
+11	0	basic_attack
+8	0	basic_attack
 \.
 
 
@@ -6835,6 +7031,7 @@ COPY public.character_skill_bar (character_id, slot_index, skill_slug) FROM stdi
 --
 
 COPY public.character_skill_mastery (character_id, mastery_slug, value) FROM stdin;
+5	staff_mastery	5
 \.
 
 
@@ -6852,6 +7049,16 @@ COPY public.character_skills (id, character_id, skill_id, current_level) FROM st
 18	3	11	1
 19	3	15	1
 20	2	15	1
+21	4	1	1
+22	5	1	1
+23	6	1	1
+24	7	1	1
+25	8	1	1
+26	9	1	1
+27	11	1	1
+28	12	1	1
+29	13	1	1
+30	14	1	1
 \.
 
 
@@ -6868,9 +7075,20 @@ COPY public.character_titles (character_id, title_slug, equipped, earned_at) FRO
 --
 
 COPY public.characters (id, name, owner_id, class_id, race_id, experience_points, level, radius, free_skill_points, gender, account_slot, created_at, last_online_at, deleted_at, play_time_sec, bind_zone_id, bind_x, bind_y, bind_z, appearance, experience_debt) FROM stdin;
+9	KekLol	8	1	1	1	1	100	0	0	4	2026-04-22 16:24:52.683006+00	\N	\N	0	\N	\N	\N	\N	\N	0
+10	rqwwqwrq	10	1	1	200	1	100	0	0	1	2026-04-23 07:37:34.781725+00	\N	\N	0	\N	\N	\N	\N	\N	0
+7	twetewetw	9	2	1	10	1	100	0	0	1	2026-04-21 17:04:03.814504+00	\N	\N	0	\N	\N	\N	\N	\N	1
 1	TetsMage1Player	5	1	1	57	2	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	0
+11	gssgdsgd	9	1	1	0	1	100	0	0	2	2026-04-23 07:55:14.919792+00	\N	\N	0	\N	\N	\N	\N	\N	0
+12	sdggssdg	9	1	1	0	1	100	0	0	3	2026-04-23 19:41:15.793931+00	\N	\N	0	\N	\N	\N	\N	\N	0
+8	gfdgffd	8	2	1	200	1	100	1	1	3	2026-04-21 18:25:55.38274+00	\N	\N	0	\N	\N	\N	\N	\N	0
+5	eeeeeeeeee	8	1	1	19	1	100	0	0	1	2026-04-21 14:13:02.03901+00	\N	\N	0	\N	\N	\N	\N	\N	0
+13	tessdgs	9	2	1	0	1	100	0	1	4	2026-06-05 08:31:04.712672+00	\N	\N	0	\N	\N	\N	\N	\N	0
+14	sfddfsdfs	11	1	1	0	1	100	0	0	1	2026-06-05 08:43:53.388421+00	\N	\N	0	\N	\N	\N	\N	\N	0
+6	fsdfsdfsdf	8	1	1	0	1	100	0	0	2	2026-04-21 14:15:41.124824+00	\N	\N	0	\N	\N	\N	\N	\N	0
 3	TetsWarrior1Player	3	2	1	5730	5	100	39	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	3616
 2	TetsMage2Player	4	1	1	1460	3	100	0	0	1	2026-03-03 16:16:54.741947+00	\N	\N	0	1	0	0	200	\N	1994
+4	sdfsdfsdfsdfs	6	1	1	0	1	100	0	0	1	2026-04-21 11:59:43.727321+00	\N	\N	0	\N	\N	\N	\N	\N	0
 \.
 
 
@@ -6900,15 +7118,22 @@ COPY public.class_skill_tree (id, class_id, skill_id, required_level, is_default
 
 
 --
+-- Data for Name: class_spawn_zones; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.class_spawn_zones (id, class_id, zone_id, min_x, max_x, min_y, max_y, min_z, max_z, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
+2	2	1	19941.295	21101.021	-19800.49	-19027.973	1600	1600	RECT	20521.158	-19414.232	0	0
+1	1	1	19962.076	21121.803	-18994.477	-18226.434	1600	1600	RECT	20541.94	-18610.455	0	0
+\.
+
+
+--
 -- Data for Name: class_starter_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.class_starter_items (id, class_id, item_id, quantity, slot_index, durability_current) FROM stdin;
-1	1	15	1	0	\N
-2	1	16	50	1	\N
-3	2	1	1	0	\N
-4	2	2	1	1	\N
-5	2	16	50	2	\N
+10	1	16	20	0	\N
+11	2	16	20	0	\N
 \.
 
 
@@ -7006,11 +7231,13 @@ ice
 
 COPY public.dialogue (id, slug, version, start_node_id) FROM stdin;
 1	milaya_main	1	1
-2	varan_main	1	201
+2	varan_main	1	200
 3	edrik_main	1	301
-4	theron_main	1	400
-5	sylara_main	1	500
+4	theron_main	1	401
+5	sylara_main	1	501
 6	ruins_dying_stranger_main	1	600
+7	ruins_dying_stranger_replay	1	650
+8	ruins_dying_stranger_items_shortcut	1	660
 \.
 
 
@@ -7019,128 +7246,82 @@ COPY public.dialogue (id, slug, version, start_node_id) FROM stdin;
 --
 
 COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_choice_key, condition_group, action_group, hide_if_locked) FROM stdin;
-23	4	7	1	milaya.choice.quest_decline	{"any": [{"slug": "wolf_hunt_intro", "type": "quest", "state": "not_started"}, {"slug": "wolf_hunt_intro", "type": "quest", "state": "turned_in"}, {"slug": "wolf_hunt_intro", "type": "quest", "state": "failed"}]}	\N	t
-41	201	202	0	varan.choice.continue	\N	\N	f
-42	202	203	0	varan.choice.dangers	\N	\N	f
-43	202	204	1	varan.choice.road	\N	\N	f
-44	202	205	2	varan.choice.watch	\N	\N	f
-46	203	202	0	varan.choice.back	\N	\N	f
-47	204	202	0	varan.choice.back	\N	\N	f
-48	205	202	0	varan.choice.back	\N	\N	f
-49	301	302	0	edrik.choice.continue	\N	\N	f
-50	302	303	0	edrik.choice.about_past	\N	\N	f
-51	302	304	1	edrik.choice.about_craft	\N	\N	f
-52	302	305	2	edrik.choice.about_village	\N	\N	f
-53	302	306	3	edrik.choice.advice	\N	\N	f
-55	303	302	0	edrik.choice.back	\N	\N	f
-56	304	302	0	edrik.choice.back	\N	\N	f
-57	305	302	0	edrik.choice.back	\N	\N	f
-58	306	302	0	edrik.choice.back	\N	\N	f
-61	15	12	0	milaya.choice.quest_abandon_yes	\N	\N	f
-62	15	1	1	milaya.choice.quest_abandon_no	\N	\N	f
-60	4	15	5	milaya.choice.quest_abandon	{"slug": "wolf_hunt_intro", "type": "quest", "state": "active"}	\N	t
-33	10	11	0		\N	\N	f
-24	4	8	2	milaya.choice.quest_status	{"all": [{"slug": "wolf_hunt_intro", "type": "quest", "state": "active"}, {"slug": "wolf_hunt_intro", "step": 0, "type": "quest_step"}]}	\N	t
-39	4	103	2	milaya.choice.quest_status	{"all": [{"slug": "wolf_hunt_intro", "type": "quest", "state": "active"}, {"slug": "wolf_hunt_intro", "step": 2, "type": "quest_step"}]}	\N	t
-63	4	101	2	milaya.choice.quest_report_wolves	{"all": [{"slug": "wolf_hunt_intro", "type": "quest", "state": "active"}, {"slug": "wolf_hunt_intro", "step": 1, "type": "quest_step"}]}	\N	t
-35	12	13	0		\N	\N	f
-64	101	102	0		\N	\N	f
-20	2	1	0	milaya.choice.back	\N	\N	f
-65	102	4	0	milaya.choice.got_it	\N	\N	f
-21	3	1	0	milaya.choice.back	\N	\N	f
-66	103	4	0	milaya.choice.got_it	\N	\N	f
-16	1	2	0	milaya.choice.about_village	\N	\N	f
-17	1	3	1	milaya.choice.about_self	\N	\N	f
-34	11	4	0	milaya.choice.back	\N	\N	f
-38	100	4	0	milaya.choice.got_it	\N	\N	f
-18	1	4	2	milaya.choice.any_work	\N	\N	f
-19	1	99	3	milaya.choice.farewell	\N	\N	f
-25	4	9	3	milaya.choice.quest_turnin	{"slug": "wolf_hunt_intro", "type": "quest", "state": "completed"}	\N	t
-27	5	6	0		\N	\N	f
-31	9	10	0	milaya.choice.give_wolves	\N	\N	f
-32	9	12	1	milaya.choice.wont_give	\N	\N	f
-45	202	299	5	varan.choice.farewell	\N	\N	f
-67	202	299	3	varan.choice.trade_buy	\N	{"actions": [{"mode": "buy", "type": "open_vendor_shop"}]}	f
-68	202	299	4	varan.choice.trade_sell	\N	{"actions": [{"mode": "sell", "type": "open_vendor_shop"}]}	f
-54	302	399	5	edrik.choice.farewell	\N	\N	f
-69	302	399	4	edrik.choice.repair	\N	{"actions": [{"type": "open_repair_shop"}]}	f
-70	400	401	0	theron.choice.continue	\N	\N	f
-71	401	402	0	theron.choice.learn_power_slash	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "power_slash", "type": "skill_not_learned"}]}	\N	t
-72	401	410	1	theron.choice.learn_shield_bash	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "shield_bash", "type": "skill_not_learned"}]}	\N	t
-73	401	420	2	theron.choice.learn_whirlwind	{"all": [{"gte": 10, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "whirlwind", "type": "skill_not_learned"}, {"slug": "shield_bash", "type": "skill_learned"}, {"gte": 1, "type": "item", "item_id": 19}]}	\N	t
-74	401	430	3	theron.choice.learn_iron_skin	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "iron_skin", "type": "skill_not_learned"}]}	\N	t
-75	401	440	4	theron.choice.learn_constitution_mastery	{"all": [{"gte": 8, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "constitution_mastery", "type": "skill_not_learned"}, {"slug": "iron_skin", "type": "skill_learned"}]}	\N	t
-76	401	499	5	theron.choice.open_shop	\N	{"actions": [{"type": "open_skill_shop"}]}	f
-28	6	4	0	milaya.choice.back	\N	\N	f
-30	8	4	0	milaya.choice.got_it	\N	\N	f
-29	7	1	0	milaya.choice.back	\N	\N	f
-36	13	1	0	milaya.choice.back	\N	\N	f
-37	14	1	0	milaya.choice.back	\N	\N	f
-26	4	14	4	milaya.choice.quest_done	{"slug": "wolf_hunt_intro", "type": "quest", "state": "turned_in"}	\N	t
-22	4	5	0	milaya.choice.quest_accept	{"any": [{"slug": "wolf_hunt_intro", "type": "quest", "state": "not_started"}, {"slug": "wolf_hunt_intro", "type": "quest", "state": "turned_in"}, {"slug": "wolf_hunt_intro", "type": "quest", "state": "failed"}]}	\N	t
-77	401	499	6	theron.choice.farewell	\N	\N	f
-78	402	403	0	theron.choice.yes	\N	\N	f
-79	402	401	1	theron.choice.no	\N	\N	f
-80	403	404	0	theron.choice.continue	\N	\N	f
-81	404	401	0	theron.choice.continue	\N	\N	f
-82	410	411	0	theron.choice.yes	\N	\N	f
-83	410	401	1	theron.choice.no	\N	\N	f
-84	411	412	0	theron.choice.continue	\N	\N	f
-85	412	401	0	theron.choice.continue	\N	\N	f
-86	420	421	0	theron.choice.yes	\N	\N	f
-87	420	401	1	theron.choice.no	\N	\N	f
-88	421	422	0	theron.choice.continue	\N	\N	f
-89	422	401	0	theron.choice.continue	\N	\N	f
-90	430	431	0	theron.choice.yes	\N	\N	f
-91	430	401	1	theron.choice.no	\N	\N	f
-92	431	432	0	theron.choice.continue	\N	\N	f
-93	432	401	0	theron.choice.continue	\N	\N	f
-94	440	441	0	theron.choice.yes	\N	\N	f
-95	440	401	1	theron.choice.no	\N	\N	f
-96	441	442	0	theron.choice.continue	\N	\N	f
-97	442	401	0	theron.choice.continue	\N	\N	f
-100	500	501	0	sylara.choice.continue	\N	\N	f
-101	501	502	0	sylara.choice.learn_fireball	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "fireball", "type": "skill_not_learned"}]}	\N	t
-102	501	510	1	sylara.choice.learn_frost_bolt	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "frost_bolt", "type": "skill_not_learned"}]}	\N	t
-103	501	520	2	sylara.choice.learn_arcane_blast	{"all": [{"gte": 8, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "arcane_blast", "type": "skill_not_learned"}, {"slug": "frost_bolt", "type": "skill_learned"}]}	\N	t
-104	501	530	3	sylara.choice.learn_chain_lightning	{"all": [{"gte": 12, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "chain_lightning", "type": "skill_not_learned"}, {"slug": "arcane_blast", "type": "skill_learned"}, {"gte": 1, "type": "item", "item_id": 24}]}	\N	t
-105	501	540	4	sylara.choice.learn_mana_shield	{"all": [{"gte": 5, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "mana_shield", "type": "skill_not_learned"}]}	\N	t
-106	501	550	5	sylara.choice.learn_elemental_mastery	{"all": [{"gte": 10, "type": "level"}, {"gte": 1, "type": "has_skill_points"}, {"slug": "elemental_mastery", "type": "skill_not_learned"}, {"slug": "mana_shield", "type": "skill_learned"}]}	\N	t
-108	501	599	7	sylara.choice.farewell	\N	\N	f
-110	502	503	0	sylara.choice.yes	\N	\N	f
-111	502	501	1	sylara.choice.no	\N	\N	f
-112	503	504	0	sylara.choice.continue	\N	\N	f
-113	504	501	0	sylara.choice.continue	\N	\N	f
-114	510	511	0	sylara.choice.yes	\N	\N	f
-115	510	501	1	sylara.choice.no	\N	\N	f
-116	511	512	0	sylara.choice.continue	\N	\N	f
-117	512	501	0	sylara.choice.continue	\N	\N	f
-118	520	521	0	sylara.choice.yes	\N	\N	f
-119	520	501	1	sylara.choice.no	\N	\N	f
-120	521	522	0	sylara.choice.continue	\N	\N	f
-121	522	501	0	sylara.choice.continue	\N	\N	f
-122	530	531	0	sylara.choice.yes	\N	\N	f
-123	530	501	1	sylara.choice.no	\N	\N	f
-124	531	532	0	sylara.choice.continue	\N	\N	f
-125	532	501	0	sylara.choice.continue	\N	\N	f
-126	540	541	0	sylara.choice.yes	\N	\N	f
-127	540	501	1	sylara.choice.no	\N	\N	f
-128	541	542	0	sylara.choice.continue	\N	\N	f
-129	542	501	0	sylara.choice.continue	\N	\N	f
-130	550	551	0	sylara.choice.yes	\N	\N	f
-131	550	501	1	sylara.choice.no	\N	\N	f
-132	551	552	0	sylara.choice.continue	\N	\N	f
-133	552	501	0	sylara.choice.continue	\N	\N	f
-107	501	599	6	sylara.choice.open_shop	\N	{"actions": [{"type": "open_skill_shop"}]}	f
-140	605	609	0	ruins_dying_stranger.choice.farewell	\N	\N	f
-137	603	605	0	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 2}]	[{"type": "give_item", "item_id": 1, "quantity": 1}, {"type": "give_item", "item_id": 3, "quantity": 2}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
-141	603	605	1	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 1}]	[{"type": "give_item", "item_id": 15, "quantity": 1}, {"type": "give_item", "item_id": 3, "quantity": 2}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
-134	600	601	0	ruins_dying_stranger.choice.why_here	\N	\N	f
-135	601	602	0	ruins_dying_stranger.choice.i_will_try	\N	\N	f
-143	611	609	0	ruins_dying_stranger.choice.farewell	\N	\N	f
-138	603	605	2	ruins_dying_stranger.choice.decline	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]	\N	t
-136	602	603	0	ruins_dying_stranger.choice.what_can_i_do	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]	\N	t
-144	602	611	1	ruins_dying_stranger.choice.nothing_more	[{"eq": true, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]	\N	t
+219	302	399	0	edrik.choice.skills	\N	{"actions": [{"type": "open_skill_shop"}]}	f
+220	302	399	1	edrik.choice.books	\N	{"actions": [{"type": "open_vendor_shop"}]}	f
+221	302	399	2	edrik.choice.farewell	\N	\N	f
+222	502	599	0	sylara.choice.skills	\N	{"actions": [{"type": "open_skill_shop"}]}	f
+223	502	599	1	sylara.choice.books	\N	{"actions": [{"type": "open_vendor_shop"}]}	f
+224	502	599	2	sylara.choice.farewell	\N	\N	f
+175	1	2	0	milaya.choice.continue	\N	\N	f
+176	2	99	0	milaya.choice.shop	\N	{"actions": [{"type": "open_vendor_shop"}]}	f
+177	2	99	1	milaya.choice.farewell	\N	\N	f
+178	200	201	0	varan.choice.continue	\N	\N	f
+179	201	299	0	varan.choice.shop	\N	{"actions": [{"type": "open_vendor_shop"}]}	f
+180	201	202	1	varan.choice.need_help	\N	\N	f
+181	201	299	2	varan.choice.farewell	\N	\N	f
+182	202	204	0	varan.choice.accept_quest	[{"any": [{"slug": "varan_fox_menace", "type": "quest", "state": "not_started"}, {"slug": "varan_fox_menace", "type": "quest", "state": "failed"}]}]	[{"slug": "varan_fox_menace", "type": "offer_quest"}]	t
+183	202	205	1	varan.choice.why_foxes	[{"any": [{"slug": "varan_fox_menace", "type": "quest", "state": "not_started"}, {"slug": "varan_fox_menace", "type": "quest", "state": "failed"}]}]	\N	t
+184	202	206	0	varan.choice.remind	[{"all": [{"slug": "varan_fox_menace", "type": "quest", "state": "active"}, {"slug": "varan_fox_menace", "step": 0, "type": "quest_step"}]}]	\N	t
+185	202	208	0	varan.choice.report_foxes	[{"all": [{"slug": "varan_fox_menace", "type": "quest", "state": "active"}, {"slug": "varan_fox_menace", "step": 1, "type": "quest_step"}]}]	[{"slug": "varan_fox_menace", "type": "advance_quest_step"}, {"type": "change_reputation", "delta": 10, "faction": "merchants"}, {"type": "give_gold", "amount": 5}]	t
+186	202	209	0	varan.choice.remind_skins	[{"all": [{"slug": "varan_fox_menace", "type": "quest", "state": "active"}, {"slug": "varan_fox_menace", "step": 2, "type": "quest_step"}]}]	\N	t
+187	202	211	0	varan.choice.turnin_foxes	[{"slug": "varan_fox_menace", "type": "quest", "state": "completed"}]	[{"slug": "varan_fox_menace", "type": "turn_in_quest"}]	t
+188	202	212	1	varan.choice.refuse_turnin_foxes	[{"slug": "varan_fox_menace", "type": "quest", "state": "completed"}]	\N	t
+189	202	211	0	varan.choice.claim_reward	[{"slug": "varan_fox_menace", "type": "quest", "state": "turned_in"}, {"eq": false, "key": "varan_fox_menace.reward_claimed", "type": "flag"}]	\N	t
+190	202	299	99	varan.choice.farewell	\N	\N	f
+191	204	202	0	varan.choice.back	\N	\N	f
+192	205	202	0	varan.choice.back	\N	\N	f
+193	206	202	0	varan.choice.back	\N	\N	f
+194	208	213	0	varan.choice.continue	\N	\N	f
+195	213	214	0	varan.choice.what_request	\N	\N	f
+196	213	216	1	varan.choice.no_more	\N	\N	f
+197	214	215	0	varan.choice.continue	\N	\N	f
+198	215	218	0	varan.choice.help_skins	\N	\N	f
+199	215	216	1	varan.choice.no_more	\N	\N	f
+200	218	202	0	varan.choice.back	\N	\N	f
+201	216	217	0	varan.choice.continue	\N	\N	f
+202	217	299	0	varan.choice.farewell	\N	\N	f
+203	209	202	0	varan.choice.back	\N	\N	f
+204	211	219	0	varan.choice.continue	\N	\N	f
+205	219	299	0	varan.choice.accept_reward	\N	[{"type": "change_reputation", "delta": 15, "faction": "merchants"}, {"type": "give_gold", "amount": 15}, {"key": "varan_fox_menace.reward_claimed", "type": "set_flag", "bool_value": true}]	f
+206	219	299	1	varan.choice.farewell	\N	\N	f
+207	212	220	0	varan.choice.continue	\N	\N	f
+208	220	299	0	varan.choice.farewell	\N	\N	f
+209	301	302	0	edrik.choice.continue	\N	\N	f
+212	401	402	0	theron.choice.continue	\N	\N	f
+213	402	499	0	theron.choice.shop	\N	{"actions": [{"type": "open_vendor_shop"}]}	f
+214	402	499	1	theron.choice.repair	\N	{"actions": [{"type": "open_repair_shop"}]}	f
+215	402	499	2	theron.choice.farewell	\N	\N	f
+216	501	502	0	sylara.choice.continue	\N	\N	f
+145	600	601	0	ruins_dying_stranger.choice.continue	\N	[{"key": "ruins_dying_stranger.dialogue_started", "type": "set_flag", "bool_value": true}]	f
+146	601	602	0	ruins_dying_stranger.choice.where_am_i	\N	\N	f
+147	601	604	1	ruins_dying_stranger.choice.what_happened	\N	\N	f
+148	601	608	2	ruins_dying_stranger.choice.useful_items	\N	\N	f
+149	601	610	3	ruins_dying_stranger.choice.leave	\N	\N	f
+150	602	603	0	ruins_dying_stranger.choice.continue	\N	\N	f
+151	603	604	0	ruins_dying_stranger.choice.what_happened	\N	\N	f
+152	603	608	1	ruins_dying_stranger.choice.useful_items	\N	\N	f
+153	603	610	2	ruins_dying_stranger.choice.leave	\N	\N	f
+154	604	605	0	ruins_dying_stranger.choice.continue	\N	\N	f
+155	605	606	0	ruins_dying_stranger.choice.tried_to_escape	\N	\N	f
+156	605	608	1	ruins_dying_stranger.choice.useful_items	\N	\N	f
+157	605	610	2	ruins_dying_stranger.choice.leave	\N	\N	f
+158	606	607	0	ruins_dying_stranger.choice.continue	\N	\N	f
+159	607	608	0	ruins_dying_stranger.choice.useful_items	\N	\N	f
+160	607	610	1	ruins_dying_stranger.choice.leave	\N	\N	f
+161	608	609	0	ruins_dying_stranger.choice.continue	\N	\N	f
+162	609	610	0	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 2}]	[{"type": "give_item", "item_id": 29, "quantity": 1}, {"type": "give_item", "item_id": 36, "quantity": 1}, {"type": "give_item", "item_id": 35, "quantity": 1}, {"type": "give_item", "item_id": 46, "quantity": 2}, {"type": "give_item", "item_id": 47, "quantity": 1}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
+163	609	610	1	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 1}]	[{"type": "give_item", "item_id": 30, "quantity": 1}, {"type": "give_item", "item_id": 37, "quantity": 1}, {"type": "give_item", "item_id": 35, "quantity": 1}, {"type": "give_item", "item_id": 46, "quantity": 2}, {"type": "give_item", "item_id": 47, "quantity": 1}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
+164	609	610	2	ruins_dying_stranger.choice.leave	\N	\N	f
+165	610	611	0	ruins_dying_stranger.choice.continue	\N	\N	f
+166	611	699	0	ruins_dying_stranger.choice.continue	\N	\N	f
+167	650	651	0	ruins_dying_stranger.choice.continue	\N	\N	f
+168	651	652	0	ruins_dying_stranger.choice.hold_on	\N	\N	f
+169	660	661	0	ruins_dying_stranger.choice.continue	\N	\N	f
+170	661	662	0	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 2}]	[{"type": "give_item", "item_id": 29, "quantity": 1}, {"type": "give_item", "item_id": 36, "quantity": 1}, {"type": "give_item", "item_id": 35, "quantity": 1}, {"type": "give_item", "item_id": 46, "quantity": 2}, {"type": "give_item", "item_id": 47, "quantity": 1}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
+171	661	662	1	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 1}]	[{"type": "give_item", "item_id": 30, "quantity": 1}, {"type": "give_item", "item_id": 37, "quantity": 1}, {"type": "give_item", "item_id": 35, "quantity": 1}, {"type": "give_item", "item_id": 46, "quantity": 2}, {"type": "give_item", "item_id": 47, "quantity": 1}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
+172	661	662	2	ruins_dying_stranger.choice.leave	\N	\N	f
+173	662	663	0	ruins_dying_stranger.choice.continue	\N	\N	f
+174	663	669	0	ruins_dying_stranger.choice.continue	\N	\N	f
 \.
 
 
@@ -7149,85 +7330,58 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 --
 
 COPY public.dialogue_node (id, dialogue_id, type, speaker_npc_id, client_node_key, condition_group, action_group, jump_target_node_id) FROM stdin;
-13	1	line	2	milaya.dialogue.quest_sad	\N	\N	\N
-14	1	line	2	milaya.dialogue.quest_done	\N	\N	\N
-99	1	end	2		\N	\N	\N
-100	1	line	2	milaya.dialogue.quest_step1_reminder	\N	\N	\N
-1	1	line	2	milaya.dialogue.greeting	\N	\N	\N
-2	1	line	2	milaya.dialogue.about_village	\N	\N	\N
-3	1	line	2	milaya.dialogue.about_self	\N	\N	\N
-4	1	choice_hub	2	milaya.dialogue.quest_hub	\N	\N	\N
-5	1	action	2		\N	{"actions": [{"slug": "wolf_hunt_intro", "type": "offer_quest"}]}	\N
-6	1	line	2	milaya.dialogue.quest_accepted	\N	\N	\N
-7	1	line	2	milaya.dialogue.quest_decline	\N	\N	\N
-8	1	line	2	milaya.dialogue.quest_reminder	\N	\N	\N
-9	1	line	2	milaya.dialogue.quest_turnin_ask	\N	\N	\N
-10	1	action	2		\N	{"actions": [{"slug": "wolf_hunt_intro", "type": "turn_in_quest"}]}	\N
-11	1	line	2	milaya.dialogue.quest_thanks	\N	\N	\N
-12	1	action	2		\N	{"actions": [{"slug": "wolf_hunt_intro", "type": "fail_quest"}]}	\N
-15	1	line	2	milaya.dialogue.quest_abandon_confirm	\N	\N	\N
-101	1	action	2		\N	{"actions": [{"slug": "wolf_hunt_intro", "type": "advance_quest_step"}]}	\N
-102	1	line	2	milaya.dialogue.next_task_skins	\N	\N	\N
-103	1	line	2	milaya.dialogue.quest_step2_reminder	\N	\N	\N
-400	4	line	4	theron.dialogue.greeting	\N	\N	\N
-401	4	choice_hub	4	theron.dialogue.skill_hub	\N	\N	\N
-402	4	line	4	theron.dialogue.confirm_power_slash	\N	\N	\N
-403	4	action	4	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 100, "skill_slug": "power_slash", "book_item_id": 0, "requires_book": false}]}	\N
-404	4	line	4	theron.dialogue.learned_power_slash	\N	\N	\N
-410	4	line	4	theron.dialogue.confirm_shield_bash	\N	\N	\N
-411	4	action	4	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 150, "skill_slug": "shield_bash", "book_item_id": 0, "requires_book": false}]}	\N
-412	4	line	4	theron.dialogue.learned_shield_bash	\N	\N	\N
-420	4	line	4	theron.dialogue.confirm_whirlwind	\N	\N	\N
-421	4	action	4	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 300, "skill_slug": "whirlwind", "book_item_id": 19, "requires_book": true}]}	\N
-422	4	line	4	theron.dialogue.learned_whirlwind	\N	\N	\N
-430	4	line	4	theron.dialogue.confirm_iron_skin	\N	\N	\N
-431	4	action	4	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 120, "skill_slug": "iron_skin", "book_item_id": 0, "requires_book": false}]}	\N
-432	4	line	4	theron.dialogue.learned_iron_skin	\N	\N	\N
-440	4	line	4	theron.dialogue.confirm_constitution_mastery	\N	\N	\N
-201	2	line	1	varan.dialogue.greeting	\N	\N	\N
-202	2	choice_hub	1	varan.dialogue.main_hub	\N	\N	\N
-203	2	line	1	varan.dialogue.about_dangers	\N	\N	\N
-204	2	line	1	varan.dialogue.about_road	\N	\N	\N
-205	2	line	1	varan.dialogue.about_watch	\N	\N	\N
-299	2	end	\N	\N	\N	\N	\N
+600	6	line	6	npc.ruins_dying_stranger.greeting	\N	\N	\N
+601	6	choice_hub	6	npc.ruins_dying_stranger.first_hub	\N	\N	\N
+602	6	line	6	npc.ruins_dying_stranger.where_am_i	\N	\N	\N
+603	6	choice_hub	6	npc.ruins_dying_stranger.from_where	\N	\N	\N
+604	6	line	6	npc.ruins_dying_stranger.what_happened	\N	\N	\N
+605	6	choice_hub	6	npc.ruins_dying_stranger.from_what_happened	\N	\N	\N
+606	6	line	6	npc.ruins_dying_stranger.tried_to_escape	\N	\N	\N
+607	6	choice_hub	6	npc.ruins_dying_stranger.from_escape	\N	\N	\N
+608	6	line	6	npc.ruins_dying_stranger.offer_item_text	\N	\N	\N
+609	6	choice_hub	6	npc.ruins_dying_stranger.accept_hub	\N	\N	\N
+610	6	line	6	npc.ruins_dying_stranger.farewell_narrative	\N	\N	\N
+611	6	line	6	npc.ruins_dying_stranger.farewell	\N	\N	\N
+699	6	end	6	\N	\N	\N	\N
+650	7	line	6	npc.ruins_dying_stranger.replay_farewell	\N	\N	\N
+651	7	choice_hub	6	npc.ruins_dying_stranger.replay_hub	\N	\N	\N
+652	7	end	6	\N	\N	\N	\N
+660	8	line	6	npc.ruins_dying_stranger.offer_item_shortcut	\N	\N	\N
+661	8	choice_hub	6	npc.ruins_dying_stranger.accept_hub	\N	\N	\N
+662	8	line	6	npc.ruins_dying_stranger.farewell_narrative	\N	\N	\N
+663	8	line	6	npc.ruins_dying_stranger.farewell	\N	\N	\N
+669	8	end	6	\N	\N	\N	\N
 301	3	line	3	edrik.dialogue.greeting	\N	\N	\N
+1	1	line	2	milaya.dialogue.greeting	\N	\N	\N
+2	1	choice_hub	2	milaya.dialogue.main_hub	\N	\N	\N
+99	1	end	2	\N	\N	\N	\N
+200	2	line	1	varan.dialogue.greeting	\N	\N	\N
+201	2	choice_hub	1	varan.dialogue.main_hub	\N	\N	\N
+202	2	choice_hub	1	varan.dialogue.quest_hub	\N	\N	\N
+204	2	line	1	varan.dialogue.quest_accepted	\N	\N	\N
+205	2	line	1	varan.dialogue.why_foxes	\N	\N	\N
+206	2	line	1	varan.dialogue.reminder_step0	\N	\N	\N
+208	2	line	1	varan.dialogue.thanks_need_more	\N	\N	\N
+209	2	line	1	varan.dialogue.reminder_step2	\N	\N	\N
+211	2	line	1	varan.dialogue.turnin_thanks	\N	\N	\N
+212	2	line	1	varan.dialogue.refuse_turnin	\N	\N	\N
+213	2	choice_hub	1	varan.dialogue.what_help	\N	\N	\N
+214	2	line	1	varan.dialogue.explain_skins	\N	\N	\N
+215	2	choice_hub	1	varan.dialogue.accept_skins_hub	\N	\N	\N
+216	2	line	1	varan.dialogue.decline_part2	\N	\N	\N
+217	2	choice_hub	1	varan.dialogue.farewell_hub	\N	\N	\N
+218	2	line	1	varan.dialogue.accepted_skins	\N	\N	\N
+219	2	choice_hub	1	varan.dialogue.accept_reward_hub	\N	\N	\N
+220	2	choice_hub	1	varan.dialogue.farewell_hub	\N	\N	\N
+299	2	end	1	\N	\N	\N	\N
 302	3	choice_hub	3	edrik.dialogue.main_hub	\N	\N	\N
-303	3	line	3	edrik.dialogue.about_past	\N	\N	\N
-304	3	line	3	edrik.dialogue.about_craft	\N	\N	\N
-305	3	line	3	edrik.dialogue.about_village	\N	\N	\N
-306	3	line	3	edrik.dialogue.advice	\N	\N	\N
-399	3	end	\N	\N	\N	\N	\N
-441	4	action	4	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 200, "skill_slug": "constitution_mastery", "book_item_id": 0, "requires_book": false}]}	\N
-442	4	line	4	theron.dialogue.learned_constitution_mastery	\N	\N	\N
+399	3	end	3	\N	\N	\N	\N
+401	4	line	4	theron.dialogue.greeting	\N	\N	\N
+402	4	choice_hub	4	theron.dialogue.main_hub	\N	\N	\N
 499	4	end	4	\N	\N	\N	\N
-500	5	line	5	sylara.dialogue.greeting	\N	\N	\N
-501	5	choice_hub	5	sylara.dialogue.skill_hub	\N	\N	\N
-502	5	line	5	sylara.dialogue.confirm_fireball	\N	\N	\N
-503	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 120, "skill_slug": "fireball", "book_item_id": 0, "requires_book": false}]}	\N
-504	5	line	5	sylara.dialogue.learned_fireball	\N	\N	\N
-510	5	line	5	sylara.dialogue.confirm_frost_bolt	\N	\N	\N
-511	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 100, "skill_slug": "frost_bolt", "book_item_id": 0, "requires_book": false}]}	\N
-512	5	line	5	sylara.dialogue.learned_frost_bolt	\N	\N	\N
-520	5	line	5	sylara.dialogue.confirm_arcane_blast	\N	\N	\N
-521	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 200, "skill_slug": "arcane_blast", "book_item_id": 0, "requires_book": false}]}	\N
-522	5	line	5	sylara.dialogue.learned_arcane_blast	\N	\N	\N
-530	5	line	5	sylara.dialogue.confirm_chain_lightning	\N	\N	\N
-531	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 400, "skill_slug": "chain_lightning", "book_item_id": 24, "requires_book": true}]}	\N
-532	5	line	5	sylara.dialogue.learned_chain_lightning	\N	\N	\N
-540	5	line	5	sylara.dialogue.confirm_mana_shield	\N	\N	\N
-541	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 150, "skill_slug": "mana_shield", "book_item_id": 0, "requires_book": false}]}	\N
-542	5	line	5	sylara.dialogue.learned_mana_shield	\N	\N	\N
-550	5	line	5	sylara.dialogue.confirm_elemental_mastery	\N	\N	\N
-551	5	action	5	\N	\N	{"actions": [{"type": "learn_skill", "sp_cost": 1, "gold_cost": 300, "skill_slug": "elemental_mastery", "book_item_id": 0, "requires_book": false}]}	\N
-552	5	line	5	sylara.dialogue.learned_elemental_mastery	\N	\N	\N
+501	5	line	5	sylara.dialogue.greeting	\N	\N	\N
+502	5	choice_hub	5	sylara.dialogue.main_hub	\N	\N	\N
 599	5	end	5	\N	\N	\N	\N
-600	6	line	6	npc.ruins_dying_stranger.place_wont_let_go	\N	\N	\N
-601	6	line	6	npc.ruins_dying_stranger.if_survive_go_exit	\N	\N	\N
-602	6	line	6	npc.ruins_dying_stranger.wont_escape_but_you_can	\N	\N	\N
-605	6	line	6	npc.ruins_dying_stranger.farewell	\N	\N	\N
-609	6	end	6	\N	\N	\N	\N
-611	6	line	6	npc.ruins_dying_stranger.nothing_more_reply	\N	\N	\N
-603	6	choice_hub	6	npc.ruins_dying_stranger.take_this_with_you	\N	\N	\N
 \.
 
 
@@ -7493,6 +7647,134 @@ COPY public.game_analytics (id, event_type, character_id, session_id, level, zon
 148	session_end	2	sess_2_1776701190093	3	1	{}	2026-04-20 16:06:39.579643+00
 149	session_start	2	sess_2_1776701208968	3	1	{}	2026-04-20 16:06:48.970754+00
 150	session_end	2	sess_2_1776701208968	3	1	{}	2026-04-20 16:06:57.392401+00
+151	session_start	4	sess_4_1776772787140	0	1	{}	2026-04-21 11:59:47.143555+00
+152	session_end	4	sess_4_1776772787140	0	1	{}	2026-04-21 12:00:13.0439+00
+153	session_start	5	sess_5_1776790861026	0	1	{}	2026-04-21 17:01:01.04216+00
+154	session_end	5	sess_5_1776790861026	0	1	{}	2026-04-21 17:01:43.182007+00
+155	session_start	6	sess_6_1776790916621	0	1	{}	2026-04-21 17:01:56.625352+00
+156	session_end	6	sess_6_1776790916621	0	1	{}	2026-04-21 17:02:07.22537+00
+157	session_start	5	sess_5_1776790938266	0	1	{}	2026-04-21 17:02:18.269399+00
+158	session_end	5	sess_5_1776790938266	0	1	{}	2026-04-21 17:02:24.350228+00
+159	session_start	5	sess_5_1776791007140	0	1	{}	2026-04-21 17:03:27.143367+00
+160	session_end	5	sess_5_1776791007140	0	1	{}	2026-04-21 17:03:33.121347+00
+161	session_start	7	sess_7_1776791047497	0	1	{}	2026-04-21 17:04:07.499484+00
+162	session_end	7	sess_7_1776791047497	0	1	{}	2026-04-21 17:04:28.281381+00
+163	session_start	5	sess_5_1776793687076	0	1	{}	2026-04-21 17:48:07.084582+00
+164	session_end	5	sess_5_1776793687076	0	1	{}	2026-04-21 17:48:11.21093+00
+165	session_start	6	sess_6_1776794614175	0	1	{}	2026-04-21 18:03:34.177667+00
+166	session_end	6	sess_6_1776794614175	0	1	{}	2026-04-21 18:03:40.937144+00
+167	session_start	8	sess_8_1776796724625	0	1	{}	2026-04-21 18:38:44.628094+00
+168	session_end	8	sess_8_1776796724625	1	1	{}	2026-04-21 18:38:49.061974+00
+169	session_start	6	sess_6_1776852674441	0	1	{}	2026-04-22 10:11:14.443575+00
+170	item_acquired	6	sess_6_1776852674441	0	1	{"source": "loot_pickup", "itemSlug": "gold_coin", "quantity": 1}	2026-04-22 10:13:36.501699+00
+171	session_end	6	sess_6_1776852674441	0	1	{}	2026-04-22 10:13:49.054217+00
+172	session_start	3	sess_3_1776852882068	5	0	{}	2026-04-22 10:14:42.070387+00
+173	session_end	3	sess_3_1776852882068	5	0	{}	2026-04-22 10:15:39.803603+00
+174	session_start	5	sess_5_1776852951899	0	1	{}	2026-04-22 10:15:51.901284+00
+175	player_death	5	sess_5_1776852951899	0	2	{}	2026-04-22 10:16:59.111498+00
+176	session_end	5	sess_5_1776852951899	0	1	{}	2026-04-22 10:19:34.12932+00
+177	session_start	6	sess_6_1776867708749	0	1	{}	2026-04-22 14:21:48.758787+00
+178	player_death	6	sess_6_1776867708749	0	2	{}	2026-04-22 14:23:12.19115+00
+179	session_end	6	sess_6_1776867708749	0	1	{}	2026-04-22 14:24:42.014789+00
+180	session_start	5	sess_5_1776871451735	1	1	{}	2026-04-22 15:24:11.738425+00
+181	mob_killed	5	sess_5_1776871451735	1	2	{"mobId": 1, "mobSlug": "SmallFox", "mobLevel": 1}	2026-04-22 15:25:29.643264+00
+182	player_death	5	sess_5_1776871451735	1	2	{}	2026-04-22 15:26:02.770806+00
+183	session_end	5	sess_5_1776871451735	1	1	{}	2026-04-22 15:32:10.263173+00
+184	session_start	6	sess_6_1776874884449	1	1	{}	2026-04-22 16:21:24.456857+00
+185	session_end	6	sess_6_1776874884449	1	1	{}	2026-04-22 16:21:35.383771+00
+186	session_start	9	sess_9_1776875100880	0	1	{}	2026-04-22 16:25:00.88367+00
+187	session_end	9	sess_9_1776875100880	0	1	{}	2026-04-22 16:25:27.625853+00
+188	session_start	7	sess_7_1776879981434	1	1	{}	2026-04-22 17:46:21.437484+00
+189	session_end	7	sess_7_1776879981434	1	1	{}	2026-04-22 17:46:32.934186+00
+190	session_start	10	sess_10_1776929858556	1	1	{}	2026-04-23 07:37:38.559999+00
+191	session_end	10	sess_10_1776929858556	1	2	{}	2026-04-23 07:38:36.62443+00
+192	session_start	7	sess_7_1776931013021	1	1	{}	2026-04-23 07:56:53.023969+00
+193	mob_killed	7	sess_7_1776931013021	1	2	{"mobId": 1, "mobSlug": "SmallFox", "mobLevel": 1}	2026-04-23 07:57:48.33562+00
+194	player_death	7	sess_7_1776931013021	1	2	{}	2026-04-23 08:00:19.073709+00
+195	session_end	7	sess_7_1776931013021	1	1	{}	2026-04-23 08:01:16.759118+00
+196	session_start	11	sess_11_1776932195274	1	1	{}	2026-04-23 08:16:35.277228+00
+197	player_death	11	sess_11_1776932195274	1	2	{}	2026-04-23 08:17:43.291229+00
+198	session_end	11	sess_11_1776932195274	1	1	{}	2026-04-23 08:20:14.116253+00
+199	session_start	8	sess_8_1776933200369	1	1	{}	2026-04-23 08:33:20.371663+00
+200	session_end	8	sess_8_1776933200369	1	1	{}	2026-04-23 08:36:43.562336+00
+201	session_start	3	sess_3_1776973540860	5	0	{}	2026-04-23 19:45:40.862922+00
+202	session_end	3	sess_3_1776973540860	5	0	{}	2026-04-23 19:48:19.74769+00
+203	session_start	8	sess_8_1776973712504	1	1	{}	2026-04-23 19:48:32.506901+00
+204	session_end	8	sess_8_1776973712504	1	2	{}	2026-04-23 19:50:25.231029+00
+205	session_start	5	sess_5_1780418729565	1	1	{}	2026-06-02 16:45:29.578624+00
+206	session_end	5	sess_5_1780418729565	1	2	{}	2026-06-02 16:49:32.81253+00
+207	session_start	3	sess_3_1780421778540	5	0	{}	2026-06-02 17:36:18.543559+00
+208	session_end	3	sess_3_1780421778540	5	0	{}	2026-06-02 17:49:24.999094+00
+209	session_start	3	sess_3_1780422583794	5	0	{}	2026-06-02 17:49:43.796423+00
+210	session_end	3	sess_3_1780422583794	5	0	{}	2026-06-02 17:49:53.745283+00
+211	session_start	3	sess_3_1780424080546	5	0	{}	2026-06-02 18:14:40.549853+00
+212	session_end	3	sess_3_1780424080546	5	0	{}	2026-06-02 18:16:52.222536+00
+213	session_start	3	sess_3_1780430396624	5	0	{}	2026-06-02 19:59:56.625949+00
+214	session_end	3	sess_3_1780430396624	5	0	{}	2026-06-02 20:00:04.341684+00
+215	session_start	3	sess_3_1780430876797	5	0	{}	2026-06-02 20:07:56.801164+00
+216	session_end	3	sess_3_1780430876797	5	0	{}	2026-06-02 20:08:28.253708+00
+217	session_start	3	sess_3_1780499948303	5	0	{}	2026-06-03 15:19:08.305694+00
+218	session_end	3	sess_3_1780499948303	5	0	{}	2026-06-03 15:19:18.560814+00
+219	session_start	5	sess_5_1780500090260	1	2	{}	2026-06-03 15:21:30.261862+00
+220	session_end	5	sess_5_1780500090260	1	2	{}	2026-06-03 15:22:06.90409+00
+221	session_start	5	sess_5_1780501426008	1	2	{}	2026-06-03 15:43:46.010213+00
+222	session_end	5	sess_5_1780501426008	1	2	{}	2026-06-03 15:44:57.042681+00
+223	session_start	5	sess_5_1780501648718	1	2	{}	2026-06-03 15:47:28.722689+00
+224	session_end	5	sess_5_1780501648718	1	2	{}	2026-06-03 15:50:31.153761+00
+225	session_start	5	sess_5_1780503288478	1	2	{}	2026-06-03 16:14:48.480351+00
+226	mob_killed	5	sess_5_1780503288478	1	2	{"mobId": 1, "mobSlug": "SmallFox", "mobLevel": 1}	2026-06-03 16:15:49.80942+00
+227	session_end	5	sess_5_1780503288478	1	2	{}	2026-06-03 16:16:05.915253+00
+228	session_start	3	sess_3_1780503378229	5	0	{}	2026-06-03 16:16:18.231277+00
+229	session_end	3	sess_3_1780503378229	5	0	{}	2026-06-03 16:16:35.403254+00
+230	session_start	3	sess_3_1780503407428	5	0	{}	2026-06-03 16:16:47.429806+00
+231	session_end	3	sess_3_1780503407428	5	0	{}	2026-06-03 16:16:53.689785+00
+232	session_start	5	sess_5_1780503633181	1	2	{}	2026-06-03 16:20:33.18266+00
+233	session_end	5	sess_5_1780503633181	1	1	{}	2026-06-03 16:21:06.065792+00
+234	session_start	5	sess_5_1780503683486	1	1	{}	2026-06-03 16:21:23.488284+00
+235	session_end	5	sess_5_1780503683486	1	1	{}	2026-06-03 16:21:31.566999+00
+236	session_start	3	sess_3_1780504147867	5	0	{}	2026-06-03 16:29:07.869458+00
+237	session_end	3	sess_3_1780504147867	5	0	{}	2026-06-03 16:30:07.878213+00
+238	session_start	5	sess_5_1780514211776	1	1	{}	2026-06-03 19:16:51.78791+00
+239	session_end	5	sess_5_1780514211776	1	1	{}	2026-06-03 19:17:01.29396+00
+240	session_start	5	sess_5_1780576004588	1	1	{}	2026-06-04 12:26:44.590585+00
+241	session_end	5	sess_5_1780576004588	1	1	{}	2026-06-04 12:27:53.982966+00
+242	session_start	5	sess_5_1780576149710	1	1	{}	2026-06-04 12:29:09.713114+00
+243	session_end	5	sess_5_1780576149710	1	1	{}	2026-06-04 12:29:24.4754+00
+244	session_start	5	sess_5_1780576209062	1	1	{}	2026-06-04 12:30:09.064111+00
+245	session_end	5	sess_5_1780576209062	1	1	{}	2026-06-04 12:30:43.91395+00
+246	session_start	3	sess_3_1780576632642	5	0	{}	2026-06-04 12:37:12.644519+00
+247	session_end	3	sess_3_1780576632642	5	0	{}	2026-06-04 12:37:51.033773+00
+248	session_start	13	sess_13_1780648269450	1	0	{}	2026-06-05 08:31:09.451842+00
+249	session_end	13	sess_13_1780648269450	1	0	{}	2026-06-05 08:31:21.329447+00
+250	session_start	3	sess_3_1780648331173	5	0	{}	2026-06-05 08:32:11.175652+00
+251	session_end	3	sess_3_1780648331173	5	0	{}	2026-06-05 08:32:43.336013+00
+252	session_start	14	sess_14_1780649036827	1	0	{}	2026-06-05 08:43:56.829772+00
+253	session_end	14	sess_14_1780649036827	1	0	{}	2026-06-05 08:44:27.897092+00
+254	session_start	14	sess_14_1780649084484	1	0	{}	2026-06-05 08:44:44.485821+00
+255	session_end	14	sess_14_1780649084484	1	0	{}	2026-06-05 08:44:57.785279+00
+256	session_start	6	sess_6_1780649228686	1	1	{}	2026-06-05 08:47:08.68863+00
+257	player_death	6	sess_6_1780649228686	1	2	{}	2026-06-05 08:47:59.969873+00
+258	session_end	6	sess_6_1780649228686	1	1	{}	2026-06-05 08:48:35.681584+00
+259	session_start	3	sess_3_1780655939174	5	0	{}	2026-06-05 10:38:59.177635+00
+260	session_end	3	sess_3_1780655939174	5	0	{}	2026-06-05 10:40:16.175523+00
+261	session_start	3	sess_3_1780656069303	5	0	{}	2026-06-05 10:41:09.305024+00
+262	session_end	3	sess_3_1780656069303	5	0	{}	2026-06-05 10:43:03.105561+00
+263	session_start	3	sess_3_1780656276989	5	0	{}	2026-06-05 10:44:36.991393+00
+264	session_end	3	sess_3_1780656276989	5	0	{}	2026-06-05 10:45:27.916616+00
+265	session_start	3	sess_3_1780656517302	5	0	{}	2026-06-05 10:48:37.306442+00
+266	session_end	3	sess_3_1780656517302	5	0	{}	2026-06-05 10:49:17.275964+00
+267	session_start	6	sess_6_1780656570914	1	1	{}	2026-06-05 10:49:30.917695+00
+268	session_end	6	sess_6_1780656570914	1	1	{}	2026-06-05 10:52:56.814551+00
+269	session_start	8	sess_8_1780656856371	1	2	{}	2026-06-05 10:54:16.373356+00
+270	session_end	8	sess_8_1780656856371	1	1	{}	2026-06-05 10:54:43.887544+00
+271	session_start	8	sess_8_1780666529388	1	1	{}	2026-06-05 13:35:29.391892+00
+272	session_end	8	sess_8_1780666529388	1	1	{}	2026-06-05 13:38:21.989444+00
+273	session_start	8	sess_8_1780667013608	1	1	{}	2026-06-05 13:43:33.610502+00
+274	session_end	8	sess_8_1780667013608	1	1	{}	2026-06-05 13:44:52.23454+00
+275	session_start	8	sess_8_1780734831340	1	1	{}	2026-06-06 08:33:51.342496+00
+276	session_end	8	sess_8_1780734831340	1	1	{}	2026-06-06 08:35:20.843485+00
+277	session_start	5	sess_5_1780739915847	1	1	{}	2026-06-06 09:58:35.849086+00
+278	session_end	5	sess_5_1780739915847	1	2	{}	2026-06-06 10:16:19.960861+00
 \.
 
 
@@ -7595,12 +7877,29 @@ COPY public.gm_action_log (id, gm_user_id, action_type, target_type, target_id, 
 --
 
 COPY public.item_attributes_mapping (id, item_id, attribute_id, value, apply_on) FROM stdin;
-1	1	12	10	equip
-2	2	6	5	equip
-7	15	13	8	equip
-8	1	3	3	equip
-9	15	4	3	equip
-10	2	17	5	equip
+15	29	3	2	equip
+16	29	12	3	equip
+17	30	4	2	equip
+18	30	13	3	equip
+19	31	3	5	equip
+20	31	12	8	equip
+21	32	4	5	equip
+22	32	13	8	equip
+23	33	4	8	equip
+24	33	13	14	equip
+25	34	3	8	equip
+26	34	12	14	equip
+27	35	6	2	equip
+28	36	6	3	equip
+29	37	6	3	equip
+30	38	6	8	equip
+31	39	6	8	equip
+32	40	6	5	equip
+33	41	6	15	equip
+34	42	6	15	equip
+35	43	6	10	equip
+36	44	15	8	equip
+37	45	2	30	equip
 \.
 
 
@@ -7609,6 +7908,18 @@ COPY public.item_attributes_mapping (id, item_id, attribute_id, value, apply_on)
 --
 
 COPY public.item_class_restrictions (item_id, class_id) FROM stdin;
+36	2
+38	2
+41	2
+37	1
+39	1
+42	1
+29	2
+31	2
+34	2
+30	1
+32	1
+33	1
 \.
 
 
@@ -7659,8 +7970,19 @@ COPY public.item_types (id, name, slug) FROM stdin;
 --
 
 COPY public.item_use_effects (id, item_id, effect_slug, attribute_slug, value, is_instant, duration_seconds, tick_ms, cooldown_seconds) FROM stdin;
-1	3	hp_restore_50	hp	50	t	0	0	30
-2	4	bread_hot	hp	5	f	30	2000	60
+5	46	hp_restore_10	hp	10	t	0	0	30
+6	47	mp_restore_10	mp	10	t	0	0	30
+7	48	speed_boost_5	move_speed	5	f	180	1000	60
+8	49	defense_boost_3	physical_defense	3	f	180	1000	60
+9	50	strength_boost_3	strength	3	f	180	1000	60
+10	51	intelligence_boost_3	intelligence	3	f	180	1000	60
+11	52	stew_hp_buff	max_health	10	f	60	1000	120
+12	53	bread_hp_restore	hp	15	t	0	0	60
+13	54	apple_hp_buff	max_health	15	f	60	1000	120
+14	55	meat_phys_atk_buff	physical_attack	5	f	180	1000	120
+15	56	wine_mag_atk_buff	magical_attack	5	f	180	1000	120
+16	53	bread_mp_restore	mp	10	t	0	0	60
+17	52	stew_mp_buff	max_mana	5	f	60	1000	120
 \.
 
 
@@ -7669,31 +7991,64 @@ COPY public.item_use_effects (id, item_id, effect_slug, attribute_slug, value, i
 --
 
 COPY public.items (id, name, slug, description, is_quest_item, item_type, weight, rarity_id, stack_max, is_container, is_durable, is_tradable, durability_max, vendor_price_buy, vendor_price_sell, equip_slot, level_requirement, is_equippable, is_harvest, is_usable, is_two_handed, mastery_slug) FROM stdin;
-5	Ancient Artifact	ancient_artifact	A mysterious artifact for quests.	t	5	0.5	1	64	f	f	t	100	1	1	\N	0	f	f	f	f	\N
-18	Tome of Shield Bash	tome_shield_bash	A worn training manual describing the technique of Shield Bash.	f	10	0.3	2	1	f	f	t	100	500	100	\N	5	f	f	t	f	\N
-19	Tome of Whirlwind	tome_whirlwind	An ancient scroll detailing the devastating Whirlwind technique. Rare.	f	10	0.3	3	1	f	f	t	100	0	50	\N	10	f	f	t	f	\N
-2	Wooden Shield	wooden_shield	A basic wooden shield.	f	2	3	1	64	f	t	t	100	40	15	7	1	t	f	f	f	\N
-3	Health Potion	health_potion	Restores 50 health points.	f	3	0.5	1	64	f	f	t	100	10	4	\N	0	f	f	t	f	\N
-4	Bread	bread	A loaf of bread to restore hunger.	f	4	0.1	1	64	f	f	t	100	3	1	\N	0	f	f	t	f	\N
-6	Iron Ore	iron_ore	A piece of iron ore, useful for crafting.	f	6	2	1	64	f	f	t	100	5	2	\N	0	f	f	f	f	\N
-9	Small Animal Skin	small_animal_skin	A basic skin of small animal.	f	6	0.3	1	64	f	f	t	100	8	3	\N	0	f	t	f	f	\N
-10	Animal Fat	animal_fat	Fat extracted from animal.	f	6	0.2	1	64	f	f	t	100	4	2	\N	0	f	t	f	f	\N
-11	Animal Blood	animal_blood	Blood extracted from animal.	f	6	0.5	1	64	f	f	t	100	4	1	\N	0	f	t	f	f	\N
-12	Animal Meat	animal_meet	Meat extracted from animal.	f	6	1	1	64	f	f	t	100	5	2	\N	0	f	t	f	f	\N
-13	Animal Fang	animal_fang	Fang extracted from animal.	f	6	0.2	1	64	f	f	t	100	6	3	\N	0	f	t	f	f	\N
-14	Animal Eye	animal_eye	Eye extracted from animal.	f	6	0.1	1	64	f	f	t	100	5	2	\N	0	f	t	f	f	\N
-7	Small Animal Bone	small_animal_bone	A small bones of small animal.	f	6	0.5	1	64	f	f	t	100	3	1	\N	0	f	t	f	f	\N
-17	Wolf Skin	wolf_skin	A rough skin of a forest wolf. Milaya will know what to do with it.	t	6	0.5	1	10	f	f	f	100	5	2	\N	0	f	f	f	f	\N
+2	Старый дубовый щит	old_oak_shield	Старый дубовый щит, повидавший немало битв, но всё ещё крепкий.	f	2	3	2	64	f	t	t	120	120	36	7	3	t	f	f	f	\N
 16	Gold Coin	gold_coin	Universal currency of the realm. Used as payment for goods and services.	f	8	0.01	1	9999999	f	f	t	100	1	1	\N	0	f	f	f	f	\N
-20	Tome of Iron Skin	tome_iron_skin	Teachings of hardening the body through relentless training.	f	10	0.3	2	1	f	f	t	100	400	80	\N	5	f	f	t	f	\N
-21	Tome of Constitution Mastery	tome_constitution_mastery	A guide to unlocking the body's true enduring potential.	f	10	0.3	2	1	f	f	t	100	800	160	\N	8	f	f	t	f	\N
-22	Tome of Frost Bolt	tome_frost_bolt	Basic arcane theory behind channelling cold into a bolt of frost.	f	10	0.3	2	1	f	f	t	100	500	100	\N	5	f	f	t	f	\N
-23	Tome of Arcane Blast	tome_arcane_blast	Concentrated arcane theory on focusing raw magical energy into a blast.	f	10	0.3	2	1	f	f	t	100	900	180	\N	8	f	f	t	f	\N
-24	Tome of Chain Lightning	tome_chain_lightning	A legendary scroll describing storm magic that arcs between enemies. Extremely rare.	f	10	0.3	4	1	f	f	t	100	0	250	\N	12	f	f	t	f	\N
-25	Tome of Mana Shield	tome_mana_shield	Teachings on weaving mana into a protective aura.	f	10	0.3	2	1	f	f	t	100	600	120	\N	5	f	f	t	f	\N
-26	Tome of Elemental Mastery	tome_elemental_mastery	A comprehensive guide to attaining mastery over elemental forces.	f	10	0.3	2	1	f	f	t	100	1200	240	\N	10	f	f	t	f	\N
-15	Wooden Staff	wooden_staff	A simple wooden staff for apprentice mages.	f	1	2	1	64	f	t	t	80	30	12	6	1	t	f	f	f	staff_mastery
-1	Iron Sword	iron_sworld	A sturdy iron sword.	f	1	5	1	64	f	t	t	100	50	20	6	1	t	f	f	f	sword_mastery
+18	Tome of Shield Bash	tome_shield_bash	A worn training manual describing the technique of Shield Bash.	f	10	0.3	2	1	f	f	t	100	500	150	\N	5	f	f	t	f	\N
+19	Tome of Whirlwind	tome_whirlwind	An ancient scroll detailing the devastating Whirlwind technique. Rare.	f	10	0.3	3	1	f	f	t	100	0	80	\N	10	f	f	t	f	\N
+20	Tome of Iron Skin	tome_iron_skin	Teachings of hardening the body through relentless training.	f	10	0.3	2	1	f	f	t	100	400	120	\N	5	f	f	t	f	\N
+21	Tome of Constitution Mastery	tome_constitution_mastery	A guide to unlocking the body's true enduring potential.	f	10	0.3	2	1	f	f	t	100	800	240	\N	8	f	f	t	f	\N
+22	Tome of Frost Bolt	tome_frost_bolt	Basic arcane theory behind channelling cold into a bolt of frost.	f	10	0.3	2	1	f	f	t	100	500	150	\N	5	f	f	t	f	\N
+23	Tome of Arcane Blast	tome_arcane_blast	Concentrated arcane theory on focusing raw magical energy into a blast.	f	10	0.3	2	1	f	f	t	100	900	270	\N	8	f	f	t	f	\N
+24	Tome of Chain Lightning	tome_chain_lightning	A legendary scroll describing storm magic that arcs between enemies. Extremely rare.	f	10	0.3	4	1	f	f	t	100	0	350	\N	12	f	f	t	f	\N
+25	Tome of Mana Shield	tome_mana_shield	Teachings on weaving mana into a protective aura.	f	10	0.3	2	1	f	f	t	100	600	180	\N	5	f	f	t	f	\N
+26	Tome of Elemental Mastery	tome_elemental_mastery	A comprehensive guide to attaining mastery over elemental forces.	f	10	0.3	2	1	f	f	t	100	1200	360	\N	10	f	f	t	f	\N
+29	Изношенный старый меч	worn_old_sword	Самое базовое оружие воина. Лезвие покрыто зазубринами, но в умелых руках ещё послужит.	f	1	4	1	1	f	t	t	80	35	10	6	1	t	f	f	f	sword_mastery
+30	Треснувший деревянный посох	cracked_wooden_staff	Самое базовое оружие мага. По дереву пошли трещины, но магическая энергия ещё течёт сквозь него.	f	1	2.5	1	1	f	t	t	60	35	10	6	1	t	f	f	f	staff_mastery
+31	Острый меч	sharp_sword	Хорошо заточенный клинок из добротной стали. Надёжное оружие для опытного воина.	f	1	4.5	2	1	f	t	t	100	140	42	6	3	t	f	f	f	sword_mastery
+32	Прочный посох	sturdy_staff	Крепкий посох из выдержанного дуба с лёгким магическим отблеском.	f	1	2.5	2	1	f	t	t	90	140	42	6	3	t	f	f	f	staff_mastery
+33	Рунный посох	rune_staff	Посох покрытый светящимися рунами. Значительно усиливает магические способности владельца.	f	1	3	3	1	f	t	t	110	500	150	6	6	t	f	f	f	staff_mastery
+34	Меч падшего воина	fallen_warrior_sword	Клинок воина павшего в великой битве. Сталь всё ещё хранит память о былом владельце и его силе.	f	1	5	3	1	f	t	t	120	500	150	6	6	t	f	f	f	sword_mastery
+35	Поношенные дырявые сапоги	worn_torn_boots	Самые базовые сапоги. Дыры в подошве, но это лучше чем идти босиком.	f	2	1.5	1	1	f	t	t	50	20	6	4	1	t	f	f	f	\N
+36	Потрёпанный нагрудник	tattered_breastplate	Самая базовая броня для воина. Кожа местами протёрта, но грудную клетку защитит.	f	2	3	1	1	f	t	t	70	30	9	2	1	t	f	f	f	\N
+37	Драная мантия	torn_robe	Самая базовая броня для мага. Мантия побывала в переделках, но магическую ауру сохраняет.	f	2	1.5	1	1	f	t	t	50	30	9	2	1	t	f	f	f	\N
+38	Кожаный нагрудник	leather_chestguard	Добротный нагрудник из толстой выделанной кожи. Хорошая защита без лишнего веса.	f	2	3.5	2	1	f	t	t	100	130	39	2	3	t	f	f	f	\N
+39	Мантия ученика	apprentice_robe	Мантия подмастерья магической гильдии. Ткань пропитана защитными чарами.	f	2	1.8	2	1	f	t	t	80	130	39	2	3	t	f	f	f	\N
+40	Кожаные сапоги	leather_boots	Крепкие кожаные сапоги. Ноги скажут спасибо после долгого перехода.	f	2	2	2	1	f	t	t	70	90	27	4	3	t	f	f	f	\N
+41	Стёганый доспех	quilted_armor	Многослойный стёганый доспех усиленный металлическими вставками. Серьёзная защита для бывалых воинов.	f	2	5	3	1	f	t	t	140	420	126	2	6	t	f	f	f	\N
+42	Плащ Мудреца	sage_cloak	Длинный плащ пропитанный мощной защитной магией. Такие носят только уважаемые чародеи.	f	2	2	3	1	f	t	t	100	420	126	2	6	t	f	f	f	\N
+43	Прочные сапоги	sturdy_boots	Сапоги усиленные стальными накладками. В таких можно и по болоту пройти и в бою устоять.	f	2	2.5	3	1	f	t	t	90	300	90	4	6	t	f	f	f	\N
+44	Амулет Звериного Чутья	beast_sense_amulet	Древний амулет обостриющий инстинкты носящего. Позволяет чувствовать опасность до того как она наступит.	f	7	0.3	3	1	f	t	t	100	380	114	10	6	t	f	f	f	\N
+45	Светящееся Кольцо	glowing_ring	Кольцо излучающее мягкий голубоватый свет. Наполняет владельца дополнительной магической энергией.	f	7	0.1	3	1	f	t	t	100	350	105	9	6	t	f	f	f	\N
+46	Малое зелье лечения	small_health_potion	Красное зелье которое восстанавливает немного здоровья.	f	3	0.5	1	64	f	f	t	100	10	3	\N	0	f	f	t	f	\N
+47	Малое зелье маны	small_mana_potion	Синее зелье которое восстанавливает немного маны.	f	3	0.5	1	64	f	f	t	100	10	3	\N	0	f	f	t	f	\N
+48	Малое зелье скорости	small_speed_potion	Зелье которое накладывает эффект увеличения скорости передвижения на некоторое время.	f	3	0.5	1	64	f	f	t	100	15	4	\N	0	f	f	t	f	\N
+49	Малое зелье защиты	small_defense_potion	Зелье которое накладывает эффект увеличения физической защиты на некоторое время.	f	3	0.5	1	64	f	f	t	100	15	4	\N	0	f	f	t	f	\N
+50	Малое зелье силы	small_strength_potion	Зелье которое накладывает эффект увеличения физической силы на некоторое время.	f	3	0.5	1	64	f	f	t	100	15	4	\N	0	f	f	t	f	\N
+51	Малое зелье магии	small_magic_potion	Зелье которое накладывает эффект увеличения интеллекта на некоторое время.	f	3	0.5	1	64	f	f	t	100	15	4	\N	0	f	f	t	f	\N
+52	Холодная похлёбка	cold_stew	Остывшая похлёбка сделанная из того что было под рукой.	f	4	0.3	1	64	f	f	t	100	6	2	\N	0	f	f	t	f	\N
+53	Свежий хлеб	fresh_bread	Свежий хрустящий хлеб. Восстанавливает силы.	f	4	0.2	1	64	f	f	t	100	8	2	\N	0	f	f	t	f	\N
+54	Яблоко	apple	Красное спелое яблоко.	f	4	0.1	1	64	f	f	t	100	5	1	\N	0	f	f	t	f	\N
+55	Жареное мясо	roasted_meat	Хорошо прожаренное мясо животного. Придаёт сил.	f	4	0.4	2	64	f	f	t	100	25	7	\N	0	f	f	t	f	\N
+56	Сладкое вино	sweet_wine	Вкусное и сладкое вино. Пробуждает магические способности.	f	4	0.3	2	64	f	f	t	100	25	7	\N	0	f	f	t	f	\N
+57	Шкура животного	animal_hide	Шкура которую можно собрать с животных. Используется в ремесле и торговле.	f	6	0.4	1	64	f	f	t	100	7	2	\N	0	f	t	f	f	\N
+58	Кости животного	animal_bones	Кости которые можно собрать с животных.	f	6	0.5	1	64	f	f	t	100	5	1	\N	0	f	t	f	f	\N
+59	Когти животного	animal_claws	Когти которые можно собрать с животных. Острые и прочные.	f	6	0.2	1	64	f	f	t	100	7	2	\N	0	f	t	f	f	\N
+60	Жир животного	animal_fat	Жир который можно собрать с животных. Горит долго и ярко.	f	6	0.3	1	64	f	f	t	100	5	1	\N	0	f	t	f	f	\N
+61	Кровь животного	animal_blood	Кровь которую можно собрать с животных. Ценится алхимиками.	f	6	0.5	1	64	f	f	t	100	5	1	\N	0	f	t	f	f	\N
+62	Каменная крошка	stone_fragment	Частицы камней которые можно собрать с големов. Содержат следы магии.	f	6	0.4	2	64	f	f	t	100	15	4	\N	0	f	t	f	f	\N
+63	Прах нежити	undead_dust	Прах который можно собрать с нежити. Тускло светится в темноте.	f	6	0.2	2	64	f	f	t	100	18	5	\N	0	f	t	f	f	\N
+64	Обломок клинка	blade_fragment	Обломок старого клинка который выпадает с разных мобов.	f	6	1	3	64	f	f	t	100	35	10	\N	0	f	t	f	f	\N
+65	Осколок ядра	core_shard	Осколок магического ядра который можно собрать с магически созданных существ.	f	6	0.3	3	64	f	f	t	100	45	13	\N	0	f	t	f	f	\N
+66	Ржавая пластина	rusty_plate	Ржавая пластина с какой-то части доспехов. Выпадает обычно с нежити.	f	6	1.2	2	64	f	f	t	100	12	3	\N	0	f	t	f	f	\N
+67	Окровавленный клок ткани	bloody_cloth_scrap	Клок одежды какой-то жертвы. Продаётся за бесценок.	f	6	0.1	1	64	f	f	t	100	5	1	\N	0	f	t	f	f	\N
+68	Ржавый наконечник стрелы	rusty_arrowhead	Старый ржавый наконечник стрелы который застрял в теле и выпадает с мобов.	f	6	0.1	1	64	f	f	t	100	6	2	\N	0	f	t	f	f	\N
+69	Сломанный нож	broken_knife	Старый сломанный нож который застрял в теле и выпадает с мобов.	f	6	0.3	1	64	f	f	t	100	7	2	\N	0	f	t	f	f	\N
+70	Старый ошейник	old_collar	Старый ошейник который выпадает с мобов типа животных.	f	6	0.2	1	64	f	f	t	100	8	2	\N	0	f	t	f	f	\N
+71	Потрёпанный дневник	tattered_diary	Потрёпанный дневник неизвестного путника. Страницы едва читаемы.	f	6	0.3	2	64	f	f	t	100	22	6	\N	0	f	t	f	f	\N
+72	Птичье перо	bird_feather	Обычное птичье перо. Лёгкое как ветер.	f	6	0.05	1	64	f	f	t	100	4	1	\N	0	f	t	f	f	\N
+73	Сломанная печать	broken_seal	Старая сломанная магическая печать. Выпадает с мобов созданных с помощью магии.	f	6	0.2	2	64	f	f	t	100	20	6	\N	0	f	t	f	f	\N
+74	Магический камень	magical_stone	Светящийся камень пропитанный магической энергией. Выпадает с магических мобов.	f	6	0.3	3	64	f	f	t	100	55	16	\N	0	f	t	f	f	\N
+75	Мясо животного	animal_meat	Свежее мясо добытое с животного. Можно приготовить или продать.	f	6	1	1	64	f	f	t	100	8	2	\N	0	f	t	f	f	\N
 \.
 
 
@@ -7728,8 +8083,14 @@ unarmed_mastery	Рукопашный бой	\N	100
 --
 
 COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressive, is_dead, slug, radius, base_xp, rank_id, aggro_range, attack_range, attack_cooldown, chase_multiplier, patrol_speed, is_social, chase_duration, flee_hp_threshold, ai_archetype, can_evolve, is_rare, rare_spawn_chance, rare_spawn_condition, faction_slug, rep_delta_per_kill, biome_slug, mob_type_slug) FROM stdin;
-1	Small Fox	2	1	40	0	f	f	SmallFox	100	15	1	600	120	2.5	1.8	0.9	t	30	0	melee	f	f	0	\N	\N	0		beast
-2	Grey Wolf	2	1	80	0	t	f	GreyWolf	100	20	1	700	120	2	2.2	1.1	f	30	0	melee	f	f	0	\N	\N	0		beast
+3	Простой кабан	2	2	120	10	f	f	ForestBoar	100	30	1	500	120	2	1.5	0.8	t	30	0	melee	f	f	0	\N	\N	0		beast
+4	Простая лиса	2	1	50	15	f	f	ForestFox	100	20	1	600	120	2.5	1	1	t	30	0	melee	f	f	0	\N	\N	0		beast
+5	Скелет	2	1	70	5	t	f	RuinSkeleton	100	25	1	500	110	2.8	0.7	0.7	f	30	0	melee	f	f	0	\N	\N	0		undead
+6	Простой волк	2	3	150	20	t	f	ForestWolf	100	45	1	700	130	2	1.3	1	f	30	0	melee	f	f	0	\N	\N	0		beast
+7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1.3	1	f	30	0	melee	f	t	8	on_kill	\N	0		beast
+8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	30	0	melee	f	t	8	on_kill	\N	0		beast
+9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	6	900	180	2.5	0.8	0.7	f	30	0	melee	f	f	0	\N	\N	0		beast
+10	Каменный голем	2	15	5000	200	t	f	StoneGolem	250	2000	6	700	200	3	0.5	0.4	f	30	0	melee	f	f	0	\N	\N	0		elemental
 \.
 
 
@@ -7746,17 +8107,73 @@ COPY public.mob_active_effect (id, mob_uid, effect_id, attribute_id, value, sour
 --
 
 COPY public.mob_loot_info (id, mob_id, item_id, drop_chance, is_harvest_only, min_quantity, max_quantity, loot_tier) FROM stdin;
-10	1	3	0.10	f	1	1	common
-11	1	9	0.60	t	1	1	common
-12	1	10	0.30	t	1	1	common
-13	1	11	0.20	t	1	2	common
-14	1	12	0.15	t	1	1	common
-15	2	6	0.15	f	1	2	common
-16	2	9	0.50	t	1	1	common
-17	2	11	0.30	t	1	1	common
-18	2	12	0.15	t	1	1	common
-19	2	13	0.20	t	1	1	common
-35	2	17	0.40	f	1	1	common
+40	3	69	0.15	f	1	1	common
+41	3	68	0.10	f	1	1	common
+42	3	70	0.07	f	1	1	uncommon
+43	3	57	0.50	t	1	1	common
+44	3	61	0.35	t	1	1	common
+45	3	60	0.30	t	1	1	common
+46	3	58	0.40	t	1	1	common
+47	3	75	0.30	t	1	1	common
+48	4	68	0.07	f	1	1	common
+49	4	72	0.18	f	1	1	common
+50	4	67	0.10	f	1	1	common
+51	4	57	0.45	t	1	1	common
+52	4	61	0.30	t	1	1	common
+53	4	60	0.25	t	1	1	common
+54	4	58	0.35	t	1	1	common
+55	4	59	0.18	t	1	1	common
+56	4	75	0.25	t	1	1	common
+57	5	71	0.10	f	1	1	common
+58	5	66	0.12	f	1	1	common
+59	5	64	0.04	f	1	1	rare
+60	5	16	0.20	f	1	2	common
+61	5	63	0.60	t	1	1	common
+62	6	70	0.12	f	1	1	common
+63	6	68	0.07	f	1	1	common
+64	6	67	0.10	f	1	1	common
+65	6	57	0.50	t	1	1	common
+66	6	61	0.35	t	1	1	common
+67	6	60	0.30	t	1	1	common
+68	6	58	0.40	t	1	1	common
+69	6	59	0.20	t	1	1	common
+70	6	75	0.30	t	1	1	common
+71	7	70	0.28	f	1	1	common
+72	7	68	0.15	f	1	1	common
+73	7	67	0.18	f	1	1	common
+74	7	44	0.07	f	1	1	very_rare
+75	7	57	0.60	t	1	1	common
+76	7	61	0.45	t	1	1	common
+77	7	60	0.40	t	1	1	common
+78	7	58	0.50	t	1	1	common
+79	7	59	0.30	t	1	1	common
+80	7	75	0.40	t	1	1	common
+81	8	68	0.15	f	1	1	common
+82	8	72	0.35	f	1	1	common
+83	8	67	0.18	f	1	1	common
+84	8	74	0.12	f	1	1	uncommon
+85	8	45	0.05	f	1	1	very_rare
+86	8	57	0.55	t	1	1	common
+87	8	61	0.40	t	1	1	common
+88	8	60	0.35	t	1	1	common
+89	8	58	0.45	t	1	1	common
+90	8	59	0.25	t	1	1	common
+91	8	75	0.30	t	1	1	common
+92	9	67	0.45	f	1	1	common
+93	9	64	0.18	f	1	1	uncommon
+94	9	69	0.28	f	1	1	common
+95	9	68	0.18	f	1	1	common
+96	9	57	0.70	t	1	2	common
+97	9	61	0.50	t	1	2	common
+98	9	60	0.45	t	1	2	common
+99	9	58	0.60	t	1	2	common
+100	9	59	0.40	t	1	2	common
+101	9	75	0.50	t	1	2	common
+102	10	16	1.00	f	2	5	common
+103	10	73	0.22	f	1	1	uncommon
+104	10	74	0.14	f	1	1	rare
+105	10	65	0.40	t	1	1	uncommon
+106	10	62	0.60	t	1	2	common
 \.
 
 
@@ -7806,8 +8223,14 @@ COPY public.mob_resistances (mob_id, element_slug) FROM stdin;
 --
 
 COPY public.mob_skills (id, mob_id, skill_id, current_level) FROM stdin;
-1	1	1	1
-2	2	1	1
+6	3	1	1
+7	4	1	1
+8	5	1	1
+9	6	1	1
+10	7	1	1
+11	8	1	1
+12	9	1	1
+13	10	1	1
 \.
 
 
@@ -7816,62 +8239,230 @@ COPY public.mob_skills (id, mob_id, skill_id, current_level) FROM stdin;
 --
 
 COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent) FROM stdin;
-137	1	1	40.00	\N	\N
-138	1	2	0.00	\N	\N
-139	1	12	6.00	\N	\N
-140	1	13	0.00	\N	\N
-141	1	6	2.00	\N	\N
-142	1	7	0.00	\N	\N
-143	1	8	3.00	\N	\N
-144	1	9	200.00	\N	\N
-145	1	14	4.00	\N	\N
-146	1	15	8.00	\N	\N
-147	1	16	0.00	\N	\N
-148	1	17	0.00	\N	\N
-149	1	10	0.50	\N	\N
-150	1	11	0.00	\N	\N
-151	1	18	6.50	\N	\N
-152	1	19	5.00	\N	\N
-153	1	20	0.00	\N	\N
-154	1	3	3.00	\N	\N
-155	1	4	1.00	\N	\N
-156	1	27	3.00	\N	\N
-157	1	28	1.00	\N	\N
-158	1	29	8.00	\N	\N
-159	1	30	0.00	\N	\N
-160	1	31	0.00	\N	\N
-161	1	32	0.00	\N	\N
-162	1	33	0.00	\N	\N
-163	1	34	0.00	\N	\N
-164	1	35	0.00	\N	\N
-165	2	1	80.00	\N	\N
-166	2	2	0.00	\N	\N
-167	2	12	10.00	\N	\N
-168	2	13	0.00	\N	\N
-169	2	6	5.00	\N	\N
-170	2	7	2.00	\N	\N
-171	2	8	5.00	\N	\N
-172	2	9	200.00	\N	\N
-173	2	14	6.00	\N	\N
-174	2	15	4.00	\N	\N
-175	2	16	0.00	\N	\N
-176	2	17	0.00	\N	\N
-177	2	10	1.00	\N	\N
-178	2	11	0.00	\N	\N
-179	2	18	5.00	\N	\N
-180	2	19	5.00	\N	\N
-181	2	20	0.00	\N	\N
-182	2	3	6.00	\N	\N
-183	2	4	2.00	\N	\N
-184	2	27	6.00	\N	\N
-185	2	28	2.00	\N	\N
-186	2	29	5.00	\N	\N
-187	2	30	0.00	\N	\N
-188	2	31	2.00	\N	\N
-189	2	32	0.00	\N	\N
-190	2	33	0.00	\N	\N
-191	2	34	0.00	\N	\N
-192	2	35	0.00	\N	\N
+200	3	1	120.00	\N	\N
+201	3	2	10.00	\N	\N
+202	3	3	7.00	\N	\N
+203	3	4	1.00	\N	\N
+204	3	6	5.00	\N	\N
+205	3	7	1.00	\N	\N
+206	3	8	3.00	\N	\N
+207	3	9	200.00	\N	\N
+208	3	10	0.50	\N	\N
+209	3	11	0.00	\N	\N
+210	3	12	12.00	\N	\N
+211	3	13	0.00	\N	\N
+212	3	14	5.00	\N	\N
+213	3	15	3.00	\N	\N
+214	3	16	0.00	\N	\N
+215	3	17	0.00	\N	\N
+216	3	18	5.50	\N	\N
+217	3	19	5.00	\N	\N
+218	3	20	0.00	\N	\N
+219	3	27	6.00	\N	\N
+220	3	28	1.00	\N	\N
+221	3	29	3.00	\N	\N
+222	3	30	0.00	\N	\N
+223	3	31	0.00	\N	\N
+224	3	32	0.00	\N	\N
+225	3	33	0.00	\N	\N
+226	3	34	0.00	\N	\N
+227	3	35	0.00	\N	\N
+228	4	1	50.00	\N	\N
+229	4	2	15.00	\N	\N
+230	4	3	3.00	\N	\N
+231	4	4	2.00	\N	\N
+232	4	6	3.00	\N	\N
+233	4	7	0.00	\N	\N
+234	4	8	4.00	\N	\N
+235	4	9	200.00	\N	\N
+236	4	10	0.50	\N	\N
+237	4	11	0.00	\N	\N
+238	4	12	7.00	\N	\N
+239	4	13	0.00	\N	\N
+240	4	14	5.00	\N	\N
+241	4	15	10.00	\N	\N
+242	4	16	0.00	\N	\N
+243	4	17	0.00	\N	\N
+244	4	18	7.00	\N	\N
+245	4	19	6.00	\N	\N
+246	4	20	0.00	\N	\N
+247	4	27	3.00	\N	\N
+248	4	28	2.00	\N	\N
+249	4	29	10.00	\N	\N
+250	4	30	0.00	\N	\N
+251	4	31	0.00	\N	\N
+252	4	32	0.00	\N	\N
+253	4	33	0.00	\N	\N
+254	4	34	0.00	\N	\N
+255	4	35	0.00	\N	\N
+256	5	1	70.00	\N	\N
+257	5	2	5.00	\N	\N
+258	5	3	5.00	\N	\N
+259	5	4	1.00	\N	\N
+260	5	6	4.00	\N	\N
+261	5	7	3.00	\N	\N
+262	5	8	2.00	\N	\N
+263	5	9	200.00	\N	\N
+264	5	10	0.30	\N	\N
+265	5	11	0.00	\N	\N
+266	5	12	9.00	\N	\N
+267	5	13	0.00	\N	\N
+268	5	14	3.00	\N	\N
+269	5	15	2.00	\N	\N
+270	5	16	0.00	\N	\N
+271	5	17	0.00	\N	\N
+272	5	18	3.50	\N	\N
+273	5	19	3.00	\N	\N
+274	5	20	0.00	\N	\N
+275	5	27	4.00	\N	\N
+276	5	28	1.00	\N	\N
+277	5	29	2.00	\N	\N
+278	5	30	0.00	\N	\N
+279	5	31	0.00	\N	\N
+280	5	32	0.00	\N	\N
+281	5	33	0.00	\N	\N
+282	5	34	0.00	\N	\N
+283	5	35	0.00	\N	\N
+284	6	1	150.00	\N	\N
+285	6	2	20.00	\N	\N
+286	6	3	8.00	\N	\N
+287	6	4	2.00	\N	\N
+288	6	6	7.00	\N	\N
+289	6	7	2.00	\N	\N
+290	6	8	5.00	\N	\N
+291	6	9	200.00	\N	\N
+292	6	10	0.80	\N	\N
+293	6	11	0.00	\N	\N
+294	6	12	15.00	\N	\N
+295	6	13	0.00	\N	\N
+296	6	14	6.00	\N	\N
+297	6	15	5.00	\N	\N
+298	6	16	0.00	\N	\N
+299	6	17	0.00	\N	\N
+300	6	18	6.50	\N	\N
+301	6	19	5.00	\N	\N
+302	6	20	0.00	\N	\N
+303	6	27	7.00	\N	\N
+304	6	28	2.00	\N	\N
+305	6	29	5.00	\N	\N
+306	6	30	0.00	\N	\N
+307	6	31	0.00	\N	\N
+308	6	32	0.00	\N	\N
+309	6	33	0.00	\N	\N
+310	6	34	0.00	\N	\N
+311	6	35	0.00	\N	\N
+312	7	1	400.00	\N	\N
+313	7	2	40.00	\N	\N
+314	7	3	12.00	\N	\N
+315	7	4	3.00	\N	\N
+316	7	6	12.00	\N	\N
+317	7	7	4.00	\N	\N
+318	7	8	6.00	\N	\N
+319	7	9	200.00	\N	\N
+320	7	10	1.50	\N	\N
+321	7	11	0.00	\N	\N
+322	7	12	25.00	\N	\N
+323	7	13	0.00	\N	\N
+324	7	14	8.00	\N	\N
+325	7	15	6.00	\N	\N
+326	7	16	0.00	\N	\N
+327	7	17	0.00	\N	\N
+328	7	18	6.00	\N	\N
+329	7	19	5.00	\N	\N
+330	7	20	0.00	\N	\N
+331	7	27	10.00	\N	\N
+332	7	28	3.00	\N	\N
+333	7	29	6.00	\N	\N
+334	7	30	0.00	\N	\N
+335	7	31	0.00	\N	\N
+336	7	32	0.00	\N	\N
+337	7	33	0.00	\N	\N
+338	7	34	0.00	\N	\N
+339	7	35	0.00	\N	\N
+340	8	1	300.00	\N	\N
+341	8	2	150.00	\N	\N
+342	8	3	4.00	\N	\N
+343	8	4	12.00	\N	\N
+344	8	6	10.00	\N	\N
+345	8	7	12.00	\N	\N
+346	8	8	8.00	\N	\N
+347	8	9	200.00	\N	\N
+348	8	10	1.00	\N	\N
+349	8	11	2.00	\N	\N
+350	8	12	12.00	\N	\N
+351	8	13	20.00	\N	\N
+352	8	14	10.00	\N	\N
+353	8	15	18.00	\N	\N
+354	8	16	0.00	\N	\N
+355	8	17	0.00	\N	\N
+356	8	18	8.00	\N	\N
+357	8	19	6.00	\N	\N
+358	8	20	0.00	\N	\N
+359	8	27	8.00	\N	\N
+360	8	28	10.00	\N	\N
+361	8	29	18.00	\N	\N
+362	8	30	0.00	\N	\N
+363	8	31	0.00	\N	\N
+364	8	32	0.00	\N	\N
+365	8	33	0.00	\N	\N
+366	8	34	0.00	\N	\N
+367	8	35	0.00	\N	\N
+368	9	1	2000.00	\N	\N
+369	9	2	50.00	\N	\N
+370	9	3	25.00	\N	\N
+371	9	4	2.00	\N	\N
+372	9	6	25.00	\N	\N
+373	9	7	10.00	\N	\N
+374	9	8	8.00	\N	\N
+375	9	9	200.00	\N	\N
+376	9	10	3.00	\N	\N
+377	9	11	0.00	\N	\N
+378	9	12	45.00	\N	\N
+379	9	13	0.00	\N	\N
+380	9	14	10.00	\N	\N
+381	9	15	3.00	\N	\N
+382	9	16	0.00	\N	\N
+383	9	17	0.00	\N	\N
+384	9	18	4.50	\N	\N
+385	9	19	4.00	\N	\N
+386	9	20	0.00	\N	\N
+387	9	27	20.00	\N	\N
+388	9	28	2.00	\N	\N
+389	9	29	3.00	\N	\N
+390	9	30	0.00	\N	\N
+391	9	31	0.00	\N	\N
+392	9	32	0.00	\N	\N
+393	9	33	0.00	\N	\N
+394	9	34	0.00	\N	\N
+395	9	35	0.00	\N	\N
+396	10	1	5000.00	\N	\N
+397	10	2	200.00	\N	\N
+398	10	3	30.00	\N	\N
+399	10	4	5.00	\N	\N
+400	10	6	40.00	\N	\N
+401	10	7	30.00	\N	\N
+402	10	8	2.00	\N	\N
+403	10	9	200.00	\N	\N
+404	10	10	2.00	\N	\N
+405	10	11	1.00	\N	\N
+406	10	12	55.00	\N	\N
+407	10	13	10.00	\N	\N
+408	10	14	8.00	\N	\N
+409	10	15	1.00	\N	\N
+410	10	16	0.00	\N	\N
+411	10	17	0.00	\N	\N
+412	10	18	3.00	\N	\N
+413	10	19	3.00	\N	\N
+414	10	20	0.00	\N	\N
+415	10	27	28.00	\N	\N
+416	10	28	3.00	\N	\N
+417	10	29	1.00	\N	\N
+418	10	30	0.00	\N	\N
+419	10	31	0.00	\N	\N
+420	10	32	0.00	\N	\N
+421	10	33	0.00	\N	\N
+422	10	34	0.00	\N	\N
+423	10	35	0.00	\N	\N
 \.
 
 
@@ -7947,6 +8538,8 @@ COPY public.npc_dialogue (npc_id, dialogue_id, priority, condition_group) FROM s
 3	3	0	\N
 4	4	0	\N
 5	5	0	\N
+6	7	2	[{"eq": true, "key": "ruins_dying_stranger.dialogue_started", "type": "flag"}, {"eq": true, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]
+6	8	1	[{"eq": true, "key": "ruins_dying_stranger.dialogue_started", "type": "flag"}, {"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]
 6	6	0	\N
 \.
 
@@ -7957,11 +8550,11 @@ COPY public.npc_dialogue (npc_id, dialogue_id, priority, condition_group) FROM s
 
 COPY public.npc_placements (id, npc_id, zone_id, x, y, z, rot_z) FROM stdin;
 12	6	\N	19015.771701309946	-19022.024921248747	1490	0
-2	2	1	2200	1120	200	-129.90160790888044
 1	3	1	-634.6344847632645	2160.291891096793	200	-20.259205622535426
-5	5	1	-220.51805190619052	1568.1504897981577	200	79.08751509189774
 3	1	1	585	-3300	200	71.8812130187667
-4	4	1	1200	-2800	200	176.85170827243957
+4	4	1	2839.3231182176823	-796.9468721200974	200	-145.0710341056735
+2	2	1	-3535.895437615007	-2136.5818797081447	200	44.58672960296602
+5	5	1	-2416.035161390464	-2718.4701626988026	200	8.13010235415546
 \.
 
 
@@ -7981,8 +8574,8 @@ COPY public.npc_skills (id, npc_id, skill_id, current_level) FROM stdin;
 --
 
 COPY public.npc_trainer_class (id, npc_id, class_id) FROM stdin;
-1	4	2
 2	5	1
+3	3	2
 \.
 
 
@@ -8029,7 +8622,11 @@ COPY public.player_flag (player_id, flag_key, int_value, bool_value, updated_at)
 3	explored_wilderness	0	t	2026-03-16 16:46:29.756499+00
 3	explored_fields	0	t	2026-03-21 18:18:49.109903+00
 3	explored_village	0	t	2026-03-21 19:01:39.204408+00
-3	ruins_dying_stranger.received_gift	0	t	2026-04-15 19:23:09.955401+00
+8	explored_village	0	t	2026-04-21 18:38:46.658824+00
+10	explored_village	0	t	2026-04-23 07:37:40.207345+00
+10	explored_fields	0	t	2026-04-23 07:38:10.208274+00
+8	explored_fields	0	t	2026-04-23 19:49:00.520156+00
+3	ruins_dying_stranger.dialogue_started	0	t	2026-06-05 10:39:07.945881+00
 2	explored_village	0	t	2026-03-20 19:31:36.562042+00
 \.
 
@@ -8039,15 +8636,6 @@ COPY public.player_flag (player_id, flag_key, int_value, bool_value, updated_at)
 --
 
 COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, durability_current, kill_count) FROM stdin;
-221	3	1	8	\N	100	0
-3	1	3	5	\N	\N	0
-165	3	3	107	\N	\N	0
-234	3	10	1	\N	\N	0
-236	2	9	1	\N	\N	0
-230	2	3	6	\N	\N	0
-176	3	15	1	\N	36	42
-169	3	16	9600	\N	\N	0
-18	3	17	8	\N	\N	0
 \.
 
 
@@ -8056,7 +8644,6 @@ COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, d
 --
 
 COPY public.player_quest (player_id, quest_id, state, current_step, progress, updated_at) FROM stdin;
-3	1	completed	2	{"have": 2}	2026-04-19 19:35:47.709002+00
 \.
 
 
@@ -8066,6 +8653,8 @@ COPY public.player_quest (player_id, quest_id, state, current_step, progress, up
 
 COPY public.player_skill_cooldown (character_id, skill_slug, cooldown_ends_at) FROM stdin;
 2	blink_home	2026-04-20 16:08:16.068+00
+7	basic_attack	2026-04-23 07:58:23.074+00
+11	basic_attack	2026-04-23 08:17:43.96+00
 \.
 
 
@@ -8074,7 +8663,7 @@ COPY public.player_skill_cooldown (character_id, skill_slug, cooldown_ends_at) F
 --
 
 COPY public.quest (id, slug, min_level, repeatable, cooldown_sec, giver_npc_id, turnin_npc_id, client_quest_key, reputation_faction_slug, reputation_on_complete, reputation_on_fail) FROM stdin;
-1	wolf_hunt_intro	1	t	600	2	2	quest.wolf_hunt_intro	\N	0	0
+2	varan_fox_menace	1	f	0	1	1	quest.varan_fox_menace	merchants	50	0
 \.
 
 
@@ -8083,8 +8672,9 @@ COPY public.quest (id, slug, min_level, repeatable, cooldown_sec, giver_npc_id, 
 --
 
 COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount, is_hidden) FROM stdin;
-2	1	exp	\N	0	300	f
-1	1	item	3	5	5	f
+4	2	item	46	3	0	f
+5	2	gold	\N	1	20	f
+6	2	exp	\N	1	50	f
 \.
 
 
@@ -8093,9 +8683,9 @@ COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount, 
 --
 
 COPY public.quest_step (id, quest_id, step_index, step_type, params, client_step_key, completion_mode) FROM stdin;
-1	1	0	kill	{"count": 5, "mob_id": 2}	quest.wolf_hunt_intro.kill_wolves	auto
-4	1	2	collect	{"count": 2, "item_id": 17}	quest.wolf_hunt_intro.collect_wolf_skins	auto
-3	1	1	custom	{}	quest.wolf_hunt_intro.report_to_milaya	manual
+8	2	0	kill	{"count": 6, "mob_id": 4}	quest.varan_fox_menace.kill_foxes	auto
+9	2	1	custom	{}	quest.varan_fox_menace.report_to_varan	manual
+10	2	2	collect	{"count": 6, "item_id": 57}	quest.varan_fox_menace.collect_hides	auto
 \.
 
 
@@ -8105,7 +8695,6 @@ COPY public.quest_step (id, quest_id, step_index, step_type, params, client_step
 
 COPY public.race (id, name, slug) FROM stdin;
 1	Human	human
-2	Elf	elf
 \.
 
 
@@ -8113,8 +8702,8 @@ COPY public.race (id, name, slug) FROM stdin;
 -- Data for Name: respawn_zones; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.respawn_zones (id, name, x, y, z, zone_id, is_default) FROM stdin;
-1	Starting Village	0	0	200	1	t
+COPY public.respawn_zones (id, name, x, y, z, zone_id, is_default, min_x, max_x, min_y, max_y, min_z, max_z, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
+1	Starting Village	313.97338826805935	-337.2851925069044	200	1	t	345.0512	1256.8528	-2752.8376	-1796.6135	200	200	RECT	0	0	0	0
 \.
 
 
@@ -8356,9 +8945,12 @@ COPY public.skills (id, name, slug, scale_stat_id, school_id, animation_name, is
 --
 
 COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_time) FROM stdin;
-2	2	2	5	00:01:00
-1	1	1	25	00:01:00
-6	6	1	5	00:01:00
+1	1	4	25	00:01:00
+2	2	6	8	00:01:00
+3	3	3	10	00:01:00
+4	4	5	8	00:01:00
+5	5	9	1	00:05:00
+6	6	10	1	00:10:00
 \.
 
 
@@ -8367,9 +8959,12 @@ COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_tim
 --
 
 COPY public.spawn_zones (zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn_z, max_spawn_x, max_spawn_y, max_spawn_z, game_zone_id, shape_type, center_x, center_y, inner_radius, outer_radius, exclusion_game_zone_id) FROM stdin;
-6	test_circle_spawn	-6368.6914109395075	10816.405407504659	400	-2832.4539132446735	12776.801441062467	800	2	CIRCLE	974.4140051920986	9629.849913509144	0	1025.3821742379987	\N
-1	Foxes Nest	5549.27440860249	7606.171800291835	100	8549.27440860249	9106.171800291835	500	2	ANNULUS	-341.30448381723545	-895.4767832193684	5608.287819504758	8172.50264880794	\N
-2	Wolf Place	-1347.7795661102573	11060.99297085309	100	719.674578427519	12560.99297085309	500	2	RECT	-314.05249384136914	11810.99297085309	0	0	\N
+1	Fox Glade	5549.27440860249	7606.171800291835	100	8549.27440860249	9106.171800291835	500	2	ANNULUS	-434.657331344104	-973.2708228250776	5608.287819504758	8172.50264880794	\N
+2	Wolf Den	-1347.7795661102573	11060.99297085309	100	719.674578427519	12560.99297085309	500	2	RECT	-314.05249384136914	11810.99297085309	0	0	\N
+3	Boar Grove	0	0	0	0	0	0	2	CIRCLE	3500	5000	0	1800	\N
+4	Ruins Outskirts	0	0	0	0	0	0	2	CIRCLE	18500	-18500	0	1500	\N
+5	Deep Thicket	0	0	0	0	0	0	2	CIRCLE	-5000	8000	0	800	\N
+6	Stone Circle	0	0	0	0	0	0	2	CIRCLE	20000	-20000	0	600	\N
 \.
 
 
@@ -8457,22 +9052,49 @@ COPY public.user_roles (id, name, label, is_staff) FROM stdin;
 --
 
 COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, expires_at, revoked_at) FROM stdin;
-1714	4	a2ca4dbb-4a95-48c1-9c6f-0122506025ae	\N	\N	2026-04-19 19:12:28.358783+00	2026-05-19 19:12:28.358783+00	\N
-1719	3	10c16ecd-0619-41d9-b466-5b3cf08b2533	\N	\N	2026-04-19 19:35:33.830048+00	2026-05-19 19:35:33.830048+00	\N
-1724	4	d29a8cd9-79e8-45ec-a0f4-923144583025	\N	\N	2026-04-19 19:41:59.300892+00	2026-05-19 19:41:59.300892+00	\N
-1715	4	e956016a-ccc2-445c-8c4f-c1811cc4ff34	\N	\N	2026-04-19 19:13:13.380118+00	2026-05-19 19:13:13.380118+00	\N
-1720	3	8d257410-2ec0-4cc7-9b2d-a8101a978cc1	\N	\N	2026-04-19 19:35:43.5596+00	2026-05-19 19:35:43.5596+00	\N
-1725	4	26a9805a-ae6a-4d9b-bb7b-6edcd3235527	\N	\N	2026-04-19 19:42:24.043112+00	2026-05-19 19:42:24.043112+00	\N
-1716	4	14afe164-ed0c-4102-ae72-f682e94b8661	\N	\N	2026-04-19 19:13:30.800018+00	2026-05-19 19:13:30.800018+00	\N
-1721	4	e4f41eaa-eb8f-4dd8-995f-a433b2d337ed	\N	\N	2026-04-19 19:35:53.240536+00	2026-05-19 19:35:53.240536+00	\N
-1717	4	48ba45c5-dea7-4e24-95c4-32c67ca3b72f	\N	\N	2026-04-19 19:27:28.752306+00	2026-05-19 19:27:28.752306+00	\N
-1722	4	82210156-9894-4206-b81e-da21b28c5855	\N	\N	2026-04-19 19:36:15.088115+00	2026-05-19 19:36:15.088115+00	\N
-1726	4	5a99fea0-2536-45ff-a084-1eb4dd801d75	\N	\N	2026-04-20 16:06:04.237349+00	2026-05-20 16:06:04.237349+00	\N
-1718	4	42a1ca4b-ddf5-4fb2-86f5-f61b2620006f	\N	\N	2026-04-19 19:32:33.930978+00	2026-05-19 19:32:33.930978+00	\N
-1723	4	699e50b7-b303-43ad-a577-c5e6bf48c49c	\N	\N	2026-04-19 19:37:01.654371+00	2026-05-19 19:37:01.654371+00	\N
-1727	4	196e86b0-c043-4ba2-b291-538a0b089c6b	\N	\N	2026-04-20 16:06:29.175749+00	2026-05-20 16:06:29.175749+00	\N
-1728	4	4b97bcf4-a584-4973-a2f6-d7d074cc89fb	\N	\N	2026-04-20 16:06:47.820417+00	2026-05-20 16:06:47.820417+00	\N
-1713	4	47eadb3e-e8db-4ea2-b5bf-66b98b3d339f	\N	\N	2026-04-19 19:11:38.555448+00	2026-05-19 19:11:38.555448+00	\N
+1838	8	2b88f331-9a71-4c56-9b03-b9ec99b262b0	\N	\N	2026-06-02 16:44:58.628628+00	2026-07-02 16:44:58.628628+00	\N
+1842	3	7a495a8d-5d95-47be-85da-56477d41a224	\N	\N	2026-06-02 19:59:55.122854+00	2026-07-02 19:59:55.122854+00	\N
+1843	3	59f2c863-020b-41ec-bcc0-563857856eff	\N	\N	2026-06-02 20:07:54.633724+00	2026-07-02 20:07:54.633724+00	\N
+1847	8	9e0a989c-b780-4d61-9835-43a7aa718ac5	\N	\N	2026-06-03 15:23:34.694994+00	2026-07-03 15:23:34.694994+00	\N
+1852	8	4ecdb901-a981-4d9f-8a4f-032b38a7aa3d	\N	\N	2026-06-03 15:47:16.314792+00	2026-07-03 15:47:16.314792+00	\N
+1853	8	54de921d-6617-4c87-93c4-7bfb26e23cba	\N	\N	2026-06-03 16:14:28.465972+00	2026-07-03 16:14:28.465972+00	\N
+1870	3	a34b5f34-35a0-4cbd-b62f-68a8958e9c50	\N	\N	2026-06-05 10:38:57.352161+00	2026-07-05 10:38:57.352161+00	\N
+1876	8	6d9e1888-e2d4-4840-9816-8eb8bb589013	\N	\N	2026-06-05 13:35:27.367116+00	2026-07-05 13:35:27.367116+00	\N
+1839	3	79a15a66-0d93-4255-90c2-5f26c72cbcee	\N	\N	2026-06-02 17:36:12.236235+00	2026-07-02 17:36:12.236235+00	\N
+1844	3	dd40a77e-ca55-413b-94b0-445780e9a772	\N	\N	2026-06-03 15:18:53.524868+00	2026-07-03 15:18:53.524868+00	\N
+1848	8	34ab7bd0-27d8-4f7f-b8fe-73b81fb9b8fe	\N	\N	2026-06-03 15:23:57.45029+00	2026-07-03 15:23:57.45029+00	\N
+1849	8	e5e6ee38-ca27-41c5-b657-a9d96a84e44c	\N	\N	2026-06-03 15:24:18.569656+00	2026-07-03 15:24:18.569656+00	\N
+1854	3	b042d898-a9b8-4f58-a831-2bae86d66b36	\N	\N	2026-06-03 16:16:16.632964+00	2026-07-03 16:16:16.632964+00	\N
+1855	3	19af6be4-61d1-4b0f-a17a-8920aee17fbf	\N	\N	2026-06-03 16:16:46.081512+00	2026-07-03 16:16:46.081512+00	\N
+1857	8	fddfa8cf-11a5-4c1f-bd98-a9dca057f272	\N	\N	2026-06-03 16:21:17.541749+00	2026-07-03 16:21:17.541749+00	\N
+1858	3	3c1521ab-5a26-44a8-8ac8-5689e62fd96e	\N	\N	2026-06-03 16:29:06.309256+00	2026-07-03 16:29:06.309256+00	\N
+1860	8	a1433ccc-a535-47c0-85fb-d5bc74f6ec31	\N	\N	2026-06-04 12:26:42.020783+00	2026-07-04 12:26:42.020783+00	\N
+1863	3	27aa3e4b-cbd1-4530-963b-abac0133b9c1	\N	\N	2026-06-04 12:37:10.835152+00	2026-07-04 12:37:10.835152+00	\N
+1864	8	1b6c3b8c-72de-4e4b-8629-ce49cb04294c	\N	\N	2026-06-05 08:29:53.737621+00	2026-07-05 08:29:53.737621+00	\N
+1869	8	e34dcb47-6397-4bfc-9580-b01c8e49d94c	\N	\N	2026-06-05 08:47:04.774565+00	2026-07-05 08:47:04.774565+00	\N
+1872	3	701e91c7-a3c7-4a05-8d89-72f55f31122b	\N	\N	2026-06-05 10:44:32.498004+00	2026-07-05 10:44:32.498004+00	\N
+1875	8	dc385c46-7b3e-4d60-894a-9c1b4195bc64	\N	\N	2026-06-05 10:54:12.85848+00	2026-07-05 10:54:12.85848+00	\N
+1877	8	ce6f1130-16c5-4d84-a317-342ba428069d	\N	\N	2026-06-05 13:43:28.177866+00	2026-07-05 13:43:28.177866+00	\N
+1878	8	540ddd73-57b9-40e8-aaa6-ce6133f58b11	\N	\N	2026-06-06 08:33:47.176167+00	2026-07-06 08:33:47.176167+00	\N
+1840	3	fe66ac38-ed55-4025-938e-5fb461a1157b	\N	\N	2026-06-02 17:49:39.106736+00	2026-07-02 17:49:39.106736+00	\N
+1845	8	67252aed-7f67-48bd-90cb-b56edac52685	\N	\N	2026-06-03 15:19:26.089533+00	2026-07-03 15:19:26.089533+00	\N
+1850	8	2571665d-1bbe-49c6-a721-2da01cccdc1e	\N	\N	2026-06-03 15:33:51.698402+00	2026-07-03 15:33:51.698402+00	\N
+1856	8	7a73d49f-9cfc-48bf-8bf3-b5498f04bf9a	\N	\N	2026-06-03 16:20:31.233115+00	2026-07-03 16:20:31.233115+00	\N
+1859	8	c92c8567-d95d-436c-9eef-53fb20d69a75	\N	\N	2026-06-03 19:16:49.536057+00	2026-07-03 19:16:49.536057+00	\N
+1861	8	ca658ef6-25ff-404a-aae9-dcebdd56f443	\N	\N	2026-06-04 12:29:08.243661+00	2026-07-04 12:29:08.243661+00	\N
+1865	9	e5a8757e-0c46-42b9-a612-dd0228c4978d	\N	\N	2026-06-05 08:30:54.401254+00	2026-07-05 08:30:54.401254+00	\N
+1866	3	d4b5c2be-5789-4c6d-857c-d308bc6051e0	\N	\N	2026-06-05 08:32:09.309798+00	2026-07-05 08:32:09.309798+00	\N
+1873	3	dea63404-2f02-466a-a71a-9391b0f7296b	\N	\N	2026-06-05 10:48:35.790209+00	2026-07-05 10:48:35.790209+00	\N
+1879	8	ca0c40be-73fb-4551-bb05-252a9cb00358	\N	\N	2026-06-06 09:58:31.155314+00	2026-07-06 09:58:31.155314+00	\N
+1841	3	f600370f-3674-4307-98d9-350b2c9b517a	\N	\N	2026-06-02 18:14:38.615078+00	2026-07-02 18:14:38.615078+00	\N
+1846	8	5c698583-0676-461b-a677-3af85db5b798	\N	\N	2026-06-03 15:22:42.203474+00	2026-07-03 15:22:42.203474+00	\N
+1851	8	747ff8db-b475-4265-9a52-1bc6e25637c5	\N	\N	2026-06-03 15:43:15.629491+00	2026-07-03 15:43:15.629491+00	\N
+1862	8	4f2c960a-c717-4ec4-aedd-ebd79162965e	\N	\N	2026-06-04 12:30:07.745356+00	2026-07-04 12:30:07.745356+00	\N
+1867	11	ad01c747-563a-4cbf-a76f-1775afab8926	\N	\N	2026-06-05 08:43:49.244838+00	2026-07-05 08:43:49.244838+00	\N
+1868	11	b3a1c8d2-eac4-460b-abd6-75cfebced4c9	\N	\N	2026-06-05 08:44:42.770688+00	2026-07-05 08:44:42.770688+00	\N
+1871	3	1795af37-6e05-41fa-929a-597801b8929c	\N	\N	2026-06-05 10:41:07.591756+00	2026-07-05 10:41:07.591756+00	\N
+1874	8	638a4fe4-c8d4-4c3e-a67b-e53f4a5042af	\N	\N	2026-06-05 10:49:28.847077+00	2026-07-05 10:49:28.847077+00	\N
+1837	8	5c8d7c1b-4e56-478c-bfb3-06f4fbe1f6ae	\N	\N	2026-06-02 16:43:43.689347+00	2026-07-02 16:43:43.689347+00	\N
 \.
 
 
@@ -8481,9 +9103,15 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 --
 
 COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
-5	test3	test3	2023-05-04 16:25:31.727922+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	\N	\N	f
-3	test1	test1	2026-04-19 19:35:43.554508+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
-4	test2	test2	2026-04-20 16:06:47.814731+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+3	test1	937e8d5fbb48bd4949536cd65b8d35c426b80d2f830c5c308e2cdec422ae2244	2026-06-05 10:48:35.785956+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+8	test1234	937e8d5fbb48bd4949536cd65b8d35c426b80d2f830c5c308e2cdec422ae2244	2026-06-06 09:58:31.150837+00	dfskdfsd@gfdsdsg.ru	0	2026-04-21 13:42:41.182808+00	t	0	\N	127.0.0.1	172.23.0.1	f
+10	wrewewr	a271f823b30066147f36331192239aa37fc09fda39409cf657969da8de503ca6	2026-04-23 07:37:27.645472+00	sfdsfd@dsfsdsf.ri	0	2026-04-23 07:37:27.645472+00	t	0	\N	\N	172.23.0.1	f
+6	werwerwe	3a7156075edaa4c22fb93aada1ddaf22a0879cb09dc01a1d523e2f2865f4ef77	2026-04-21 11:59:14.540026+00	fdfdsfdfdssd@fdsfsd.ri	0	2026-04-21 11:59:14.540026+00	t	0	\N	\N	172.23.0.1	f
+9	test12345	6fec2a9601d5b3581c94f2150fc07fa3d6e45808079428354b868e412b76e6bb	2026-06-05 08:30:54.396818+00	gayerwyug@fgssgddgs.ri	0	2026-04-21 17:03:52.041088+00	t	0	\N	127.0.0.1	172.23.0.1	f
+5	test3	937e8d5fbb48bd4949536cd65b8d35c426b80d2f830c5c308e2cdec422ae2244	2023-05-04 16:25:31.727922+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	\N	\N	f
+4	test2	937e8d5fbb48bd4949536cd65b8d35c426b80d2f830c5c308e2cdec422ae2244	2026-04-20 16:06:47.814731+00	\N	0	2026-03-03 16:16:54.618401+00	t	0	\N	127.0.0.1	\N	f
+11	test123456	85777f270ad7cf2a790981bbae3c4e484a1dc55e24a77390d692fbf1cffa12fa	2026-06-05 08:44:42.766677+00	fdsfdsfd@dfsfds.ri	0	2026-06-05 08:43:49.244838+00	t	0	\N	127.0.0.1	172.23.0.1	f
+7	test123	c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646	2026-04-21 13:39:58.000907+00	fdsfsd@fdsfds.ru	0	2026-04-21 13:39:58.000907+00	t	5	2026-04-21 16:44:50.834632+00	\N	172.23.0.1	f
 \.
 
 
@@ -8492,18 +9120,49 @@ COPY public.users (id, login, password, last_login, email, role, created_at, is_
 --
 
 COPY public.vendor_inventory (id, vendor_npc_id, item_id, stock_count, price_override, restock_amount, stock_max, restock_interval_sec, last_restock_at) FROM stdin;
-3	1	3	-1	\N	0	-1	3600	\N
-4	1	4	-1	\N	0	-1	3600	\N
-1	1	1	5	\N	5	-1	3600	\N
-2	1	2	5	\N	5	-1	3600	\N
-5	1	15	5	\N	5	-1	3600	\N
-6	2	18	-1	\N	0	-1	0	\N
-7	2	20	-1	\N	0	-1	0	\N
-8	2	21	-1	\N	0	-1	0	\N
-9	3	22	-1	\N	0	-1	0	\N
-10	3	23	-1	\N	0	-1	0	\N
-11	3	25	-1	\N	0	-1	0	\N
-12	3	26	-1	\N	0	-1	0	\N
+50	2	2	-1	\N	0	-1	3600	\N
+51	2	29	-1	\N	0	-1	3600	\N
+52	2	30	-1	\N	0	-1	3600	\N
+53	2	31	-1	\N	0	-1	3600	\N
+54	2	32	-1	\N	0	-1	3600	\N
+55	2	33	-1	\N	0	-1	3600	\N
+56	2	34	-1	\N	0	-1	3600	\N
+57	2	35	-1	\N	0	-1	3600	\N
+58	2	36	-1	\N	0	-1	3600	\N
+59	2	37	-1	\N	0	-1	3600	\N
+60	2	38	-1	\N	0	-1	3600	\N
+61	2	39	-1	\N	0	-1	3600	\N
+62	2	40	-1	\N	0	-1	3600	\N
+63	2	41	-1	\N	0	-1	3600	\N
+64	2	42	-1	\N	0	-1	3600	\N
+65	2	43	-1	\N	0	-1	3600	\N
+66	2	44	-1	\N	0	-1	3600	\N
+67	2	45	-1	\N	0	-1	3600	\N
+68	4	46	-1	\N	0	-1	3600	\N
+69	4	47	-1	\N	0	-1	3600	\N
+70	4	48	-1	\N	0	-1	3600	\N
+71	4	49	-1	\N	0	-1	3600	\N
+72	4	50	-1	\N	0	-1	3600	\N
+73	4	51	-1	\N	0	-1	3600	\N
+74	4	52	-1	\N	0	-1	3600	\N
+75	4	53	-1	\N	0	-1	3600	\N
+76	4	54	-1	\N	0	-1	3600	\N
+77	4	55	-1	\N	0	-1	3600	\N
+78	4	56	-1	\N	0	-1	3600	\N
+79	1	57	-1	\N	0	-1	3600	\N
+80	1	58	-1	\N	0	-1	3600	\N
+81	1	59	-1	\N	0	-1	3600	\N
+82	1	60	-1	\N	0	-1	3600	\N
+83	1	61	-1	\N	0	-1	3600	\N
+84	1	75	-1	\N	0	-1	3600	\N
+85	3	22	-1	\N	0	-1	0	\N
+86	3	23	-1	\N	0	-1	0	\N
+87	3	25	-1	\N	0	-1	0	\N
+88	3	26	-1	\N	0	-1	0	\N
+89	5	18	-1	\N	0	-1	3600	\N
+90	5	20	-1	\N	0	-1	3600	\N
+91	5	21	-1	\N	0	-1	3600	\N
+92	5	19	1	\N	1	1	86400	\N
 \.
 
 
@@ -8515,6 +9174,8 @@ COPY public.vendor_npc (id, npc_id, markup_pct) FROM stdin;
 1	1	10
 2	4	0
 3	5	0
+4	2	5
+5	3	0
 \.
 
 
@@ -8551,8 +9212,8 @@ COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration
 
 COPY public.zones (id, slug, name, min_level, max_level, is_pvp, is_safe_zone, min_x, max_x, min_y, max_y, exploration_xp_reward, champion_threshold_kills, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
 5	test-annulus	test-annulus	1	999	f	f	-9397.597686836896	-6455.5758930071315	-4179.679412879304	-1389.2455690536517	100	100	ANNULUS	20950.722530349605	-17000.046904890885	5385.319887443037	7625.2081965622165
+1	village	Village	1	10	f	t	-5440.2178821979505	4568.621024817196	-5471.3412259071965	3002.10848639096	100	100	CIRCLE	-364.183657769343	-962.321990454137	0	4966.320930263775
 2	fields	Fields	1	20	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	100	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	8586.163024291778
-1	village	Village	1	10	f	t	-5440.2178821979505	4568.621024817196	-5471.3412259071965	3002.10848639096	100	100	CIRCLE	-368.6564432549312	-962.321990454137	0	4966.320930263775
 \.
 
 
@@ -8581,35 +9242,35 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 262, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 321, true);
 
 
 --
 -- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 92, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 99, true);
 
 
 --
 -- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_position_id_seq', 3, true);
+SELECT pg_catalog.setval('public.character_position_id_seq', 14, true);
 
 
 --
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 20, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 30, true);
 
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.characters_id_seq', 3, true);
+SELECT pg_catalog.setval('public.characters_id_seq', 14, true);
 
 
 --
@@ -8620,10 +9281,17 @@ SELECT pg_catalog.setval('public.class_skill_tree_id_seq', 26, true);
 
 
 --
+-- Name: class_spawn_zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.class_spawn_zones_id_seq', 4, true);
+
+
+--
 -- Name: class_starter_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.class_starter_items_id_seq', 5, true);
+SELECT pg_catalog.setval('public.class_starter_items_id_seq', 2, true);
 
 
 --
@@ -8637,21 +9305,21 @@ SELECT pg_catalog.setval('public.currency_transactions_id_seq', 1, false);
 -- Name: dialogue_edge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 144, true);
+SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 224, true);
 
 
 --
 -- Name: dialogue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dialogue_id_seq', 6, true);
+SELECT pg_catalog.setval('public.dialogue_id_seq', 8, true);
 
 
 --
 -- Name: dialogue_node_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.dialogue_node_id_seq', 611, true);
+SELECT pg_catalog.setval('public.dialogue_node_id_seq', 699, true);
 
 
 --
@@ -8679,7 +9347,7 @@ SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 -- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 150, true);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 278, true);
 
 
 --
@@ -8693,7 +9361,7 @@ SELECT pg_catalog.setval('public.gm_action_log_id_seq', 1, false);
 -- Name: item_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_attributes_mapping_id_seq', 10, true);
+SELECT pg_catalog.setval('public.item_attributes_mapping_id_seq', 37, true);
 
 
 --
@@ -8721,14 +9389,14 @@ SELECT pg_catalog.setval('public.item_types_id_seq', 10, true);
 -- Name: item_use_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.item_use_effects_id_seq', 2, true);
+SELECT pg_catalog.setval('public.item_use_effects_id_seq', 17, true);
 
 
 --
 -- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.items_id_seq', 26, true);
+SELECT pg_catalog.setval('public.items_id_seq', 75, true);
 
 
 --
@@ -8742,14 +9410,14 @@ SELECT pg_catalog.setval('public.mob_active_effect_id_seq', 1, false);
 -- Name: mob_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mob_id_seq', 8, true);
+SELECT pg_catalog.setval('public.mob_id_seq', 10, true);
 
 
 --
 -- Name: mob_loot_info_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mob_loot_info_id_seq', 35, true);
+SELECT pg_catalog.setval('public.mob_loot_info_id_seq', 106, true);
 
 
 --
@@ -8770,14 +9438,14 @@ SELECT pg_catalog.setval('public.mob_race_id_seq', 3, true);
 -- Name: mob_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mob_skills_id_seq', 5, true);
+SELECT pg_catalog.setval('public.mob_skills_id_seq', 13, true);
 
 
 --
 -- Name: mob_stat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mob_stat_id_seq', 192, true);
+SELECT pg_catalog.setval('public.mob_stat_id_seq', 423, true);
 
 
 --
@@ -8826,7 +9494,7 @@ SELECT pg_catalog.setval('public.npc_skills_id_seq', 2, true);
 -- Name: npc_trainer_class_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.npc_trainer_class_id_seq', 2, true);
+SELECT pg_catalog.setval('public.npc_trainer_class_id_seq', 3, true);
 
 
 --
@@ -8847,35 +9515,35 @@ SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 1, false);
 -- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1204, true);
+SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1346, true);
 
 
 --
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 236, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 259, true);
 
 
 --
 -- Name: quest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quest_id_seq', 1, true);
+SELECT pg_catalog.setval('public.quest_id_seq', 2, true);
 
 
 --
 -- Name: quest_reward_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quest_reward_id_seq', 2, true);
+SELECT pg_catalog.setval('public.quest_reward_id_seq', 6, true);
 
 
 --
 -- Name: quest_step_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.quest_step_id_seq', 4, true);
+SELECT pg_catalog.setval('public.quest_step_id_seq', 10, true);
 
 
 --
@@ -9022,28 +9690,28 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 1728, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 1879, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 5, true);
+SELECT pg_catalog.setval('public.users_id_seq', 11, true);
 
 
 --
 -- Name: vendor_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_inventory_id_seq', 27, true);
+SELECT pg_catalog.setval('public.vendor_inventory_id_seq', 92, true);
 
 
 --
 -- Name: vendor_npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.vendor_npc_id_seq', 1, true);
+SELECT pg_catalog.setval('public.vendor_npc_id_seq', 5, true);
 
 
 --
@@ -9201,6 +9869,22 @@ ALTER TABLE ONLY public.characters
 
 ALTER TABLE ONLY public.class_skill_tree
     ADD CONSTRAINT class_skill_tree_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: class_spawn_zones class_spawn_zones_class_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.class_spawn_zones
+    ADD CONSTRAINT class_spawn_zones_class_id_key UNIQUE (class_id);
+
+
+--
+-- Name: class_spawn_zones class_spawn_zones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.class_spawn_zones
+    ADD CONSTRAINT class_spawn_zones_pkey PRIMARY KEY (id);
 
 
 --
@@ -10146,6 +10830,13 @@ CREATE INDEX idx_character_emotes_character_id ON public.character_emotes USING 
 --
 
 CREATE INDEX idx_character_pity_char ON public.character_pity USING btree (character_id);
+
+
+--
+-- Name: idx_class_spawn_zones_class; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_class_spawn_zones_class ON public.class_spawn_zones USING btree (class_id);
 
 
 --
@@ -11163,6 +11854,22 @@ ALTER TABLE ONLY public.class_skill_tree
 
 ALTER TABLE ONLY public.class_skill_tree
     ADD CONSTRAINT class_skill_tree_skill_id_fkey FOREIGN KEY (skill_id) REFERENCES public.skills(id);
+
+
+--
+-- Name: class_spawn_zones class_spawn_zones_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.class_spawn_zones
+    ADD CONSTRAINT class_spawn_zones_class_id_fkey FOREIGN KEY (class_id) REFERENCES public.character_class(id) ON DELETE CASCADE;
+
+
+--
+-- Name: class_spawn_zones class_spawn_zones_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.class_spawn_zones
+    ADD CONSTRAINT class_spawn_zones_zone_id_fkey FOREIGN KEY (zone_id) REFERENCES public.zones(id);
 
 
 --

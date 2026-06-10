@@ -52,6 +52,21 @@ void NetworkManager::startAccept()
                     std::string clientIP = remoteEndpoint.address().to_string();
                     std::string portNumber = std::to_string(remoteEndpoint.port());
 
+                    short maxClients = std::get<1>(configs_).max_clients;
+                    {
+                        std::lock_guard<std::mutex> lock(activeSocketsMutex_);
+                        if (activeSockets_.size() >= static_cast<size_t>(maxClients))
+                        {
+                            log_->warn("Max clients reached (" + std::to_string(maxClients) +
+                                       "), rejecting connection from " + clientIP + ":" + portNumber);
+                            boost::system::error_code closeEc;
+                            clientSocket->close(closeEc);
+                            startAccept();
+                            return;
+                        }
+                        activeSockets_.insert(clientSocket.get());
+                    }
+
                     // Print the Client IP address
                     log_->info("New Client with IP: " + clientIP + " Port: " + portNumber + " - connected!");
                     
@@ -364,6 +379,10 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                               std::lock_guard<std::mutex> lock(socketBufferMutex_);
                                               socketBuffers_.erase(clientSocket.get());
                                           }
+                                          {
+                                              std::lock_guard<std::mutex> lock(activeSocketsMutex_);
+                                              activeSockets_.erase(clientSocket.get());
+                                          }
                                           boost::system::error_code closeEc;
                                           clientSocket->close(closeEc);
                                       }
@@ -376,6 +395,10 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                               std::lock_guard<std::mutex> lock(socketBufferMutex_);
                                               socketBuffers_.erase(clientSocket.get());
                                           }
+                                          {
+                                              std::lock_guard<std::mutex> lock(activeSocketsMutex_);
+                                              activeSockets_.erase(clientSocket.get());
+                                          }
                                           boost::system::error_code closeEc;
                                           clientSocket->close(closeEc);
                                       }
@@ -387,6 +410,10 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                           {
                                               std::lock_guard<std::mutex> lock(socketBufferMutex_);
                                               socketBuffers_.erase(clientSocket.get());
+                                          }
+                                          {
+                                              std::lock_guard<std::mutex> lock(activeSocketsMutex_);
+                                              activeSockets_.erase(clientSocket.get());
                                           }
                                           boost::system::error_code closeEc;
                                           clientSocket->close(closeEc);

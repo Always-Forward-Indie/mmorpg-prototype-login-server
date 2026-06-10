@@ -23,40 +23,31 @@ services:
       interval: 5s
       retries: 5
       timeout: 3s
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 2048M
-        reservations:
-          cpus: "1"
-          memory: 1024M
 
   login-server:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "27014:27014"
+    volumes:
+      - ./src:/usr/src/app/src  # ✅ Mount only the `src` folder
+      - ./include:/usr/src/app/include  # ✅ Mount only the `include` folder
+      - ./CMakeLists.txt:/usr/src/app/CMakeLists.txt  # ✅ Mount CMakeLists.txt so new source files are picked up without image rebuilds
     environment:
+      - ENV=development
       - LOG_LEVEL=info
       - LOG_LEVEL_NETWORK=warn
       - LOG_LEVEL_GAMELOOP=warn
       - LOG_LEVEL_EVENTS=warn
     restart: unless-stopped
+    security_opt:
+      - seccomp=unconfined
     depends_on:
       db:
         condition: service_healthy
     networks:
       - mmo_network
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 1024M
-        reservations:
-          cpus: "1"
-          memory: 512M
 
 volumes:
   db_data:

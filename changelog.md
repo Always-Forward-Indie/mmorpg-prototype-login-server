@@ -1,3 +1,46 @@
+v0.1.14
+10.06.2026
+================
+New:
+
+**DB dump — новый контент: предметы, мобы, квесты, зоны.**
+- `mmo_prototype_dump.sql` — масштабное обновление тестовых данных.
+- **Новые предметы** (items 29–75): 6 томов скилов (Whirlwind, Iron Skin, Constitution Mastery, Frost Bolt, Arcane Blast, Chain Lightning, Mana Shield, Elemental Mastery), оружие (worn_old_sword, cracked_wooden_staff, sharp_sword, sturdy_staff, rune_staff, fallen_warrior_sword), броня (worn_torn_boots, tattered_breastplate, torn_robe, leather_chestguard, apprentice_robe, leather_boots, quilted_armor, sage_cloak, sturdy_boots), аксессуары (beast_sense_amulet, glowing_ring), зелья (HP/MP/speed/defense/strength/magic), еда (cold_stew, fresh_bread, apple, roasted_meat, sweet_wine), крафтовые материалы (шкуры, кости, когти, жир, кровь, каменная крошка, прах нежити, обломки клинка, осколки ядра, ржавые пластины, клоки ткани, наконечники стрел, ножи, ошейники, дневники, перья, печати, магические камни, мясо).
+- **Новые мобы** (id 3–10): ForestBoar (lvl 2), ForestFox (lvl 1), RuinSkeleton (lvl 1), ForestWolf (lvl 3), AlphaWolf (lvl 5, rare), SpiritFox (lvl 5, rare), ForestBear (lvl 10), StoneGolem (lvl 15). Каждый имеет полный набор: `mob`, `mob_stat`, `mob_skills`, `mob_loot_info`.
+- **Новый квест**: `varan_fox_menace` (quest id=2) — kill 6 ForestFox, collect 6 hides, report to Varan. Награды: 3× small_health_potion, 20 gold, 50 XP.
+- **Таблица `class_spawn_zones`**: стартовые зоны для классов (class_id, zone_id, shape+bounds). UNIQUE constraint по class_id, FK на character_class и zones.
+- **`respawn_zones`**: расширена полями area bounds (min_x, max_x, min_y, max_y, min_z, max_z, shape_type, center_x, center_y, inner_radius, outer_radius).
+- **`spawn_zones`**: обновлены имена и мобы (Fox Glade, Wolf Den, Boar Grove, Ruins Outskirts, Deep Thicket, Stone Circle).
+- **`zones`**: village зона переведена на CIRCLE с центром и радиусом.
+- Обновлены `vendor_inventory`, `vendor_npc`, `npc_placements`, `npc_trainer_class`, `npc_dialogue`, `player_flag`, `user_sessions`, `users` (пароли теперь SHA-256 хэши).
+- Обновлены все sequence setval'ы под новое состояние данных.
+
+**Build system — Debug/Release, Docker prod/dev разделение.**
+- `CMakeLists.txt` — убран хардкод `CMAKE_BUILD_TYPE Debug`. Тип сборки задаётся через `-DCMAKE_BUILD_TYPE=Debug|Release`.
+- `CMakeLists.txt` — убран избыточный `pq` из `target_link_libraries` (libpqxx линкует его транзитивно).
+- `CMakeLists.txt` — добавлен явный `libssl-dev` (ранее тянулся транзитивно через `libpq-dev`).
+- `Dockerfile` → переименован в `Dockerfile.dev` — dev-образ с Debug-сборкой, Rust/watchexec, gdb, ccache.
+- Новый `Dockerfile` — production-образ: Release-сборка, stripped binary, минимальные apt-пакеты, без watchexec, прямой `CMD`.
+- `docker-compose.yml` → переименован в `docker-compose.dev.yml` — dev compose с volume mounts, hot-reload, `dockerfile: Dockerfile.dev`.
+- Новый `docker-compose.yml` (по умолчанию) — production compose без volume mounts, с `deploy.resources.limits`.
+- `watch_and_run.sh` — в cmake добавлен `-DCMAKE_BUILD_TYPE=Debug`.
+
+**JSON_ASSERT fix — защита от битого JSON в Release.**
+- `include/utils/JsonAssertFix.hpp` — новый заголовочный файл: переопределяет `JSON_ASSERT` на `std::abort()` вместо `assert()`, который удаляется в Release/NDEBUG сборках.
+- `include/utils/Config.hpp` — добавлен `#include "JsonAssertFix.hpp"` перед `nlohmann/json.hpp`.
+
+**Connection limits — лимит подключений из config.json.**
+- `include/network/NetworkManager.hpp` — добавлены `std::unordered_set<tcp::socket*> activeSockets_` и `std::mutex activeSocketsMutex_` для трекинга.
+- `src/network/NetworkManager.cpp::startAccept()` — при превышении `LoginServerConfig.max_clients` новые подключения отклоняются с закрытием сокета. Ранее `max_clients` использовался только для TCP backlog.
+- `src/network/NetworkManager.cpp::startReadingFromClient()` — во все три пути дисконнекта добавлена очистка из `activeSockets_`.
+
+Fixes:
+
+**Dockerfile — добавлен явный `libssl-dev`.**
+- `AccountManager.cpp` напрямую использует `<openssl/evp.h>` (SHA-256), `CMakeLists.txt` требует `find_package(OpenSSL REQUIRED)`. В старом Dockerfile пакет отсутствовал — сборка могла упасть.
+
+---
+
 v0.1.13
 23.04.2026
 ================
