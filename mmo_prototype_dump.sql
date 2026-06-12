@@ -154,7 +154,7 @@ CREATE TABLE public.character_permanent_modifiers (
     value numeric DEFAULT 0 NOT NULL,
     source_type character varying(30) DEFAULT 'gm'::character varying NOT NULL,
     source_id integer,
-    CONSTRAINT character_permanent_modifiers_source_type_check CHECK (((source_type)::text = ANY ((ARRAY['gm'::character varying, 'quest'::character varying, 'achievement'::character varying, 'event'::character varying, 'admin'::character varying])::text[])))
+    CONSTRAINT character_permanent_modifiers_source_type_check CHECK (((source_type)::text = ANY (ARRAY[('gm'::character varying)::text, ('quest'::character varying)::text, ('achievement'::character varying)::text, ('event'::character varying)::text, ('admin'::character varying)::text])))
 );
 
 
@@ -2796,7 +2796,7 @@ CREATE TABLE public.mob (
     biome_slug character varying(64) DEFAULT ''::character varying NOT NULL,
     mob_type_slug character varying(64) DEFAULT 'beast'::character varying NOT NULL,
     patrol_radius double precision DEFAULT 350.0 NOT NULL,
-    CONSTRAINT mob_ai_archetype_check CHECK (((ai_archetype)::text = ANY ((ARRAY['melee'::character varying, 'caster'::character varying, 'ranged'::character varying, 'support'::character varying, 'summoner'::character varying, 'lurker'::character varying])::text[]))),
+    CONSTRAINT mob_ai_archetype_check CHECK (((ai_archetype)::text = ANY (ARRAY[('melee'::character varying)::text, ('caster'::character varying)::text, ('ranged'::character varying)::text, ('support'::character varying)::text, ('summoner'::character varying)::text, ('lurker'::character varying)::text]))),
     CONSTRAINT mob_flee_hp_threshold_check CHECK (((flee_hp_threshold >= (0.0)::double precision) AND (flee_hp_threshold < (1.0)::double precision)))
 );
 
@@ -3047,7 +3047,7 @@ CREATE TABLE public.mob_loot_info (
     min_quantity smallint DEFAULT 1 NOT NULL,
     max_quantity smallint DEFAULT 1 NOT NULL,
     loot_tier character varying(32) DEFAULT 'common'::character varying NOT NULL,
-    CONSTRAINT mob_loot_info_loot_tier_check CHECK (((loot_tier)::text = ANY ((ARRAY['common'::character varying, 'uncommon'::character varying, 'rare'::character varying, 'very_rare'::character varying])::text[]))),
+    CONSTRAINT mob_loot_info_loot_tier_check CHECK (((loot_tier)::text = ANY (ARRAY[('common'::character varying)::text, ('uncommon'::character varying)::text, ('rare'::character varying)::text, ('very_rare'::character varying)::text]))),
     CONSTRAINT mob_loot_quantity_check CHECK (((max_quantity >= min_quantity) AND (min_quantity >= 1)))
 );
 
@@ -6069,7 +6069,7 @@ CREATE TABLE public.world_object_states (
     object_id integer NOT NULL,
     state character varying(16) DEFAULT 'active'::character varying NOT NULL,
     depleted_at timestamp with time zone,
-    CONSTRAINT world_object_states_state_check CHECK (((state)::text = ANY ((ARRAY['active'::character varying, 'depleted'::character varying, 'disabled'::character varying])::text[])))
+    CONSTRAINT world_object_states_state_check CHECK (((state)::text = ANY (ARRAY[('active'::character varying)::text, ('depleted'::character varying)::text, ('disabled'::character varying)::text])))
 );
 
 
@@ -6127,8 +6127,8 @@ CREATE TABLE public.world_objects (
     is_active_by_default boolean DEFAULT true NOT NULL,
     min_level integer DEFAULT 0 NOT NULL,
     condition_group jsonb DEFAULT 'null'::jsonb NOT NULL,
-    CONSTRAINT world_objects_object_type_check CHECK (((object_type)::text = ANY ((ARRAY['examine'::character varying, 'search'::character varying, 'activate'::character varying, 'use_with_item'::character varying, 'channeled'::character varying])::text[]))),
-    CONSTRAINT world_objects_scope_check CHECK (((scope)::text = ANY ((ARRAY['per_player'::character varying, 'global'::character varying])::text[])))
+    CONSTRAINT world_objects_object_type_check CHECK (((object_type)::text = ANY (ARRAY[('examine'::character varying)::text, ('search'::character varying)::text, ('activate'::character varying)::text, ('use_with_item'::character varying)::text, ('channeled'::character varying)::text]))),
+    CONSTRAINT world_objects_scope_check CHECK (((scope)::text = ANY (ARRAY[('per_player'::character varying)::text, ('global'::character varying)::text])))
 );
 
 
@@ -6914,7 +6914,7 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 --
 
 COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-1	1	1	f	2026-06-11 16:56:27.622404+00
+1	88	225	f	2026-06-12 07:26:00.234137+00
 \.
 
 
@@ -6923,6 +6923,7 @@ COPY public.character_current_state (character_id, current_health, current_mana,
 --
 
 COPY public.character_emotes (id, character_id, emote_slug, unlocked_at) FROM stdin;
+1	1	wave	2026-06-12 07:24:08.141166+00
 \.
 
 
@@ -6965,7 +6966,7 @@ COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
 --
 
 COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
-1	1	0.00	0.00	200.00	1	0
+1	1	18507.07	-18297.59	1558.39	1	149.950012
 \.
 
 
@@ -7422,6 +7423,8 @@ COPY public.factions (id, slug, name) FROM stdin;
 --
 
 COPY public.game_analytics (id, event_type, character_id, session_id, level, zone_id, payload, created_at) FROM stdin;
+1	session_start	1	sess_1_1781249048118	1	0	{}	2026-06-12 07:24:08.119377+00
+2	session_end	1	sess_1_1781249048118	1	0	{}	2026-06-12 07:26:00.236607+00
 \.
 
 
@@ -7664,6 +7667,7 @@ COPY public.items (id, name, slug, description, is_quest_item, item_type, weight
 41	Стёганый доспех	quilted_armor	Многослойный стёганый доспех усиленный металлическими вставками. Серьёзная защита для бывалых воинов.	f	2	5	3	1	f	t	t	140	420	126	2	6	t	f	f	f	\N
 42	Плащ Мудреца	sage_cloak	Длинный плащ пропитанный мощной защитной магией. Такие носят только уважаемые чародеи.	f	2	2	3	1	f	t	t	100	420	126	2	6	t	f	f	f	\N
 43	Прочные сапоги	sturdy_boots	Сапоги усиленные стальными накладками. В таких можно и по болоту пройти и в бою устоять.	f	2	2.5	3	1	f	t	t	90	300	90	4	6	t	f	f	f	\N
+71	Потрёпанный дневник	tattered_diary	Потрёпанный дневник неизвестного путника. Страницы едва читаемы.	f	6	0.3	2	64	f	f	t	100	22	6	\N	0	f	t	f	f	\N
 44	Амулет Звериного Чутья	beast_sense_amulet	Древний амулет обостриющий инстинкты носящего. Позволяет чувствовать опасность до того как она наступит.	f	7	0.3	3	1	f	t	t	100	380	114	10	6	t	f	f	f	\N
 45	Светящееся Кольцо	glowing_ring	Кольцо излучающее мягкий голубоватый свет. Наполняет владельца дополнительной магической энергией.	f	7	0.1	3	1	f	t	t	100	350	105	9	6	t	f	f	f	\N
 46	Малое зелье лечения	small_health_potion	Красное зелье которое восстанавливает немного здоровья.	f	3	0.5	1	64	f	f	t	100	10	3	\N	0	f	f	t	f	\N
@@ -7691,7 +7695,6 @@ COPY public.items (id, name, slug, description, is_quest_item, item_type, weight
 68	Ржавый наконечник стрелы	rusty_arrowhead	Старый ржавый наконечник стрелы который застрял в теле и выпадает с мобов.	f	6	0.1	1	64	f	f	t	100	6	2	\N	0	f	t	f	f	\N
 69	Сломанный нож	broken_knife	Старый сломанный нож который застрял в теле и выпадает с мобов.	f	6	0.3	1	64	f	f	t	100	7	2	\N	0	f	t	f	f	\N
 70	Старый ошейник	old_collar	Старый ошейник который выпадает с мобов типа животных.	f	6	0.2	1	64	f	f	t	100	8	2	\N	0	f	t	f	f	\N
-71	Потрёпанный дневник	tattered_diary	Потрёпанный дневник неизвестного путника. Страницы едва читаемы.	f	6	0.3	2	64	f	f	t	100	22	6	\N	0	f	t	f	f	\N
 72	Птичье перо	bird_feather	Обычное птичье перо. Лёгкое как ветер.	f	6	0.05	1	64	f	f	t	100	4	1	\N	0	f	t	f	f	\N
 73	Сломанная печать	broken_seal	Старая сломанная магическая печать. Выпадает с мобов созданных с помощью магии.	f	6	0.2	2	64	f	f	t	100	20	6	\N	0	f	t	f	f	\N
 74	Магический камень	magical_stone	Светящийся камень пропитанный магической энергией. Выпадает с магических мобов.	f	6	0.3	3	64	f	f	t	100	55	16	\N	0	f	t	f	f	\N
@@ -7736,8 +7739,8 @@ COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressi
 7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1	1	f	10	0	melee	f	t	8	on_kill	\N	0		beast	500
 8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0	melee	f	t	8	on_kill	\N	0		beast	400
 9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	6	900	180	2.5	0.8	0.7	f	10	0	melee	f	f	0	\N	\N	0		beast	500
-5	Скелет	2	1	70	5	t	f	RuinSkeleton	100	25	1	500	110	2.8	1.2	0.7	f	10	0	melee	f	f	0	\N	\N	0		undead	300
 10	Каменный голем	2	15	5000	200	t	f	StoneGolem	250	2000	6	700	200	3	1	0.4	f	10	0	melee	f	f	0	\N	\N	0		elemental	300
+5	Скелет	2	1	70	5	f	f	RuinSkeleton	100	25	1	500	110	2.8	1.2	0.7	f	10	0	melee	f	f	0	\N	\N	0		undead	300
 \.
 
 
@@ -8582,9 +8585,9 @@ COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_tim
 1	1	4	25	00:01:00
 2	2	6	8	00:01:00
 3	3	3	10	00:01:00
-4	4	5	8	00:01:00
 5	5	9	1	00:05:00
 6	6	10	1	00:10:00
+4	4	5	4	00:01:00
 \.
 
 
@@ -8593,12 +8596,12 @@ COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_tim
 --
 
 COPY public.spawn_zones (zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn_z, max_spawn_x, max_spawn_y, max_spawn_z, game_zone_id, shape_type, center_x, center_y, inner_radius, outer_radius, exclusion_game_zone_id) FROM stdin;
-6	Stone Circle	0	0	0	0	0	0	2	CIRCLE	-12032.552595842932	16916.98064456221	0	835.8154207180941	\N
-4	Ruins Outskirts	0	0	0	0	0	0	2	CIRCLE	22361.918394712295	-16638.499766577526	0	1500	\N
-3	Boar Grove	0	0	0	0	0	0	2	CIRCLE	-850.226306775221	15642.154846168898	0	1800	\N
-2	Wolf Den	-720.424608875459	-21622.574107102497	100	1347.0295356623174	-20122.574107102497	500	2	RECT	313.3024633934292	-20872.574107102497	0	0	\N
-1	Fox Glade	5549.27440860249	7606.171800291835	100	8549.27440860249	9106.171800291835	500	2	ANNULUS	-434.657331344104	-973.2708228250776	5608.287819504758	8172.50264880794	\N
-5	Deep Thicket	0	0	0	0	0	0	2	CIRCLE	18268.79008474665	18532.813925674505	0	800	\N
+6	Stone Circle	0	0	830	0	0	960	2	CIRCLE	-12032.552595842932	16916.98064456221	0	835.8154207180941	\N
+3	Boar Grove	0	0	450	0	0	600	2	CIRCLE	-850.226306775221	15642.154846168898	0	1800	\N
+2	Wolf Den	-720.424608875459	-21622.574107102497	500	1347.0295356623174	-20122.574107102497	650	2	RECT	313.3024633934292	-20872.574107102497	0	0	\N
+1	Fox Glade	5549.27440860249	7606.171800291835	250	8549.27440860249	9106.171800291835	350	2	ANNULUS	-434.657331344104	-973.2708228250776	5608.287819504758	8172.50264880794	\N
+5	Deep Thicket	0	0	450	0	0	600	2	CIRCLE	18268.79008474665	18532.813925674505	0	800	\N
+4	Ruins Outskirts	0	0	1500	0	0	1650	2	CIRCLE	20796.443474754982	-17054.468816737615	0	772.2266057201705	\N
 \.
 
 
@@ -8687,6 +8690,7 @@ COPY public.user_roles (id, name, label, is_staff) FROM stdin;
 
 COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, expires_at, revoked_at) FROM stdin;
 1	1	8fb02bc8-84a1-487f-b10e-775b217ed6d1	\N	\N	2026-06-11 16:56:19.966534+00	2026-07-11 16:56:19.966534+00	\N
+2	1	8e9ca63e-d065-47c8-9c99-96d698f56d62	\N	\N	2026-06-12 07:24:00.483234+00	2026-07-12 07:24:00.483234+00	\N
 \.
 
 
@@ -8695,7 +8699,7 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 --
 
 COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
-1	denissined	a93b3e0cfe9ae955ed502648a98a4cba9c724c200ec68032006b29ef30ff49b6	2026-06-11 16:56:19.966534+00	admin@admin.com	0	2026-06-11 16:56:19.966534+00	t	0	\N	\N	172.23.0.1	f
+1	denissined	a93b3e0cfe9ae955ed502648a98a4cba9c724c200ec68032006b29ef30ff49b6	2026-06-12 07:24:00.475403+00	admin@admin.com	2	2026-06-11 16:56:19.966534+00	t	0	\N	127.0.0.1	172.23.0.1	f
 \.
 
 
@@ -8795,9 +8799,9 @@ COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration
 --
 
 COPY public.zones (id, slug, name, min_level, max_level, is_pvp, is_safe_zone, min_x, max_x, min_y, max_y, exploration_xp_reward, champion_threshold_kills, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
-5	test-annulus	test-annulus	1	999	f	f	-9397.597686836896	-6455.5758930071315	-4179.679412879304	-1389.2455690536517	100	100	ANNULUS	20950.722530349605	-17000.046904890885	5385.319887443037	7625.2081965622165
-1	village	Village	1	10	f	t	-5440.2178821979505	4568.621024817196	-5471.3412259071965	3002.10848639096	100	100	CIRCLE	-364.183657769343	-962.321990454137	0	4966.320930263775
-2	fields	Fields	1	20	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	100	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	8586.163024291778
+1	village	Village	1	5	f	t	-5440.2178821979505	4568.621024817196	-5471.3412259071965	3002.10848639096	100	100	CIRCLE	-364.183657769343	-962.321990454137	0	4966.320930263775
+2	fields	Fields	1	2	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	100	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	8586.163024291778
+6	ruins	ruins	1	2	f	f	16339.084894023457	25193.736027167175	-21151.22668900151	-12934.748610498787	100	100	CIRCLE	20766.410460595318	-17042.987649750146	0	4427
 \.
 
 
@@ -8826,7 +8830,7 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 1, false);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 1, true);
 
 
 --
@@ -8931,7 +8935,7 @@ SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 -- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 1, false);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 2, true);
 
 
 --
@@ -9274,7 +9278,7 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 1, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 2, true);
 
 
 --
@@ -9316,7 +9320,7 @@ SELECT pg_catalog.setval('public.zone_event_templates_id_seq', 3, true);
 -- Name: zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.zones_id_seq', 5, true);
+SELECT pg_catalog.setval('public.zones_id_seq', 6, true);
 
 
 --

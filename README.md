@@ -31,3 +31,8 @@ docker-compose -f docker-compose.dev.yml up --build -d
 `config.json`:
 - `max_clients` — лимит одновременных подключений (применяется в коде, а не только TCP backlog)
 - `database` — доступы к PostgreSQL (host: `db` внутри Docker-сети)
+
+## Дроп базы данных и заливка дампа
+docker exec -it mmorpg_prototype_db dropdb -U postgres --force mmo_prototype
+docker exec -it mmorpg_prototype_db createdb -U postgres mmo_prototype
+docker exec -i mmorpg_prototype_db psql -U postgres -d mmo_prototype < mmo_prototype_dump.sql
