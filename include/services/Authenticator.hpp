@@ -8,5 +8,5 @@
 class Authenticator
 {
 public:
-    int authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password);
+    int authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password, const std::string &clientIp);
 };

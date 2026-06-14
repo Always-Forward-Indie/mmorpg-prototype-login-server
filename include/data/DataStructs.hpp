@@ -43,6 +43,7 @@ struct CharacterDataStruct
     std::string characterGender = ""; ///< slug (machine-readable, e.g. "male" / "female")
     PositionStruct characterPosition;
     bool needDBUpdate = false;
+    bool isOnline = false;
     std::vector<EquipmentPreviewItemStruct> equipment; ///< equipped items for character-select preview
 };
 
@@ -52,6 +53,7 @@ struct ClientDataStruct
     std::string login = "";
     std::string password = "";
     std::string hash = "";
+    int role = 0;
     std::shared_ptr<boost::asio::ip::tcp::socket> socket;
     CharacterDataStruct characterData;
     bool needDBUpdate = false;

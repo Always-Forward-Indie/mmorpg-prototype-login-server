@@ -7,7 +7,7 @@
 #include <pqxx/pqxx>
 #include <iostream>
 
-int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password)
+int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password, const std::string &clientIp)
 {
     try
     {
@@ -24,6 +24,7 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         const auto &row = getUserDBData[0];
         int userID = row["id"].as<int>();
         std::string storedPassword = row["password"].as<std::string>();
+        int role = row["role"].is_null() ? 0 : row["role"].as<int>();
 
         // Step 2: verify password (stored as SHA-256 hex, must hash the incoming plaintext).
         const std::string hashedInput = AccountManager::hashPassword(password);
@@ -36,7 +37,8 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         }
 
         // Step 3: reset failed login counter and update last_login
-        transaction.exec_prepared("reset_failed_logins", userID, "127.0.0.1");
+        const std::string ipStr = clientIp.empty() ? "127.0.0.1" : clientIp;
+        transaction.exec_prepared("reset_failed_logins", userID, ipStr);
         transaction.commit();
 
         // Step 4: generate session token
@@ -54,6 +56,7 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         clientDataStruct.clientId = userID;
         clientDataStruct.login = login;
         clientDataStruct.hash = uniqueHash;
+        clientDataStruct.role = role;
 
         clientData.storeClientData(clientDataStruct);
         return userID;

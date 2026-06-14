@@ -43,6 +43,7 @@ std::vector<CharacterDataStruct> CharacterManager::getCharactersList(pqxx::conne
             characterDataStruct.characterRace = row["race_slug"].as<std::string>();
             characterDataStruct.characterGender = row["gender_slug"].is_null() ? "" : row["gender_slug"].as<std::string>();
             characterDataStruct.characterExperiencePoints = row["experience_points"].as<int>();
+            characterDataStruct.isOnline = row["is_online"].is_null() ? false : row["is_online"].as<bool>();
             characterDataStruct.characterCurrentHealth = row["current_health"].as<int>();
             characterDataStruct.characterCurrentMana = row["current_mana"].as<int>();
 

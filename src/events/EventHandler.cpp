@@ -34,7 +34,15 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
 
             // Authenticate the client
             auto poolGuard = pool_.acquire();
-            int authClientID = authenticator.authenticate(poolGuard.get(), clientData, passedClientData.login, passedClientData.password);
+            std::string clientIp = "127.0.0.1";
+            if (passedClientData.socket && passedClientData.socket->is_open())
+            {
+                boost::system::error_code ec;
+                auto endpoint = passedClientData.socket->remote_endpoint(ec);
+                if (!ec)
+                    clientIp = endpoint.address().to_string();
+            }
+            int authClientID = authenticator.authenticate(poolGuard.get(), clientData, passedClientData.login, passedClientData.password, clientIp);
 
             // Get the clientData object with the new init data
             const ClientDataStruct *currentClientData = clientData.getClientData(authClientID);
@@ -69,6 +77,7 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
                            .setHeader("hash", currentClientData->hash)
                            .setHeader("login", currentClientData->login)
                            .setHeader("clientId", currentClientData->clientId)
+                           .setHeader("role", std::to_string(currentClientData->role))
                            .setHeader("eventType", "authentificationClient")
                            .setBody("", "")
                            .build();
@@ -146,6 +155,7 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
                 characterJson["raceSlug"] = character.characterRace;
                 characterJson["genderSlug"] = character.characterGender;
                 characterJson["characterLevel"] = character.characterLevel;
+                characterJson["isOnline"] = character.isOnline;
 
                 // Fetch equipment preview for this character (for character-selection screen)
                 std::vector<EquipmentPreviewItemStruct> equip =

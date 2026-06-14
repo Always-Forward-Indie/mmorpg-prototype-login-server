@@ -1,3 +1,36 @@
+v0.1.17
+15.06.2026
+================
+DB:
+
+**Online-статус и время игры персонажа.**
+- `characters.play_time_sec` переименован в `total_play_time_sec`.
+- Добавлены колонки `last_session_play_time_sec` (bigint), `is_online` (boolean).
+- Добавлен индекс `idx_characters_is_online ON characters (is_online) WHERE is_online = true`.
+- `users.is_email_verified` удалён (не использовался в коде).
+- `characters.radius` удалён (не использовался; у мобов свой `mob.radius`).
+- Миграции: `071_character_online_playtime.sql`, `072_cleanup_columns.sql`.
+
+New:
+
+**isOnline в списке персонажей.**
+- `CharacterDataStruct` — поле `bool isOnline`.
+- `Database::get_characters_list` — SELECT дополнен `c.is_online`.
+- `CharacterManager::getCharactersList` — читает `is_online` из строки.
+- `EventHandler::handleGetCharactersListEvent` — поле `isOnline` в JSON-ответе.
+
+**Роль пользователя в ответе аутентификации.**
+- `ClientDataStruct` — поле `int role`.
+- `Authenticator::authenticate` — читает `role` из результата `search_user`.
+- `EventHandler::handleAuthentificateClientEvent` — `role` в заголовке JSON-ответа аутентификации.
+
+Fix:
+
+**last_login_ip — реальный IP клиента вместо 127.0.0.1.**
+- `Authenticator::authenticate` — новый параметр `const std::string &clientIp`.
+- `EventHandler::handleAuthentificateClientEvent` — извлекает IP из `clientSocket->remote_endpoint()`, передаёт в `authenticate()`.
+- Хардкод `"127.0.0.1"` убран.
+
 v0.1.16
 14.06.2026
 ================

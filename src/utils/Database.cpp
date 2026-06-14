@@ -107,7 +107,7 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "cc.slug AS class_slug, "
                  "r.slug AS race_slug, "
                  "cg.name AS gender_slug, "
-                 "c.experience_points, c.account_slot, "
+                 "c.experience_points, c.account_slot, c.is_online, "
                  "COALESCE(ccs.current_health, 1) AS current_health, "
                  "COALESCE(ccs.current_mana, 1) AS current_mana "
                  "FROM characters c "

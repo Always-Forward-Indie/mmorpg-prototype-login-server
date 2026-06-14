@@ -17,7 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: effect_modifier_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: effect_modifier_type; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.effect_modifier_type AS ENUM (
@@ -27,10 +27,8 @@ CREATE TYPE public.effect_modifier_type AS ENUM (
 );
 
 
-ALTER TYPE public.effect_modifier_type OWNER TO postgres;
-
 --
--- Name: node_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: node_type; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.node_type AS ENUM (
@@ -42,17 +40,15 @@ CREATE TYPE public.node_type AS ENUM (
 );
 
 
-ALTER TYPE public.node_type OWNER TO postgres;
-
 --
--- Name: TYPE node_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TYPE node_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TYPE public.node_type IS 'Тип узла диалога: line/choice_hub/action/jump/end';
 
 
 --
--- Name: quest_state; Type: TYPE; Schema: public; Owner: postgres
+-- Name: quest_state; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.quest_state AS ENUM (
@@ -64,17 +60,15 @@ CREATE TYPE public.quest_state AS ENUM (
 );
 
 
-ALTER TYPE public.quest_state OWNER TO postgres;
-
 --
--- Name: TYPE quest_state; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TYPE quest_state; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TYPE public.quest_state IS 'Состояние квеста у игрока';
 
 
 --
--- Name: quest_step_type; Type: TYPE; Schema: public; Owner: postgres
+-- Name: quest_step_type; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.quest_step_type AS ENUM (
@@ -86,17 +80,15 @@ CREATE TYPE public.quest_step_type AS ENUM (
 );
 
 
-ALTER TYPE public.quest_step_type OWNER TO postgres;
-
 --
--- Name: TYPE quest_step_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TYPE quest_step_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TYPE public.quest_step_type IS 'Тип шага квеста (структура в params JSON)';
 
 
 --
--- Name: spawn_zone_shape; Type: TYPE; Schema: public; Owner: postgres
+-- Name: spawn_zone_shape; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.spawn_zone_shape AS ENUM (
@@ -106,10 +98,8 @@ CREATE TYPE public.spawn_zone_shape AS ENUM (
 );
 
 
-ALTER TYPE public.spawn_zone_shape OWNER TO postgres;
-
 --
--- Name: status_effect_category; Type: TYPE; Schema: public; Owner: postgres
+-- Name: status_effect_category; Type: TYPE; Schema: public; Owner: -
 --
 
 CREATE TYPE public.status_effect_category AS ENUM (
@@ -121,10 +111,8 @@ CREATE TYPE public.status_effect_category AS ENUM (
 );
 
 
-ALTER TYPE public.status_effect_category OWNER TO postgres;
-
 --
--- Name: game_config_set_updated_at(); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: game_config_set_updated_at(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION public.game_config_set_updated_at() RETURNS trigger
@@ -137,14 +125,12 @@ END;
 $$;
 
 
-ALTER FUNCTION public.game_config_set_updated_at() OWNER TO postgres;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: character_permanent_modifiers; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_permanent_modifiers; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_permanent_modifiers (
@@ -158,45 +144,43 @@ CREATE TABLE public.character_permanent_modifiers (
 );
 
 
-ALTER TABLE public.character_permanent_modifiers OWNER TO postgres;
-
 --
--- Name: TABLE character_permanent_modifiers; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_permanent_modifiers; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_permanent_modifiers IS 'Постоянные модификаторы характеристик персонажа из внешних источников. Источники: квест, достижение, GM-правка, событие. НЕ является кешем — это источник правды для перманентных бонусов. Базовые статы класса хранятся в class_stat_formula, бонусы шмота — в character_equipment.';
 
 
 --
--- Name: COLUMN character_permanent_modifiers.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_permanent_modifiers.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_permanent_modifiers.attribute_id IS 'Характеристика из entity_attributes';
 
 
 --
--- Name: COLUMN character_permanent_modifiers.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_permanent_modifiers.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_permanent_modifiers.value IS 'Значение бонуса (может быть отрицательным для штрафов)';
 
 
 --
--- Name: COLUMN character_permanent_modifiers.source_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_permanent_modifiers.source_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_permanent_modifiers.source_type IS 'Источник: gm | quest | achievement | event | admin';
 
 
 --
--- Name: COLUMN character_permanent_modifiers.source_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_permanent_modifiers.source_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_permanent_modifiers.source_id IS 'ID источника (quest.id / achievement.id / NULL для GM)';
 
 
 --
--- Name: character_attributes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_attributes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.character_permanent_modifiers ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -210,7 +194,7 @@ ALTER TABLE public.character_permanent_modifiers ALTER COLUMN id ADD GENERATED A
 
 
 --
--- Name: entity_attributes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: entity_attributes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.entity_attributes (
@@ -221,38 +205,36 @@ CREATE TABLE public.entity_attributes (
 );
 
 
-ALTER TABLE public.entity_attributes OWNER TO postgres;
-
 --
--- Name: TABLE entity_attributes; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE entity_attributes; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.entity_attributes IS 'Справочник всех атрибутов игровых сущностей (сила, ловкость, физический урон и т.д.). Единый для персонажей, мобов, NPC и предметов. Использовать slug как стабильный ключ — id может меняться между окружениями.';
 
 
 --
--- Name: COLUMN entity_attributes.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN entity_attributes.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.entity_attributes.id IS 'Суррогатный PK. В коде ссылаться по slug, не по числу.';
 
 
 --
--- Name: COLUMN entity_attributes.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN entity_attributes.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.entity_attributes.name IS 'Отображаемое название атрибута (EN), например "Physical Attack".';
 
 
 --
--- Name: COLUMN entity_attributes.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN entity_attributes.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.entity_attributes.slug IS 'Машиночитаемый ключ атрибута, уникален. Примеры: strength, agility, physical_attack, physical_defense, crit_chance, evasion, heal_on_use, hunger_restore. Использовать в коде вместо числового id.';
 
 
 --
--- Name: character_attributes_id_seq1; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_attributes_id_seq1; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.entity_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -266,7 +248,7 @@ ALTER TABLE public.entity_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDE
 
 
 --
--- Name: character_bestiary; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_bestiary; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_bestiary (
@@ -276,38 +258,36 @@ CREATE TABLE public.character_bestiary (
 );
 
 
-ALTER TABLE public.character_bestiary OWNER TO postgres;
-
 --
--- Name: TABLE character_bestiary; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_bestiary; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_bestiary IS 'Бестиарий персонажа: сколько раз игрок убил каждый шаблон моба. Используется для разблокировки записей бестиария и potential pity-механик.';
 
 
 --
--- Name: COLUMN character_bestiary.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_bestiary.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_bestiary.character_id IS 'FK → characters.id. Персонаж-владелец записи бестиария.';
 
 
 --
--- Name: COLUMN character_bestiary.mob_template_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_bestiary.mob_template_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_bestiary.mob_template_id IS 'FK → mob.id. Шаблон моба (не runtime-инстанс).';
 
 
 --
--- Name: COLUMN character_bestiary.kill_count; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_bestiary.kill_count; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_bestiary.kill_count IS 'Суммарное количество убийств данного моба персонажем.';
 
 
 --
--- Name: character_class; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_class; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_class (
@@ -318,17 +298,15 @@ CREATE TABLE public.character_class (
 );
 
 
-ALTER TABLE public.character_class OWNER TO postgres;
-
 --
--- Name: TABLE character_class; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_class; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_class IS 'Классы персонажей (воин, маг и т.д.)';
 
 
 --
--- Name: character_class_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_class_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.character_class ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -342,7 +320,7 @@ ALTER TABLE public.character_class ALTER COLUMN id ADD GENERATED ALWAYS AS IDENT
 
 
 --
--- Name: character_current_state; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_current_state; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_current_state (
@@ -354,45 +332,43 @@ CREATE TABLE public.character_current_state (
 );
 
 
-ALTER TABLE public.character_current_state OWNER TO postgres;
-
 --
--- Name: TABLE character_current_state; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_current_state; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_current_state IS 'Горячее состояние персонажа (HP/MP/смерть). Пишется часто (каждый тик боя). Хранить отдельно от персистентных данных characters';
 
 
 --
--- Name: COLUMN character_current_state.current_health; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_current_state.current_health; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_current_state.current_health IS 'Текущие HP. Меняются в бою каждые N мс';
 
 
 --
--- Name: COLUMN character_current_state.current_mana; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_current_state.current_mana; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_current_state.current_mana IS 'Текущая мана. Меняется при кастах и регене';
 
 
 --
--- Name: COLUMN character_current_state.is_dead; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_current_state.is_dead; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_current_state.is_dead IS 'Флаг смерти. TRUE пока персонаж не воскрешён';
 
 
 --
--- Name: COLUMN character_current_state.updated_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_current_state.updated_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_current_state.updated_at IS 'Время последнего обновления состояния (для staleness-проверок)';
 
 
 --
--- Name: character_emotes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_emotes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_emotes (
@@ -403,17 +379,15 @@ CREATE TABLE public.character_emotes (
 );
 
 
-ALTER TABLE public.character_emotes OWNER TO postgres;
-
 --
--- Name: TABLE character_emotes; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_emotes; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_emotes IS 'Per-character unlocked emotes; default emotes are seeded here too';
 
 
 --
--- Name: character_emotes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_emotes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.character_emotes_id_seq
@@ -425,17 +399,15 @@ CREATE SEQUENCE public.character_emotes_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.character_emotes_id_seq OWNER TO postgres;
-
 --
--- Name: character_emotes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: character_emotes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.character_emotes_id_seq OWNED BY public.character_emotes.id;
 
 
 --
--- Name: character_equipment; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_equipment; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_equipment (
@@ -447,52 +419,50 @@ CREATE TABLE public.character_equipment (
 );
 
 
-ALTER TABLE public.character_equipment OWNER TO postgres;
-
 --
--- Name: TABLE character_equipment; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_equipment; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_equipment IS 'Экипированные предметы персонажа. Ссылается на player_inventory, а не на items напрямую — чтобы учитывать состояние конкретного инстанса (прочность). Один персонаж не может занять один слот дважды (UNIQUE на character_id + equip_slot_id).';
 
 
 --
--- Name: COLUMN character_equipment.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_equipment.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_equipment.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN character_equipment.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_equipment.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_equipment.character_id IS 'FK → characters.id.';
 
 
 --
--- Name: COLUMN character_equipment.equip_slot_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_equipment.equip_slot_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_equipment.equip_slot_id IS 'FK → equip_slots.id. Слот экипировки (голова, грудь, оружие и т.д.).';
 
 
 --
--- Name: COLUMN character_equipment.inventory_item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_equipment.inventory_item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_equipment.inventory_item_id IS 'FK → player_inventory.id. Конкретный инстанс предмета из инвентаря персонажа.';
 
 
 --
--- Name: COLUMN character_equipment.equipped_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_equipment.equipped_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_equipment.equipped_at IS 'Метка времени надевания. DEFAULT now().';
 
 
 --
--- Name: character_equipment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_equipment_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.character_equipment_id_seq
@@ -503,17 +473,15 @@ CREATE SEQUENCE public.character_equipment_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.character_equipment_id_seq OWNER TO postgres;
-
 --
--- Name: character_equipment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: character_equipment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.character_equipment_id_seq OWNED BY public.character_equipment.id;
 
 
 --
--- Name: character_genders; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_genders; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_genders (
@@ -523,17 +491,15 @@ CREATE TABLE public.character_genders (
 );
 
 
-ALTER TABLE public.character_genders OWNER TO postgres;
-
 --
--- Name: TABLE character_genders; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_genders; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_genders IS 'Справочник полов персонажей: 0=мужской, 1=женский, 2=не задан';
 
 
 --
--- Name: character_pity; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_pity; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_pity (
@@ -543,38 +509,36 @@ CREATE TABLE public.character_pity (
 );
 
 
-ALTER TABLE public.character_pity OWNER TO postgres;
-
 --
--- Name: TABLE character_pity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_pity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_pity IS 'Pity-счётчики редких дропов. Хранит количество убийств без выпадения конкретного предмета, чтобы гарантировать дроп при превышении порога (гарантированный лут).';
 
 
 --
--- Name: COLUMN character_pity.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_pity.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_pity.character_id IS 'FK → characters.id. Персонаж.';
 
 
 --
--- Name: COLUMN character_pity.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_pity.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_pity.item_id IS 'FK → items.id. Предмет с pity-механикой (редкий дроп).';
 
 
 --
--- Name: COLUMN character_pity.kill_count; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_pity.kill_count; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_pity.kill_count IS 'Счётчик убийств без выпадения данного предмета. Сбрасывается в 0 после получения предмета.';
 
 
 --
--- Name: character_position; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_position; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_position (
@@ -588,31 +552,29 @@ CREATE TABLE public.character_position (
 );
 
 
-ALTER TABLE public.character_position OWNER TO postgres;
-
 --
--- Name: TABLE character_position; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_position; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_position IS 'Текущая позиция персонажа в мире. Одна запись на персонажа';
 
 
 --
--- Name: COLUMN character_position.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_position.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_position.zone_id IS 'Зона, в которой находится персонаж. NULL = не в зоне/оффлайн';
 
 
 --
--- Name: COLUMN character_position.rot_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_position.rot_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_position.rot_z IS 'Угол поворота персонажа по оси Z (направление взгляда, в радианах)';
 
 
 --
--- Name: character_position_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_position_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.character_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -626,7 +588,7 @@ ALTER TABLE public.character_position ALTER COLUMN id ADD GENERATED ALWAYS AS ID
 
 
 --
--- Name: character_reputation; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_reputation; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_reputation (
@@ -636,38 +598,36 @@ CREATE TABLE public.character_reputation (
 );
 
 
-ALTER TABLE public.character_reputation OWNER TO postgres;
-
 --
--- Name: TABLE character_reputation; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_reputation; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_reputation IS 'Репутация персонажа у каждой фракции. Положительные значения = союзник, отрицательные = враг. Используется для диалоговых условий и доступа к контенту.';
 
 
 --
--- Name: COLUMN character_reputation.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_reputation.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_reputation.character_id IS 'FK → characters.id. Персонаж.';
 
 
 --
--- Name: COLUMN character_reputation.faction_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_reputation.faction_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_reputation.faction_slug IS 'FK → factions.slug. Фракция.';
 
 
 --
--- Name: COLUMN character_reputation.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_reputation.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_reputation.value IS 'Очки репутации. > 0 = союзник, < 0 = враг. Диапазон определяется дизайном.';
 
 
 --
--- Name: character_skill_bar; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_skill_bar; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_skill_bar (
@@ -678,31 +638,29 @@ CREATE TABLE public.character_skill_bar (
 );
 
 
-ALTER TABLE public.character_skill_bar OWNER TO postgres;
-
 --
--- Name: TABLE character_skill_bar; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_skill_bar; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_skill_bar IS 'Stores which skill slug is assigned to each hotbar slot per character. Absent rows = empty slot.';
 
 
 --
--- Name: COLUMN character_skill_bar.slot_index; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_skill_bar.slot_index; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_skill_bar.slot_index IS 'Zero-based hotbar slot index (0–11). Max 12 slots enforced by CHECK constraint.';
 
 
 --
--- Name: COLUMN character_skill_bar.skill_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_skill_bar.skill_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_skill_bar.skill_slug IS 'Slug of the skill assigned to this slot. Must be a known skill slug.';
 
 
 --
--- Name: character_skill_mastery; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_skill_mastery; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_skill_mastery (
@@ -712,38 +670,36 @@ CREATE TABLE public.character_skill_mastery (
 );
 
 
-ALTER TABLE public.character_skill_mastery OWNER TO postgres;
-
 --
--- Name: TABLE character_skill_mastery; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_skill_mastery; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_skill_mastery IS 'Накопленные очки мастерства персонажа по типу оружия/школы. Например, sword_mastery растёт при ударах мечом и влияет на бонусы к урону.';
 
 
 --
--- Name: COLUMN character_skill_mastery.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_skill_mastery.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_skill_mastery.character_id IS 'FK → characters.id. Персонаж.';
 
 
 --
--- Name: COLUMN character_skill_mastery.mastery_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_skill_mastery.mastery_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_skill_mastery.mastery_slug IS 'FK → mastery_definitions.slug. Тип мастерства.';
 
 
 --
--- Name: COLUMN character_skill_mastery.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_skill_mastery.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_skill_mastery.value IS 'Текущие накопленные очки мастерства. Ограничены mastery_definitions.max_value.';
 
 
 --
--- Name: character_skills; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_skills; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_skills (
@@ -754,24 +710,22 @@ CREATE TABLE public.character_skills (
 );
 
 
-ALTER TABLE public.character_skills OWNER TO postgres;
-
 --
--- Name: TABLE character_skills; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_skills; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_skills IS 'Скиллы, изученные персонажем, с их текущим уровнем';
 
 
 --
--- Name: COLUMN character_skills.current_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_skills.current_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_skills.current_level IS 'Текущий уровень изученного скилла';
 
 
 --
--- Name: character_skills_id_seq1; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: character_skills_id_seq1; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.character_skills_id_seq1
@@ -783,17 +737,15 @@ CREATE SEQUENCE public.character_skills_id_seq1
     CACHE 1;
 
 
-ALTER TABLE public.character_skills_id_seq1 OWNER TO postgres;
-
 --
--- Name: character_skills_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: character_skills_id_seq1; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.character_skills_id_seq1 OWNED BY public.character_skills.id;
 
 
 --
--- Name: character_titles; Type: TABLE; Schema: public; Owner: postgres
+-- Name: character_titles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.character_titles (
@@ -804,45 +756,43 @@ CREATE TABLE public.character_titles (
 );
 
 
-ALTER TABLE public.character_titles OWNER TO postgres;
-
 --
--- Name: TABLE character_titles; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE character_titles; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.character_titles IS 'Титулы, заработанные персонажем. equipped=true означает, что этот титул отображается над именем в мире. Только один может быть активным одновременно.';
 
 
 --
--- Name: COLUMN character_titles.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_titles.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_titles.character_id IS 'FK → characters.id. Персонаж.';
 
 
 --
--- Name: COLUMN character_titles.title_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_titles.title_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_titles.title_slug IS 'FK → title_definitions.slug. Полученный титул.';
 
 
 --
--- Name: COLUMN character_titles.equipped; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_titles.equipped; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_titles.equipped IS 'TRUE = этот титул отображается над именем персонажа в игровом мире.';
 
 
 --
--- Name: COLUMN character_titles.earned_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN character_titles.earned_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.character_titles.earned_at IS 'Временная метка получения титула.';
 
 
 --
--- Name: characters; Type: TABLE; Schema: public; Owner: postgres
+-- Name: characters; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.characters (
@@ -853,118 +803,124 @@ CREATE TABLE public.characters (
     race_id integer DEFAULT 1 NOT NULL,
     experience_points bigint DEFAULT 0 NOT NULL,
     level integer DEFAULT 0 NOT NULL,
-    radius integer DEFAULT 100 NOT NULL,
     free_skill_points smallint DEFAULT 0 NOT NULL,
     gender smallint DEFAULT 0 NOT NULL,
     account_slot smallint DEFAULT 1 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     last_online_at timestamp with time zone,
     deleted_at timestamp with time zone,
-    play_time_sec bigint DEFAULT 0 NOT NULL,
+    total_play_time_sec bigint DEFAULT 0 NOT NULL,
     bind_zone_id integer,
     bind_x double precision,
     bind_y double precision,
     bind_z double precision,
     appearance jsonb,
-    experience_debt integer DEFAULT 0 NOT NULL
+    experience_debt integer DEFAULT 0 NOT NULL,
+    last_session_play_time_sec bigint DEFAULT 0 NOT NULL,
+    is_online boolean DEFAULT false NOT NULL
 );
 
 
-ALTER TABLE public.characters OWNER TO postgres;
-
 --
--- Name: TABLE characters; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE characters; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.characters IS 'Персонажи игроков. Привязаны к аккаунту через owner_id';
 
 
 --
--- Name: COLUMN characters.radius; Type: COMMENT; Schema: public; Owner: postgres
---
-
-COMMENT ON COLUMN public.characters.radius IS 'Радиус коллизии/взаимодействия в игровых единицах';
-
-
---
--- Name: COLUMN characters.free_skill_points; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.free_skill_points; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.free_skill_points IS 'Очки скиллов, ожидающие распределения игроком';
 
 
 --
--- Name: COLUMN characters.gender; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.gender; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.gender IS '0=male, 1=female';
 
 
 --
--- Name: COLUMN characters.account_slot; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.account_slot; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.account_slot IS 'Порядок на экране выбора персонажей';
 
 
 --
--- Name: COLUMN characters.last_online_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.last_online_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.last_online_at IS 'Время последнего выхода из игры';
 
 
 --
--- Name: COLUMN characters.deleted_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.deleted_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.deleted_at IS 'Soft delete — персонаж удалён, но восстановим';
 
 
 --
--- Name: COLUMN characters.play_time_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.total_play_time_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.characters.play_time_sec IS 'Суммарное время игры в секундах';
+COMMENT ON COLUMN public.characters.total_play_time_sec IS 'Суммарное время игры в секундах';
 
 
 --
--- Name: COLUMN characters.bind_zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.bind_zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.bind_zone_id IS 'Зона точки воскрешения/возврата';
 
 
 --
--- Name: COLUMN characters.bind_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.bind_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.bind_x IS 'X-координата точки привязки воскрешения';
 
 
 --
--- Name: COLUMN characters.bind_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.bind_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.bind_y IS 'Y-координата точки привязки воскрешения';
 
 
 --
--- Name: COLUMN characters.bind_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.bind_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.bind_z IS 'Z-координата точки привязки воскрешения';
 
 
 --
--- Name: COLUMN characters.appearance; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN characters.appearance; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.characters.appearance IS 'Кастомизация внешности: цвет волос/глаз, рост и т.д. (JSONB)';
 
 
 --
--- Name: characters_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: COLUMN characters.last_session_play_time_sec; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.last_session_play_time_sec IS 'Время проведённое в игре за последнюю сессию в секундах';
+
+
+--
+-- Name: COLUMN characters.is_online; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.characters.is_online IS 'Находится ли персонаж в игре в данный момент';
+
+
+--
+-- Name: characters_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.characters ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -978,7 +934,7 @@ ALTER TABLE public.characters ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: class_skill_tree; Type: TABLE; Schema: public; Owner: postgres
+-- Name: class_skill_tree; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.class_skill_tree (
@@ -996,66 +952,64 @@ CREATE TABLE public.class_skill_tree (
 );
 
 
-ALTER TABLE public.class_skill_tree OWNER TO postgres;
-
 --
--- Name: TABLE class_skill_tree; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE class_skill_tree; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.class_skill_tree IS 'Шаблон доступных скилов для класса. is_default=true — скил выдаётся автоматически при создании персонажа. required_level — минимальный уровень персонажа для изучения скила. Факт выученных скилов хранится в character_skills.';
 
 
 --
--- Name: COLUMN class_skill_tree.is_default; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.is_default; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.is_default IS 'TRUE = скилл выдаётся автоматически при создании персонажа данного класса';
 
 
 --
--- Name: COLUMN class_skill_tree.prerequisite_skill_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.prerequisite_skill_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.prerequisite_skill_id IS 'Skill that must already be learned before this one becomes available. NULL = no prereq.';
 
 
 --
--- Name: COLUMN class_skill_tree.skill_point_cost; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.skill_point_cost; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.skill_point_cost IS 'Skill points consumed when this skill is learned. 0 = free (default skills).';
 
 
 --
--- Name: COLUMN class_skill_tree.gold_cost; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.gold_cost; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.gold_cost IS 'Gold (gold_coin quantity) required to learn this skill. 0 = no gold cost.';
 
 
 --
--- Name: COLUMN class_skill_tree.max_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.max_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.max_level IS 'Maximum level to which this skill can be upgraded. 1 = cannot be upgraded.';
 
 
 --
--- Name: COLUMN class_skill_tree.requires_book; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.requires_book; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.requires_book IS 'If TRUE the player must have the skill_book_item_id item in inventory to learn.';
 
 
 --
--- Name: COLUMN class_skill_tree.skill_book_item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_skill_tree.skill_book_item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_skill_tree.skill_book_item_id IS 'The skill book item that is consumed when learning this skill (if requires_book=TRUE).';
 
 
 --
--- Name: class_skill_tree_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: class_skill_tree_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.class_skill_tree_id_seq
@@ -1067,17 +1021,15 @@ CREATE SEQUENCE public.class_skill_tree_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.class_skill_tree_id_seq OWNER TO postgres;
-
 --
--- Name: class_skill_tree_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: class_skill_tree_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.class_skill_tree_id_seq OWNED BY public.class_skill_tree.id;
 
 
 --
--- Name: class_spawn_zones; Type: TABLE; Schema: public; Owner: postgres
+-- Name: class_spawn_zones; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.class_spawn_zones (
@@ -1098,38 +1050,36 @@ CREATE TABLE public.class_spawn_zones (
 );
 
 
-ALTER TABLE public.class_spawn_zones OWNER TO postgres;
-
 --
--- Name: TABLE class_spawn_zones; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE class_spawn_zones; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.class_spawn_zones IS 'Стартовые спавн-зоны для классов. Когда персонаж создаётся и впервые входит в игру, он появляется в случайной точке внутри зоны своего класса.';
 
 
 --
--- Name: COLUMN class_spawn_zones.class_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_spawn_zones.class_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_spawn_zones.class_id IS 'FK → character_class.id. Класс которому принадлежит зона спавна.';
 
 
 --
--- Name: COLUMN class_spawn_zones.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_spawn_zones.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_spawn_zones.zone_id IS 'FK → zones.id. Игровая зона, в которой находится спавн.';
 
 
 --
--- Name: COLUMN class_spawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_spawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_spawn_zones.shape_type IS 'Форма зоны: RECT (прямоугольник), CIRCLE (круг), ANNULUS (кольцо).';
 
 
 --
--- Name: class_spawn_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: class_spawn_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.class_spawn_zones_id_seq
@@ -1141,17 +1091,15 @@ CREATE SEQUENCE public.class_spawn_zones_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.class_spawn_zones_id_seq OWNER TO postgres;
-
 --
--- Name: class_spawn_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: class_spawn_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.class_spawn_zones_id_seq OWNED BY public.class_spawn_zones.id;
 
 
 --
--- Name: class_starter_items; Type: TABLE; Schema: public; Owner: postgres
+-- Name: class_starter_items; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.class_starter_items (
@@ -1164,52 +1112,50 @@ CREATE TABLE public.class_starter_items (
 );
 
 
-ALTER TABLE public.class_starter_items OWNER TO postgres;
-
 --
--- Name: TABLE class_starter_items; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE class_starter_items; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.class_starter_items IS 'Предметы, автоматически выдаваемые персонажу при создании в зависимости от класса. Количество и слот настраиваются. Durability = NULL означает полную прочность по умолчанию.';
 
 
 --
--- Name: COLUMN class_starter_items.class_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_starter_items.class_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_starter_items.class_id IS 'FK → character_class.id. Класс которому выдаётся предмет.';
 
 
 --
--- Name: COLUMN class_starter_items.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_starter_items.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_starter_items.item_id IS 'FK → items.id. Шаблон предмета для выдачи.';
 
 
 --
--- Name: COLUMN class_starter_items.quantity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_starter_items.quantity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_starter_items.quantity IS 'Количество предметов в стаке.';
 
 
 --
--- Name: COLUMN class_starter_items.slot_index; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_starter_items.slot_index; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_starter_items.slot_index IS 'Позиция в инвентаре. NULL = сервер назначает автоматически.';
 
 
 --
--- Name: COLUMN class_starter_items.durability_current; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_starter_items.durability_current; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_starter_items.durability_current IS 'Начальная прочность. NULL = использовать durability_max из таблицы items.';
 
 
 --
--- Name: class_starter_items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: class_starter_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.class_starter_items_id_seq
@@ -1221,17 +1167,15 @@ CREATE SEQUENCE public.class_starter_items_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.class_starter_items_id_seq OWNER TO postgres;
-
 --
--- Name: class_starter_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: class_starter_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.class_starter_items_id_seq OWNED BY public.class_starter_items.id;
 
 
 --
--- Name: class_stat_formula; Type: TABLE; Schema: public; Owner: postgres
+-- Name: class_stat_formula; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.class_stat_formula (
@@ -1244,52 +1188,50 @@ CREATE TABLE public.class_stat_formula (
 );
 
 
-ALTER TABLE public.class_stat_formula OWNER TO postgres;
-
 --
--- Name: TABLE class_stat_formula; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE class_stat_formula; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.class_stat_formula IS 'Формула роста базовых характеристик класса по уровням. Итоговый стат = base_value + multiplier * level^exponent. Заменяет class_base_stats. Используется game server при логине и левел-апе для пересчёта character_permanent_modifiers.';
 
 
 --
--- Name: COLUMN class_stat_formula.class_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_stat_formula.class_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_stat_formula.class_id IS 'Класс персонажа';
 
 
 --
--- Name: COLUMN class_stat_formula.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_stat_formula.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_stat_formula.attribute_id IS 'Характеристика из entity_attributes';
 
 
 --
--- Name: COLUMN class_stat_formula.base_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_stat_formula.base_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_stat_formula.base_value IS 'Значение характеристики на 1 уровне';
 
 
 --
--- Name: COLUMN class_stat_formula.multiplier; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_stat_formula.multiplier; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_stat_formula.multiplier IS 'Множитель роста: ROUND(base_value + multiplier * level^exponent)';
 
 
 --
--- Name: COLUMN class_stat_formula.exponent; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN class_stat_formula.exponent; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.class_stat_formula.exponent IS 'Степень кривой: 1.0 = линейный, >1.0 = ускоряется, <1.0 = замедляется';
 
 
 --
--- Name: currency_transactions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: currency_transactions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.currency_transactions (
@@ -1302,45 +1244,43 @@ CREATE TABLE public.currency_transactions (
 );
 
 
-ALTER TABLE public.currency_transactions OWNER TO postgres;
-
 --
--- Name: TABLE currency_transactions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE currency_transactions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.currency_transactions IS 'Полный журнал всех денежных операций персонажей (ledger-подход)';
 
 
 --
--- Name: COLUMN currency_transactions.amount; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN currency_transactions.amount; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.currency_transactions.amount IS 'Положительное = доход, отрицательное = расход';
 
 
 --
--- Name: COLUMN currency_transactions.reason_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN currency_transactions.reason_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.currency_transactions.reason_type IS 'quest_reward, vendor_buy, vendor_sell, drop, gm_grant, trade';
 
 
 --
--- Name: COLUMN currency_transactions.source_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN currency_transactions.source_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.currency_transactions.source_id IS 'ID источника (quest_id, vendor_npc_id и т.д.) в зависимости от reason_type';
 
 
 --
--- Name: COLUMN currency_transactions.created_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN currency_transactions.created_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.currency_transactions.created_at IS 'Время транзакции';
 
 
 --
--- Name: currency_transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: currency_transactions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.currency_transactions_id_seq
@@ -1351,17 +1291,15 @@ CREATE SEQUENCE public.currency_transactions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.currency_transactions_id_seq OWNER TO postgres;
-
 --
--- Name: currency_transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: currency_transactions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.currency_transactions_id_seq OWNED BY public.currency_transactions.id;
 
 
 --
--- Name: damage_elements; Type: TABLE; Schema: public; Owner: postgres
+-- Name: damage_elements; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.damage_elements (
@@ -1369,24 +1307,22 @@ CREATE TABLE public.damage_elements (
 );
 
 
-ALTER TABLE public.damage_elements OWNER TO postgres;
-
 --
--- Name: TABLE damage_elements; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE damage_elements; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.damage_elements IS 'Справочник элементов урона: fire, ice, physical, shadow, holy и т.д. PK — slug. Используется в mob_resistances и mob_weaknesses.';
 
 
 --
--- Name: COLUMN damage_elements.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN damage_elements.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.damage_elements.slug IS 'PK. Уникальный код элемента урона: physical, fire, ice, shadow, holy, arcane и т.д.';
 
 
 --
--- Name: dialogue; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dialogue; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.dialogue (
@@ -1397,38 +1333,36 @@ CREATE TABLE public.dialogue (
 );
 
 
-ALTER TABLE public.dialogue OWNER TO postgres;
-
 --
--- Name: TABLE dialogue; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE dialogue; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.dialogue IS 'Диалог как граф. У NPC может быть несколько диалогов.';
 
 
 --
--- Name: COLUMN dialogue.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue.slug IS 'Уникальный ключ диалога для поиска/линковки';
 
 
 --
--- Name: COLUMN dialogue.version; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue.version; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue.version IS 'Версия контента (для редактора/каталогизации)';
 
 
 --
--- Name: COLUMN dialogue.start_node_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue.start_node_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue.start_node_id IS 'ID стартового узла (dialogue_node.id)';
 
 
 --
--- Name: dialogue_edge; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dialogue_edge; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.dialogue_edge (
@@ -1444,66 +1378,64 @@ CREATE TABLE public.dialogue_edge (
 );
 
 
-ALTER TABLE public.dialogue_edge OWNER TO postgres;
-
 --
--- Name: TABLE dialogue_edge; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE dialogue_edge; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.dialogue_edge IS 'Варианты выбора (рёбра графа) из узла в узел';
 
 
 --
--- Name: COLUMN dialogue_edge.from_node_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.from_node_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.from_node_id IS 'Исходный узел (кнопка показывается на нём)';
 
 
 --
--- Name: COLUMN dialogue_edge.to_node_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.to_node_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.to_node_id IS 'Узел-назначение при выборе';
 
 
 --
--- Name: COLUMN dialogue_edge.order_index; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.order_index; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.order_index IS 'Порядок отображения кнопок на клиенте';
 
 
 --
--- Name: COLUMN dialogue_edge.client_choice_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.client_choice_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.client_choice_key IS 'Ключ текста варианта для клиента';
 
 
 --
--- Name: COLUMN dialogue_edge.condition_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.condition_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.condition_group IS 'JSON-условия доступности варианта';
 
 
 --
--- Name: COLUMN dialogue_edge.action_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.action_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.action_group IS 'JSON-действия, применяемые по клику';
 
 
 --
--- Name: COLUMN dialogue_edge.hide_if_locked; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_edge.hide_if_locked; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_edge.hide_if_locked IS 'Если TRUE — скрыть вариант при невыполненных условиях';
 
 
 --
--- Name: dialogue_edge_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: dialogue_edge_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.dialogue_edge_id_seq
@@ -1514,17 +1446,15 @@ CREATE SEQUENCE public.dialogue_edge_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.dialogue_edge_id_seq OWNER TO postgres;
-
 --
--- Name: dialogue_edge_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: dialogue_edge_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.dialogue_edge_id_seq OWNED BY public.dialogue_edge.id;
 
 
 --
--- Name: dialogue_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: dialogue_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.dialogue_id_seq
@@ -1535,17 +1465,15 @@ CREATE SEQUENCE public.dialogue_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.dialogue_id_seq OWNER TO postgres;
-
 --
--- Name: dialogue_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: dialogue_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.dialogue_id_seq OWNED BY public.dialogue.id;
 
 
 --
--- Name: dialogue_node; Type: TABLE; Schema: public; Owner: postgres
+-- Name: dialogue_node; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.dialogue_node (
@@ -1561,59 +1489,57 @@ CREATE TABLE public.dialogue_node (
 );
 
 
-ALTER TABLE public.dialogue_node OWNER TO postgres;
-
 --
--- Name: TABLE dialogue_node; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE dialogue_node; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.dialogue_node IS 'Узел графа диалога (реплика, выбор, действие, прыжок, конец)';
 
 
 --
--- Name: COLUMN dialogue_node.type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_node.type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_node.type IS 'Тип узла: line/choice_hub/action/jump/end';
 
 
 --
--- Name: COLUMN dialogue_node.speaker_npc_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_node.speaker_npc_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_node.speaker_npc_id IS 'Идентификатор говорящего NPC (для клиента)';
 
 
 --
--- Name: COLUMN dialogue_node.client_node_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_node.client_node_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_node.client_node_key IS 'Ключ строки/контента на клиенте';
 
 
 --
--- Name: COLUMN dialogue_node.condition_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_node.condition_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_node.condition_group IS 'JSON-условия: когда узел актуален (иначе пропуск)';
 
 
 --
--- Name: COLUMN dialogue_node.action_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_node.action_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_node.action_group IS 'JSON-действия, исполняемые при входе в action-узел';
 
 
 --
--- Name: COLUMN dialogue_node.jump_target_node_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN dialogue_node.jump_target_node_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.dialogue_node.jump_target_node_id IS 'Целевой узел для прыжка (type=jump)';
 
 
 --
--- Name: dialogue_node_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: dialogue_node_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.dialogue_node_id_seq
@@ -1624,17 +1550,15 @@ CREATE SEQUENCE public.dialogue_node_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.dialogue_node_id_seq OWNER TO postgres;
-
 --
--- Name: dialogue_node_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: dialogue_node_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.dialogue_node_id_seq OWNED BY public.dialogue_node.id;
 
 
 --
--- Name: emote_definitions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: emote_definitions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.emote_definitions (
@@ -1649,45 +1573,43 @@ CREATE TABLE public.emote_definitions (
 );
 
 
-ALTER TABLE public.emote_definitions OWNER TO postgres;
-
 --
--- Name: TABLE emote_definitions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE emote_definitions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.emote_definitions IS 'Static catalog of player emote / animation definitions';
 
 
 --
--- Name: COLUMN emote_definitions.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN emote_definitions.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.emote_definitions.slug IS 'Unique snake_case key used in packets, e.g. dance_silly';
 
 
 --
--- Name: COLUMN emote_definitions.animation_name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN emote_definitions.animation_name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.emote_definitions.animation_name IS 'Name of the client-side animation clip to play';
 
 
 --
--- Name: COLUMN emote_definitions.category; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN emote_definitions.category; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.emote_definitions.category IS 'UI grouping: basic | social | dance | sit | ...';
 
 
 --
--- Name: COLUMN emote_definitions.is_default; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN emote_definitions.is_default; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.emote_definitions.is_default IS 'TRUE = all characters own this emote automatically';
 
 
 --
--- Name: emote_definitions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: emote_definitions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.emote_definitions_id_seq
@@ -1699,17 +1621,15 @@ CREATE SEQUENCE public.emote_definitions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.emote_definitions_id_seq OWNER TO postgres;
-
 --
--- Name: emote_definitions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: emote_definitions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.emote_definitions_id_seq OWNED BY public.emote_definitions.id;
 
 
 --
--- Name: equip_slot; Type: TABLE; Schema: public; Owner: postgres
+-- Name: equip_slot; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.equip_slot (
@@ -1719,17 +1639,15 @@ CREATE TABLE public.equip_slot (
 );
 
 
-ALTER TABLE public.equip_slot OWNER TO postgres;
-
 --
--- Name: TABLE equip_slot; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE equip_slot; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.equip_slot IS 'Справочник слотов экипировки (голова, грудь, главная рука и т.д.)';
 
 
 --
--- Name: exp_for_level; Type: TABLE; Schema: public; Owner: postgres
+-- Name: exp_for_level; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.exp_for_level (
@@ -1739,24 +1657,22 @@ CREATE TABLE public.exp_for_level (
 );
 
 
-ALTER TABLE public.exp_for_level OWNER TO postgres;
-
 --
--- Name: TABLE exp_for_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE exp_for_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.exp_for_level IS 'Таблица порогов опыта: сколько XP нужно для достижения каждого уровня';
 
 
 --
--- Name: COLUMN exp_for_level.experience_points; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN exp_for_level.experience_points; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.exp_for_level.experience_points IS 'Суммарный опыт, необходимый для достижения данного уровня';
 
 
 --
--- Name: exp_for_level_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: exp_for_level_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.exp_for_level ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -1770,7 +1686,7 @@ ALTER TABLE public.exp_for_level ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 
 
 --
--- Name: factions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: factions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.factions (
@@ -1780,38 +1696,36 @@ CREATE TABLE public.factions (
 );
 
 
-ALTER TABLE public.factions OWNER TO postgres;
-
 --
--- Name: TABLE factions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE factions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.factions IS 'Справочник фракций игрового мира. Мобы и NPC принадлежат фракции (faction_slug). Репутация персонажа ко фракции хранится в character_reputation.';
 
 
 --
--- Name: COLUMN factions.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN factions.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.factions.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN factions.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN factions.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.factions.slug IS 'Уникальный код фракции. Используется как FK в mob, npc, character_reputation.';
 
 
 --
--- Name: COLUMN factions.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN factions.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.factions.name IS 'Отображаемое имя фракции.';
 
 
 --
--- Name: factions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: factions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.factions_id_seq
@@ -1823,17 +1737,15 @@ CREATE SEQUENCE public.factions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.factions_id_seq OWNER TO postgres;
-
 --
--- Name: factions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: factions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.factions_id_seq OWNED BY public.factions.id;
 
 
 --
--- Name: game_analytics; Type: TABLE; Schema: public; Owner: postgres
+-- Name: game_analytics; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.game_analytics (
@@ -1848,73 +1760,71 @@ CREATE TABLE public.game_analytics (
 );
 
 
-ALTER TABLE public.game_analytics OWNER TO postgres;
-
 --
--- Name: TABLE game_analytics; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE game_analytics; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.game_analytics IS 'Append-only event log for playtest analytics. Written by Game Server; never updated or deleted manually.';
 
 
 --
--- Name: COLUMN game_analytics.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.id IS 'Auto-increment primary key.';
 
 
 --
--- Name: COLUMN game_analytics.event_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.event_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.event_type IS 'Type of event: session_start, session_end, level_up, player_death, quest_accept, quest_complete, quest_abandon, mob_killed, item_acquired, gold_change, skill_used, etc.';
 
 
 --
--- Name: COLUMN game_analytics.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.character_id IS 'FK → characters.id. SET NULL on character deletion so historic rows are preserved.';
 
 
 --
--- Name: COLUMN game_analytics.session_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.session_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.session_id IS 'Server-generated session token "sess_{characterId}_{unix_ms}". Generated once on joinGameCharacter and reused for every event in that play session.';
 
 
 --
--- Name: COLUMN game_analytics.level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.level IS 'Character level at the moment the event occurred. Direct column (not in payload) for fast GROUP BY / filter queries.';
 
 
 --
--- Name: COLUMN game_analytics.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.zone_id IS 'Zone/chunk where the event occurred. 0 = unknown/global.';
 
 
 --
--- Name: COLUMN game_analytics.payload; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.payload; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.payload IS 'Event-specific JSONB. Schema varies by event_type — see analytics-system-plan.md.';
 
 
 --
--- Name: COLUMN game_analytics.created_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_analytics.created_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_analytics.created_at IS 'Server-side UTC timestamp when the row was inserted.';
 
 
 --
--- Name: game_analytics_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: game_analytics_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.game_analytics_id_seq
@@ -1925,17 +1835,15 @@ CREATE SEQUENCE public.game_analytics_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.game_analytics_id_seq OWNER TO postgres;
-
 --
--- Name: game_analytics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: game_analytics_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.game_analytics_id_seq OWNED BY public.game_analytics.id;
 
 
 --
--- Name: game_config; Type: TABLE; Schema: public; Owner: postgres
+-- Name: game_config; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.game_config (
@@ -1948,52 +1856,50 @@ CREATE TABLE public.game_config (
 );
 
 
-ALTER TABLE public.game_config OWNER TO postgres;
-
 --
--- Name: TABLE game_config; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE game_config; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.game_config IS 'Геймплейные константы и параметры баланса. Читаются при старте game-server и отправляются в chunk-server. Изменения применяются без перезапуска через GM-команду reload.';
 
 
 --
--- Name: COLUMN game_config.key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_config.key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_config.key IS 'Уникальный ключ параметра. Формат: namespace.param_name. Примеры: combat.defense_formula_k, aggro.base_radius.';
 
 
 --
--- Name: COLUMN game_config.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_config.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_config.value IS 'Значение в виде строки. Интерпретируется согласно value_type.';
 
 
 --
--- Name: COLUMN game_config.value_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_config.value_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_config.value_type IS 'Тип значения: int | float | bool | string. Используется GameConfigService для корректного приведения типа.';
 
 
 --
--- Name: COLUMN game_config.description; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_config.description; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_config.description IS 'Описание параметра и его влияния на геймплей. Для GM-UI и документации.';
 
 
 --
--- Name: COLUMN game_config.updated_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN game_config.updated_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.game_config.updated_at IS 'Автообновляется при изменении строки (через триггер ниже).';
 
 
 --
--- Name: gm_action_log; Type: TABLE; Schema: public; Owner: postgres
+-- Name: gm_action_log; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.gm_action_log (
@@ -2008,31 +1914,29 @@ CREATE TABLE public.gm_action_log (
 );
 
 
-ALTER TABLE public.gm_action_log OWNER TO postgres;
-
 --
--- Name: TABLE gm_action_log; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE gm_action_log; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.gm_action_log IS 'Полный аудит-лог действий GM и администраторов';
 
 
 --
--- Name: COLUMN gm_action_log.old_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN gm_action_log.old_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.gm_action_log.old_value IS 'Состояние до изменения (JSONB)';
 
 
 --
--- Name: COLUMN gm_action_log.new_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN gm_action_log.new_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.gm_action_log.new_value IS 'Состояние после изменения (JSONB)';
 
 
 --
--- Name: gm_action_log_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: gm_action_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.gm_action_log_id_seq
@@ -2043,17 +1947,15 @@ CREATE SEQUENCE public.gm_action_log_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.gm_action_log_id_seq OWNER TO postgres;
-
 --
--- Name: gm_action_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: gm_action_log_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.gm_action_log_id_seq OWNED BY public.gm_action_log.id;
 
 
 --
--- Name: item_attributes_mapping; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_attributes_mapping; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_attributes_mapping (
@@ -2066,52 +1968,50 @@ CREATE TABLE public.item_attributes_mapping (
 );
 
 
-ALTER TABLE public.item_attributes_mapping OWNER TO postgres;
-
 --
--- Name: TABLE item_attributes_mapping; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_attributes_mapping; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_attributes_mapping IS 'Атрибуты предметов с их значениями и режимом применения. apply_on=equip → бонус суммируется в стат персонажа при надевании. apply_on=use   → создаётся player_active_effect при использовании предмета. FK attribute_id → entity_attributes (единый справочник атрибутов).';
 
 
 --
--- Name: COLUMN item_attributes_mapping.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_attributes_mapping.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_attributes_mapping.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN item_attributes_mapping.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_attributes_mapping.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_attributes_mapping.item_id IS 'FK → items.id. Предмет-шаблон, к которому привязан атрибут.';
 
 
 --
--- Name: COLUMN item_attributes_mapping.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_attributes_mapping.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_attributes_mapping.attribute_id IS 'Атрибут из entity_attributes (единый справочник для персонажей, мобов и предметов). Экипируемые предметы (apply_on=equip): physical_attack, strength, crit_chance и т.д. Используемые предметы (apply_on=use): heal_on_use, hunger_restore, hp_regen_per_s и т.д.';
 
 
 --
--- Name: COLUMN item_attributes_mapping.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_attributes_mapping.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_attributes_mapping.value IS 'Числовое значение атрибута. Интерпретируется по slug: physical_attack=10 → +10 к атаке; heal_on_use=50 → восстановить 50 HP.';
 
 
 --
--- Name: COLUMN item_attributes_mapping.apply_on; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_attributes_mapping.apply_on; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_attributes_mapping.apply_on IS 'equip = суммируется в стат персонажа при надевании (броня, оружие). use   = создаёт player_active_effect при использовании предмета (зелья, еда).';
 
 
 --
--- Name: item_attributes_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: item_attributes_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.item_attributes_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -2125,7 +2025,7 @@ ALTER TABLE public.item_attributes_mapping ALTER COLUMN id ADD GENERATED ALWAYS 
 
 
 --
--- Name: item_class_restrictions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_class_restrictions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_class_restrictions (
@@ -2134,31 +2034,29 @@ CREATE TABLE public.item_class_restrictions (
 );
 
 
-ALTER TABLE public.item_class_restrictions OWNER TO postgres;
-
 --
--- Name: TABLE item_class_restrictions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_class_restrictions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_class_restrictions IS 'Ограничения предмета по классу персонажа. Если для предмета есть хотя бы одна запись — предмет может использовать только указанный класс.';
 
 
 --
--- Name: COLUMN item_class_restrictions.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_class_restrictions.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_class_restrictions.item_id IS 'FK → items.id. Предмет с ограничением по классу.';
 
 
 --
--- Name: COLUMN item_class_restrictions.class_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_class_restrictions.class_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_class_restrictions.class_id IS 'FK → character_class.id. Класс, которому разрешён данный предмет.';
 
 
 --
--- Name: item_set_bonuses; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_set_bonuses; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_set_bonuses (
@@ -2170,45 +2068,43 @@ CREATE TABLE public.item_set_bonuses (
 );
 
 
-ALTER TABLE public.item_set_bonuses OWNER TO postgres;
-
 --
--- Name: TABLE item_set_bonuses; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_set_bonuses; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_set_bonuses IS 'Сетовые бонусы: бонус к атрибуту, который даётся при надевании pieces_required предметов из одного сета. Несколько строк на сет для разных порогов.';
 
 
 --
--- Name: COLUMN item_set_bonuses.set_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_set_bonuses.set_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_set_bonuses.set_id IS 'FK → item_sets.id. Набор, к которому относится бонус.';
 
 
 --
--- Name: COLUMN item_set_bonuses.pieces_required; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_set_bonuses.pieces_required; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_set_bonuses.pieces_required IS 'Минимальное количество предметов набора для активации этого бонуса.';
 
 
 --
--- Name: COLUMN item_set_bonuses.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_set_bonuses.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_set_bonuses.attribute_id IS 'FK → entity_attributes.id. Атрибут, к которому прибавляется бонус.';
 
 
 --
--- Name: COLUMN item_set_bonuses.bonus_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_set_bonuses.bonus_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_set_bonuses.bonus_value IS 'Величина прибавки к атрибуту при активации бонуса.';
 
 
 --
--- Name: item_set_bonuses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: item_set_bonuses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.item_set_bonuses_id_seq
@@ -2220,17 +2116,15 @@ CREATE SEQUENCE public.item_set_bonuses_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.item_set_bonuses_id_seq OWNER TO postgres;
-
 --
--- Name: item_set_bonuses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: item_set_bonuses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.item_set_bonuses_id_seq OWNED BY public.item_set_bonuses.id;
 
 
 --
--- Name: item_set_members; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_set_members; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_set_members (
@@ -2239,31 +2133,29 @@ CREATE TABLE public.item_set_members (
 );
 
 
-ALTER TABLE public.item_set_members OWNER TO postgres;
-
 --
--- Name: TABLE item_set_members; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_set_members; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_set_members IS 'Состав сетов: какие предметы входят в набор. Один предмет может быть только в одном сете.';
 
 
 --
--- Name: COLUMN item_set_members.set_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_set_members.set_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_set_members.set_id IS 'FK → item_sets.id. Набор.';
 
 
 --
--- Name: COLUMN item_set_members.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_set_members.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_set_members.item_id IS 'FK → items.id. Предмет, входящий в набор.';
 
 
 --
--- Name: item_sets; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_sets; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_sets (
@@ -2273,38 +2165,36 @@ CREATE TABLE public.item_sets (
 );
 
 
-ALTER TABLE public.item_sets OWNER TO postgres;
-
 --
--- Name: TABLE item_sets; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_sets; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_sets IS 'Именованные наборы предметов (сеты). Бонусы за сборку набора хранятся в item_set_bonuses.';
 
 
 --
--- Name: COLUMN item_sets.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_sets.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_sets.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN item_sets.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_sets.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_sets.name IS 'Отображаемое имя набора.';
 
 
 --
--- Name: COLUMN item_sets.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_sets.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_sets.slug IS 'Уникальный код набора: используется в game-server и клиентском UI.';
 
 
 --
--- Name: item_sets_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: item_sets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.item_sets_id_seq
@@ -2316,17 +2206,15 @@ CREATE SEQUENCE public.item_sets_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.item_sets_id_seq OWNER TO postgres;
-
 --
--- Name: item_sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: item_sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.item_sets_id_seq OWNED BY public.item_sets.id;
 
 
 --
--- Name: item_types; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_types; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_types (
@@ -2336,38 +2224,36 @@ CREATE TABLE public.item_types (
 );
 
 
-ALTER TABLE public.item_types OWNER TO postgres;
-
 --
--- Name: TABLE item_types; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_types; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_types IS 'Справочник типов предметов: weapon, armor, accessory, potion, food, quest_item, resource, currency, container.';
 
 
 --
--- Name: COLUMN item_types.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_types.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_types.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN item_types.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_types.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_types.name IS 'Отображаемое название типа предмета.';
 
 
 --
--- Name: COLUMN item_types.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_types.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_types.slug IS 'Машиночитаемый ключ типа, уникален. Примеры: weapon, armor, potion, food, quest_item, resource.';
 
 
 --
--- Name: item_types_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: item_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.item_types ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -2381,7 +2267,7 @@ ALTER TABLE public.item_types ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: item_use_effects; Type: TABLE; Schema: public; Owner: postgres
+-- Name: item_use_effects; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.item_use_effects (
@@ -2397,73 +2283,71 @@ CREATE TABLE public.item_use_effects (
 );
 
 
-ALTER TABLE public.item_use_effects OWNER TO postgres;
-
 --
--- Name: TABLE item_use_effects; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE item_use_effects; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.item_use_effects IS 'Эффекты, применяемые при использовании предмета (зелье, еда). is_instant=true → разовое мгновенное применение; false → эффект с длительностью и тиками.';
 
 
 --
--- Name: COLUMN item_use_effects.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.item_id IS 'FK → items.id. Предмет, за которым закреплён эффект.';
 
 
 --
--- Name: COLUMN item_use_effects.effect_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.effect_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.effect_slug IS 'Идентификатор эффекта (произвольный slug или ссылка на status_effects.slug).';
 
 
 --
--- Name: COLUMN item_use_effects.attribute_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.attribute_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.attribute_slug IS 'Атрибут-цель эффекта (ссылается на entity_attributes.slug).';
 
 
 --
--- Name: COLUMN item_use_effects.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.value IS 'Числовое значение изменения атрибута.';
 
 
 --
--- Name: COLUMN item_use_effects.is_instant; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.is_instant; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.is_instant IS 'TRUE = мгновенное применение (зелье). FALSE = длительный эффект.';
 
 
 --
--- Name: COLUMN item_use_effects.duration_seconds; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.duration_seconds; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.duration_seconds IS 'Продолжительность эффекта в секундах (0 для мгновенных).';
 
 
 --
--- Name: COLUMN item_use_effects.tick_ms; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.tick_ms; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.tick_ms IS 'Интервал тика в мс для периодических эффектов (0 для мгновенных).';
 
 
 --
--- Name: COLUMN item_use_effects.cooldown_seconds; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN item_use_effects.cooldown_seconds; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.item_use_effects.cooldown_seconds IS 'Кулдаун предмета после использования в секундах.';
 
 
 --
--- Name: item_use_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: item_use_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.item_use_effects_id_seq
@@ -2475,17 +2359,15 @@ CREATE SEQUENCE public.item_use_effects_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.item_use_effects_id_seq OWNER TO postgres;
-
 --
--- Name: item_use_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: item_use_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.item_use_effects_id_seq OWNED BY public.item_use_effects.id;
 
 
 --
--- Name: items; Type: TABLE; Schema: public; Owner: postgres
+-- Name: items; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.items (
@@ -2514,164 +2396,162 @@ CREATE TABLE public.items (
 );
 
 
-ALTER TABLE public.items OWNER TO postgres;
-
 --
--- Name: TABLE items; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE items; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.items IS 'Каталог предметов игры — шаблоны, не инстансы. Инстансы (конкретные предметы персонажа) хранятся в player_inventory. Поля is_equippable / is_usable / is_quest_item определяют поведение предмета.';
 
 
 --
--- Name: COLUMN items.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.id IS 'Суррогатный PK шаблона предмета.';
 
 
 --
--- Name: COLUMN items.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.name IS 'Отображаемое название предмета.';
 
 
 --
--- Name: COLUMN items.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.slug IS 'Машиночитаемый уникальный ключ. Используется в коде и конфигах.';
 
 
 --
--- Name: COLUMN items.description; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.description; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.description IS 'Текстовое описание предмета для UI-тултипа. NULL допустим.';
 
 
 --
--- Name: COLUMN items.is_quest_item; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_quest_item; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_quest_item IS 'TRUE = квестовый предмет, не выпадает из инвентаря';
 
 
 --
--- Name: COLUMN items.item_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.item_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.item_type IS 'FK → item_types.id. Тип предмета (оружие, броня, зелье и т.д.).';
 
 
 --
--- Name: COLUMN items.weight; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.weight; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.weight IS 'Вес предмета в килограммах. Используется если включена система веса инвентаря.';
 
 
 --
--- Name: COLUMN items.rarity_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.rarity_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.rarity_id IS 'FK → item_rarity.id. Редкость: обычный, необычный, редкий и т.д. DEFAULT 1 = обычный.';
 
 
 --
--- Name: COLUMN items.stack_max; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.stack_max; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.stack_max IS 'Максимальное количество предметов в одном стаке инвентаря';
 
 
 --
--- Name: COLUMN items.is_container; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_container; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_container IS 'TRUE = предмет является сумкой/контейнером';
 
 
 --
--- Name: COLUMN items.is_durable; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_durable; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_durable IS 'TRUE = предмет имеет прочность и изнашивается';
 
 
 --
--- Name: COLUMN items.is_tradable; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_tradable; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_tradable IS 'TRUE = предмет можно передать другому игроку или продать';
 
 
 --
--- Name: COLUMN items.durability_max; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.durability_max; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.durability_max IS 'Максимальная прочность (relevantно если is_durable = true)';
 
 
 --
--- Name: COLUMN items.vendor_price_buy; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.vendor_price_buy; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.vendor_price_buy IS 'Цена покупки у NPC-торговца (медь)';
 
 
 --
--- Name: COLUMN items.vendor_price_sell; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.vendor_price_sell; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.vendor_price_sell IS 'Цена продажи NPC-торговцу (медь). Обычно ниже buy';
 
 
 --
--- Name: COLUMN items.equip_slot; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.equip_slot; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.equip_slot IS 'Слот экипировки (FK → equip_slot). NULL = неэкипируемый предмет';
 
 
 --
--- Name: COLUMN items.level_requirement; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.level_requirement; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.level_requirement IS 'Минимальный уровень персонажа для экипировки/использования';
 
 
 --
--- Name: COLUMN items.is_equippable; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_equippable; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_equippable IS 'TRUE = предмет можно надеть в слот экипировки';
 
 
 --
--- Name: COLUMN items.is_harvest; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_harvest; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_harvest IS 'TRUE = добываемый ресурс (трава, руда и т.д.)';
 
 
 --
--- Name: COLUMN items.is_usable; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.is_usable; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.is_usable IS 'TRUE = предмет можно использовать из инвентаря (зелья, свитки, еда). При использовании атрибуты (apply_on=''use'') из item_attributes_mapping создают запись в player_active_effect с таймером expires_at.';
 
 
 --
--- Name: COLUMN items.mastery_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items.mastery_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items.mastery_slug IS 'FK → mastery_definitions.slug. Требуемый тип мастерства для использования/экипировки предмета. NULL = без требований к мастерству.';
 
 
 --
--- Name: items_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.items ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -2685,7 +2565,7 @@ ALTER TABLE public.items ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: items_rarity; Type: TABLE; Schema: public; Owner: postgres
+-- Name: items_rarity; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.items_rarity (
@@ -2696,24 +2576,22 @@ CREATE TABLE public.items_rarity (
 );
 
 
-ALTER TABLE public.items_rarity OWNER TO postgres;
-
 --
--- Name: TABLE items_rarity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE items_rarity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.items_rarity IS 'Редкости предметов с цветовым кодом для UI';
 
 
 --
--- Name: COLUMN items_rarity.color_hex; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN items_rarity.color_hex; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.items_rarity.color_hex IS 'Hex-цвет для подсветки предмета в UI (например #00ff00 для необычного)';
 
 
 --
--- Name: mastery_definitions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mastery_definitions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mastery_definitions (
@@ -2724,45 +2602,43 @@ CREATE TABLE public.mastery_definitions (
 );
 
 
-ALTER TABLE public.mastery_definitions OWNER TO postgres;
-
 --
--- Name: TABLE mastery_definitions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mastery_definitions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mastery_definitions IS 'Справочник типов мастерства оружия/магии (sword, bow, fire_magic и т.д.). PK — slug. max_value задаёт капу накопления.';
 
 
 --
--- Name: COLUMN mastery_definitions.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mastery_definitions.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mastery_definitions.slug IS 'PK. Уникальный код типа мастерства: sword, bow, fire_magic и т.д.';
 
 
 --
--- Name: COLUMN mastery_definitions.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mastery_definitions.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mastery_definitions.name IS 'Отображаемое имя мастерства.';
 
 
 --
--- Name: COLUMN mastery_definitions.weapon_type_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mastery_definitions.weapon_type_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mastery_definitions.weapon_type_slug IS 'NULL = общая мастерства; иначе — привязана к конкретному типу оружия.';
 
 
 --
--- Name: COLUMN mastery_definitions.max_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mastery_definitions.max_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mastery_definitions.max_value IS 'Максимальный уровень накопления очков мастерства (капа).';
 
 
 --
--- Name: mob; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob (
@@ -2801,136 +2677,134 @@ CREATE TABLE public.mob (
 );
 
 
-ALTER TABLE public.mob OWNER TO postgres;
-
 --
--- Name: TABLE mob; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob IS 'Шаблоны мобов. Это не игровые инстансы, а определения спавна';
 
 
 --
--- Name: COLUMN mob.spawn_health; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.spawn_health; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.spawn_health IS 'Стартовое здоровье экземпляра при спавне. НЕ текущее состояние — runtime-хп моба хранится в памяти chunk-server.';
 
 
 --
--- Name: COLUMN mob.spawn_mana; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.spawn_mana; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.spawn_mana IS 'Стартовая мана экземпляра при спавне. НЕ текущее состояние — runtime-мана моба хранится в памяти chunk-server.';
 
 
 --
--- Name: COLUMN mob.is_aggressive; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.is_aggressive; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.is_aggressive IS 'TRUE = атакует игроков приближающихся в радиус агра';
 
 
 --
--- Name: COLUMN mob.is_dead; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.is_dead; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.is_dead IS 'TRUE = шаблон моба отмечен как "мёртвый" (для дизайна, не инстанс)';
 
 
 --
--- Name: COLUMN mob.radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.radius IS 'Радиус коллизии и зоны агра в игровых единицах';
 
 
 --
--- Name: COLUMN mob.base_xp; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.base_xp; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.base_xp IS 'Базовый опыт за убийство. Итоговый = base_xp × mob_ranks.mult';
 
 
 --
--- Name: COLUMN mob.rank_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.rank_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.rank_id IS 'Ранг моба (FK → mob_ranks). Влияет на множитель характеристик и XP';
 
 
 --
--- Name: COLUMN mob.aggro_range; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.aggro_range; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.aggro_range IS 'Radius at which mob detects and begins chasing a player (world units)';
 
 
 --
--- Name: COLUMN mob.attack_range; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.attack_range; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.attack_range IS 'Distance at which mob can attack a player (world units)';
 
 
 --
--- Name: COLUMN mob.attack_cooldown; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.attack_cooldown; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.attack_cooldown IS 'Seconds between consecutive mob attacks';
 
 
 --
--- Name: COLUMN mob.chase_multiplier; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.chase_multiplier; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.chase_multiplier IS 'aggro_range * chase_multiplier = max chase distance before giving up';
 
 
 --
--- Name: COLUMN mob.patrol_speed; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.patrol_speed; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.patrol_speed IS 'Speed multiplier for patrol movement (1.0 = normal)';
 
 
 --
--- Name: COLUMN mob.is_social; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.is_social; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.is_social IS 'TRUE = mob participates in group-aggro and passive-social mechanics.';
 
 
 --
--- Name: COLUMN mob.chase_duration; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.chase_duration; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.chase_duration IS 'Max seconds a mob will chase before leashing (replaces hard-coded 30 s). Per-mob override; larger values = more persistent pursuit.';
 
 
 --
--- Name: COLUMN mob.flee_hp_threshold; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.flee_hp_threshold; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.flee_hp_threshold IS '0.0 = не убегает. 0.25 = убегает при HP <= 25%. Используется, когда реализован FLEEING state в MobAIController.';
 
 
 --
--- Name: COLUMN mob.ai_archetype; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.ai_archetype; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.ai_archetype IS 'Архетип ИИ: melee (ближний бой, дефолт) | caster (kiting+заклинания) | ranged | support | summoner | lurker (засада). Используется, когда реализован выбор поведения по архетипу.';
 
 
 --
--- Name: COLUMN mob.patrol_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob.patrol_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob.patrol_radius IS 'Max distance mob can wander from spawn during patrol (world units)';
 
 
 --
--- Name: mob_active_effect; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_active_effect; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_active_effect (
@@ -2948,66 +2822,64 @@ CREATE TABLE public.mob_active_effect (
 );
 
 
-ALTER TABLE public.mob_active_effect OWNER TO postgres;
-
 --
--- Name: TABLE mob_active_effect; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_active_effect; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_active_effect IS 'Активные баффы/дебаффы runtime-экземпляров мобов. mob_uid = MobDataStruct::uid из памяти chunk-server (не mob.id). Записи создаются при применении скила игрока на моба и удаляются при смерти моба или истечении таймера.';
 
 
 --
--- Name: COLUMN mob_active_effect.mob_uid; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.mob_uid; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.mob_uid IS 'Runtime UID экземпляра моба (MobDataStruct::uid)';
 
 
 --
--- Name: COLUMN mob_active_effect.effect_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.effect_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.effect_id IS 'Ссылка на skill_effects';
 
 
 --
--- Name: COLUMN mob_active_effect.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.attribute_id IS 'Модифицируемый атрибут (NULL для non-stat эффектов)';
 
 
 --
--- Name: COLUMN mob_active_effect.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.value IS 'Величина изменения атрибута';
 
 
 --
--- Name: COLUMN mob_active_effect.source_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.source_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.source_type IS 'Источник активного эффекта: skill | zone | quest | admin';
 
 
 --
--- Name: COLUMN mob_active_effect.source_player_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.source_player_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.source_player_id IS 'FK → characters.id. Персонаж, наложивший эффект на моба. NULL = эффект от зоны, квеста или системы.';
 
 
 --
--- Name: COLUMN mob_active_effect.expires_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_active_effect.expires_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_active_effect.expires_at IS 'NULL = постоянный (до смерти моба)';
 
 
 --
--- Name: mob_active_effect_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_active_effect_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.mob_active_effect ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3021,7 +2893,7 @@ ALTER TABLE public.mob_active_effect ALTER COLUMN id ADD GENERATED ALWAYS AS IDE
 
 
 --
--- Name: mob_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.mob ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3035,7 +2907,7 @@ ALTER TABLE public.mob ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: mob_loot_info; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_loot_info; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_loot_info (
@@ -3052,45 +2924,43 @@ CREATE TABLE public.mob_loot_info (
 );
 
 
-ALTER TABLE public.mob_loot_info OWNER TO postgres;
-
 --
--- Name: TABLE mob_loot_info; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_loot_info; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_loot_info IS 'Таблица дропа моба: какие предметы и с какой вероятностью';
 
 
 --
--- Name: COLUMN mob_loot_info.drop_chance; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_loot_info.drop_chance; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_loot_info.drop_chance IS 'Вероятность выпадения: 0.0 = никогда, 1.0 = всегда';
 
 
 --
--- Name: COLUMN mob_loot_info.is_harvest_only; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_loot_info.is_harvest_only; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_loot_info.is_harvest_only IS 'TRUE = предмет доступен только через harvest (взаимодействие с трупом), не выпадает при обычном убийстве.';
 
 
 --
--- Name: COLUMN mob_loot_info.min_quantity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_loot_info.min_quantity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_loot_info.min_quantity IS 'Минимальное количество выпадающего предмета (>= 1)';
 
 
 --
--- Name: COLUMN mob_loot_info.max_quantity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_loot_info.max_quantity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_loot_info.max_quantity IS 'Максимальное количество выпадающего предмета (>= min_quantity)';
 
 
 --
--- Name: mob_loot_info_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_loot_info_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.mob_loot_info ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3104,7 +2974,7 @@ ALTER TABLE public.mob_loot_info ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 
 
 --
--- Name: mob_position; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_position; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_position (
@@ -3118,31 +2988,29 @@ CREATE TABLE public.mob_position (
 );
 
 
-ALTER TABLE public.mob_position OWNER TO postgres;
-
 --
--- Name: TABLE mob_position; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_position; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_position IS 'Статические позиции спавна шаблонов мобов в зонах. FK: mob_id → mob';
 
 
 --
--- Name: COLUMN mob_position.rot_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_position.rot_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_position.rot_z IS 'Начальный угол поворота моба в точке спавна (в радианах)';
 
 
 --
--- Name: COLUMN mob_position.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_position.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_position.zone_id IS 'Зона, в которой размещён моб. NULL = не привязан к зоне';
 
 
 --
--- Name: mob_position_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_position_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.mob_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3156,7 +3024,7 @@ ALTER TABLE public.mob_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY
 
 
 --
--- Name: mob_race; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_race; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_race (
@@ -3165,17 +3033,15 @@ CREATE TABLE public.mob_race (
 );
 
 
-ALTER TABLE public.mob_race OWNER TO postgres;
-
 --
--- Name: TABLE mob_race; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_race; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_race IS 'Расы мобов (нежить, зверь, демон и т.д.)';
 
 
 --
--- Name: mob_race_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_race_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.mob_race ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3189,7 +3055,7 @@ ALTER TABLE public.mob_race ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: mob_ranks; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_ranks; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_ranks (
@@ -3199,31 +3065,29 @@ CREATE TABLE public.mob_ranks (
 );
 
 
-ALTER TABLE public.mob_ranks OWNER TO postgres;
-
 --
--- Name: TABLE mob_ranks; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_ranks; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_ranks IS 'Ранги мобов (normal/elite/boss) с множителем характеристик';
 
 
 --
--- Name: COLUMN mob_ranks.code; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_ranks.code; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_ranks.code IS 'Код ранга: normal / elite / boss / world_boss';
 
 
 --
--- Name: COLUMN mob_ranks.mult; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_ranks.mult; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_ranks.mult IS 'Множитель характеристик относительно нормального моба (1.0 = норма)';
 
 
 --
--- Name: mob_resistances; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_resistances; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_resistances (
@@ -3232,31 +3096,29 @@ CREATE TABLE public.mob_resistances (
 );
 
 
-ALTER TABLE public.mob_resistances OWNER TO postgres;
-
 --
--- Name: TABLE mob_resistances; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_resistances; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_resistances IS 'Сопротивления моба к элементам урона. Значение сопротивления задаётся логикой combat_calculator в chunk-server согласно записи в этой таблице.';
 
 
 --
--- Name: COLUMN mob_resistances.mob_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_resistances.mob_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_resistances.mob_id IS 'FK → mob.id. Шаблон моба.';
 
 
 --
--- Name: COLUMN mob_resistances.element_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_resistances.element_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_resistances.element_slug IS 'FK → damage_elements.slug. Элемент, к которому у моба есть сопротивление.';
 
 
 --
--- Name: mob_skills; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_skills; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_skills (
@@ -3267,24 +3129,22 @@ CREATE TABLE public.mob_skills (
 );
 
 
-ALTER TABLE public.mob_skills OWNER TO postgres;
-
 --
--- Name: TABLE mob_skills; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_skills; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_skills IS 'Скиллы шаблона моба с уровнем';
 
 
 --
--- Name: COLUMN mob_skills.current_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_skills.current_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_skills.current_level IS 'Уровень скилла у данного шаблона моба';
 
 
 --
--- Name: mob_skills_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_skills_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.mob_skills_id_seq
@@ -3296,17 +3156,15 @@ CREATE SEQUENCE public.mob_skills_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.mob_skills_id_seq OWNER TO postgres;
-
 --
--- Name: mob_skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: mob_skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.mob_skills_id_seq OWNED BY public.mob_skills.id;
 
 
 --
--- Name: mob_stat; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_stat; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_stat (
@@ -3320,38 +3178,36 @@ CREATE TABLE public.mob_stat (
 );
 
 
-ALTER TABLE public.mob_stat OWNER TO postgres;
-
 --
--- Name: TABLE mob_stat; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_stat; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_stat IS 'Единая таблица статов шаблона моба. multiplier IS NULL → использовать flat_value как есть. multiplier IS NOT NULL → ROUND(flat_value + multiplier * level^exponent).';
 
 
 --
--- Name: COLUMN mob_stat.flat_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_stat.flat_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_stat.flat_value IS 'Базовое значение (или константа L1 при multiplier IS NULL)';
 
 
 --
--- Name: COLUMN mob_stat.multiplier; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_stat.multiplier; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_stat.multiplier IS 'NULL = нет формулы; иначе — коэффициент масштабирования';
 
 
 --
--- Name: COLUMN mob_stat.exponent; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_stat.exponent; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_stat.exponent IS 'Показатель степени для level (только при multiplier IS NOT NULL)';
 
 
 --
--- Name: mob_stat_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: mob_stat_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.mob_stat ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3365,7 +3221,7 @@ ALTER TABLE public.mob_stat ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: mob_weaknesses; Type: TABLE; Schema: public; Owner: postgres
+-- Name: mob_weaknesses; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mob_weaknesses (
@@ -3374,31 +3230,29 @@ CREATE TABLE public.mob_weaknesses (
 );
 
 
-ALTER TABLE public.mob_weaknesses OWNER TO postgres;
-
 --
--- Name: TABLE mob_weaknesses; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE mob_weaknesses; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.mob_weaknesses IS 'Уязвимости моба к элементам урона. При попадании атакой уязвимого элемента chunk-server применяет множитель урона.';
 
 
 --
--- Name: COLUMN mob_weaknesses.mob_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_weaknesses.mob_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_weaknesses.mob_id IS 'FK → mob.id. Шаблон моба.';
 
 
 --
--- Name: COLUMN mob_weaknesses.element_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN mob_weaknesses.element_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.mob_weaknesses.element_slug IS 'FK → damage_elements.slug. Элемент, к которому у моба есть уязвимость.';
 
 
 --
--- Name: npc; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc (
@@ -3417,38 +3271,36 @@ CREATE TABLE public.npc (
 );
 
 
-ALTER TABLE public.npc OWNER TO postgres;
-
 --
--- Name: TABLE npc; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc IS 'Шаблоны NPC. Содержат торговцев, квестодателей, диалоговых персонажей';
 
 
 --
--- Name: COLUMN npc.radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc.radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc.radius IS 'Радиус коллизии, используемый клиентом';
 
 
 --
--- Name: COLUMN npc.is_interactable; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc.is_interactable; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc.is_interactable IS 'TRUE = игрок может начать диалог / взаимодействие с этим NPC';
 
 
 --
--- Name: COLUMN npc.npc_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc.npc_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc.npc_type IS 'Тип NPC (FK → npc_type): торговец, квестодатель и т.д.';
 
 
 --
--- Name: npc_ambient_speech_configs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_ambient_speech_configs (
@@ -3459,38 +3311,36 @@ CREATE TABLE public.npc_ambient_speech_configs (
 );
 
 
-ALTER TABLE public.npc_ambient_speech_configs OWNER TO postgres;
-
 --
--- Name: TABLE npc_ambient_speech_configs; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_ambient_speech_configs; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_ambient_speech_configs IS 'Per-NPC ambient speech timing configuration.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_configs.npc_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_configs.npc_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_configs.npc_id IS 'FK to npcs.id. One config per NPC.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_configs.min_interval_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_configs.min_interval_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_configs.min_interval_sec IS 'Minimum interval (seconds) between periodic lines on client.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_configs.max_interval_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_configs.max_interval_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_configs.max_interval_sec IS 'Maximum interval (seconds) between periodic lines on client.';
 
 
 --
--- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.npc_ambient_speech_configs_id_seq
@@ -3502,17 +3352,15 @@ CREATE SEQUENCE public.npc_ambient_speech_configs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.npc_ambient_speech_configs_id_seq OWNER TO postgres;
-
 --
--- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.npc_ambient_speech_configs_id_seq OWNED BY public.npc_ambient_speech_configs.id;
 
 
 --
--- Name: npc_ambient_speech_lines; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_ambient_speech_lines (
@@ -3528,66 +3376,64 @@ CREATE TABLE public.npc_ambient_speech_lines (
 );
 
 
-ALTER TABLE public.npc_ambient_speech_lines OWNER TO postgres;
-
 --
--- Name: TABLE npc_ambient_speech_lines; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_ambient_speech_lines; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_ambient_speech_lines IS 'Individual ambient speech lines for NPCs.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.line_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.line_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.line_key IS 'Localisation key sent to client, e.g. npc.blacksmith.idle_1';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.trigger_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.trigger_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.trigger_type IS '"periodic" = fired by client timer; "proximity" = fired once on player approach.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.trigger_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.trigger_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.trigger_radius IS 'Trigger / display radius in world units (used for proximity trigger and UI culling).';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.priority; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.priority; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.priority IS 'Highest-priority non-empty pool is used. Within a pool, lines are weighted-random.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.weight; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.weight; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.weight IS 'Relative weight for weighted-random selection within same priority group.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.cooldown_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.cooldown_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.cooldown_sec IS 'Per-client cooldown (seconds) before this specific line may show again.';
 
 
 --
--- Name: COLUMN npc_ambient_speech_lines.condition_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_ambient_speech_lines.condition_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_ambient_speech_lines.condition_group IS 'Optional JSONB condition tree compatible with DialogueConditionEvaluator. NULL = always show.';
 
 
 --
--- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.npc_ambient_speech_lines_id_seq
@@ -3599,17 +3445,15 @@ CREATE SEQUENCE public.npc_ambient_speech_lines_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.npc_ambient_speech_lines_id_seq OWNER TO postgres;
-
 --
--- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.npc_ambient_speech_lines_id_seq OWNED BY public.npc_ambient_speech_lines.id;
 
 
 --
--- Name: npc_attributes; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_attributes; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_attributes (
@@ -3620,24 +3464,22 @@ CREATE TABLE public.npc_attributes (
 );
 
 
-ALTER TABLE public.npc_attributes OWNER TO postgres;
-
 --
--- Name: TABLE npc_attributes; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_attributes; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_attributes IS 'Значения атрибутов NPC';
 
 
 --
--- Name: COLUMN npc_attributes.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_attributes.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_attributes.value IS 'Значение атрибута для данного NPC';
 
 
 --
--- Name: npc_attributes_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_attributes_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.npc_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3651,7 +3493,7 @@ ALTER TABLE public.npc_attributes ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTI
 
 
 --
--- Name: npc_dialogue; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_dialogue; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_dialogue (
@@ -3662,31 +3504,29 @@ CREATE TABLE public.npc_dialogue (
 );
 
 
-ALTER TABLE public.npc_dialogue OWNER TO postgres;
-
 --
--- Name: TABLE npc_dialogue; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_dialogue; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_dialogue IS 'Связка NPC → Диалог с приоритетом выбора';
 
 
 --
--- Name: COLUMN npc_dialogue.priority; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_dialogue.priority; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_dialogue.priority IS 'Чем выше число, тем раньше выбирается диалог для NPC';
 
 
 --
--- Name: COLUMN npc_dialogue.condition_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_dialogue.condition_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_dialogue.condition_group IS 'JSON-условия активации диалога (те же правила что в dialogue_edge.condition_group)';
 
 
 --
--- Name: npc_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.npc ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3700,7 +3540,7 @@ ALTER TABLE public.npc ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: npc_placements; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_placements; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_placements (
@@ -3714,17 +3554,15 @@ CREATE TABLE public.npc_placements (
 );
 
 
-ALTER TABLE public.npc_placements OWNER TO postgres;
-
 --
--- Name: TABLE npc_placements; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_placements; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_placements IS 'Статичное размещение NPC в игровом мире. Используется gameserver при инициализации локации.';
 
 
 --
--- Name: npc_placements_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_placements_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.npc_placements_id_seq
@@ -3735,17 +3573,15 @@ CREATE SEQUENCE public.npc_placements_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.npc_placements_id_seq OWNER TO postgres;
-
 --
--- Name: npc_placements_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: npc_placements_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.npc_placements_id_seq OWNED BY public.npc_placements.id;
 
 
 --
--- Name: npc_skills; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_skills; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_skills (
@@ -3756,24 +3592,22 @@ CREATE TABLE public.npc_skills (
 );
 
 
-ALTER TABLE public.npc_skills OWNER TO postgres;
-
 --
--- Name: TABLE npc_skills; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_skills; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_skills IS 'Скиллы NPC с уровнем';
 
 
 --
--- Name: COLUMN npc_skills.current_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN npc_skills.current_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.npc_skills.current_level IS 'Уровень скилла у данного NPC';
 
 
 --
--- Name: npc_skills_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_skills_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.npc_skills_id_seq
@@ -3785,17 +3619,15 @@ CREATE SEQUENCE public.npc_skills_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.npc_skills_id_seq OWNER TO postgres;
-
 --
--- Name: npc_skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: npc_skills_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.npc_skills_id_seq OWNED BY public.npc_skills.id;
 
 
 --
--- Name: npc_trainer_class; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_trainer_class; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_trainer_class (
@@ -3805,17 +3637,15 @@ CREATE TABLE public.npc_trainer_class (
 );
 
 
-ALTER TABLE public.npc_trainer_class OWNER TO postgres;
-
 --
--- Name: TABLE npc_trainer_class; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_trainer_class; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_trainer_class IS 'Maps trainer NPC ids to the class whose skills they can teach. Used by game-server to build setTrainerData payload sent to chunk-servers at startup.';
 
 
 --
--- Name: npc_trainer_class_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_trainer_class_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.npc_trainer_class_id_seq
@@ -3827,17 +3657,15 @@ CREATE SEQUENCE public.npc_trainer_class_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.npc_trainer_class_id_seq OWNER TO postgres;
-
 --
--- Name: npc_trainer_class_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: npc_trainer_class_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.npc_trainer_class_id_seq OWNED BY public.npc_trainer_class.id;
 
 
 --
--- Name: npc_type; Type: TABLE; Schema: public; Owner: postgres
+-- Name: npc_type; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.npc_type (
@@ -3847,17 +3675,15 @@ CREATE TABLE public.npc_type (
 );
 
 
-ALTER TABLE public.npc_type OWNER TO postgres;
-
 --
--- Name: TABLE npc_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE npc_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.npc_type IS 'Типы NPC: торговец, квестодатель, страж и т.д.';
 
 
 --
--- Name: npc_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: npc_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.npc_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -3871,7 +3697,7 @@ ALTER TABLE public.npc_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: passive_skill_modifiers; Type: TABLE; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.passive_skill_modifiers (
@@ -3884,31 +3710,29 @@ CREATE TABLE public.passive_skill_modifiers (
 );
 
 
-ALTER TABLE public.passive_skill_modifiers OWNER TO postgres;
-
 --
--- Name: TABLE passive_skill_modifiers; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE passive_skill_modifiers; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.passive_skill_modifiers IS 'Stat modifiers granted by passive skills. Loaded by game server on character join.';
 
 
 --
--- Name: COLUMN passive_skill_modifiers.modifier_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN passive_skill_modifiers.modifier_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.passive_skill_modifiers.modifier_type IS 'flat = additive delta; percent = percent of base value';
 
 
 --
--- Name: COLUMN passive_skill_modifiers.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN passive_skill_modifiers.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.passive_skill_modifiers.value IS 'Magnitude. Negative = penalty. Percent: -20 means -20 %.';
 
 
 --
--- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.passive_skill_modifiers_id_seq
@@ -3920,17 +3744,15 @@ CREATE SEQUENCE public.passive_skill_modifiers_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.passive_skill_modifiers_id_seq OWNER TO postgres;
-
 --
--- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.passive_skill_modifiers_id_seq OWNED BY public.passive_skill_modifiers.id;
 
 
 --
--- Name: player_active_effect; Type: TABLE; Schema: public; Owner: postgres
+-- Name: player_active_effect; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.player_active_effect (
@@ -3949,87 +3771,85 @@ CREATE TABLE public.player_active_effect (
 );
 
 
-ALTER TABLE public.player_active_effect OWNER TO postgres;
-
 --
--- Name: TABLE player_active_effect; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE player_active_effect; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.player_active_effect IS 'Активные эффекты персонажа: баффы/дебаффы с таймером или постоянные. Постоянные (квестовые награды, GM-модификаторы) хранятся в character_permanent_modifiers. Здесь — временые эффекты с expires_at и on-use эффекты от предметов (зелья, еда).';
 
 
 --
--- Name: COLUMN player_active_effect.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN player_active_effect.player_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.player_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.player_id IS 'FK → characters.id. Персонаж, на которого наложен эффект.';
 
 
 --
--- Name: COLUMN player_active_effect.status_effect_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.status_effect_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.status_effect_id IS 'FK to status_effects.id — the named status condition';
 
 
 --
--- Name: COLUMN player_active_effect.source_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.source_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.source_type IS 'Источник эффекта: quest / dialogue / skill / item';
 
 
 --
--- Name: COLUMN player_active_effect.source_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.source_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.source_id IS 'ID источника (quest_id, dialogue_node_id, skill_id, item_id)';
 
 
 --
--- Name: COLUMN player_active_effect.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.value IS 'Величина эффекта (например, +50 к макс. HP)';
 
 
 --
--- Name: COLUMN player_active_effect.applied_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.applied_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.applied_at IS 'Время наложения эффекта. DEFAULT now().';
 
 
 --
--- Name: COLUMN player_active_effect.expires_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.expires_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.expires_at IS 'Время истечения. NULL = бессрочный эффект';
 
 
 --
--- Name: COLUMN player_active_effect.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.attribute_id IS 'Какой атрибут модифицирует эффект (FK → entity_attributes). NULL допустим для не-стат эффектов (stun, silence, root).';
 
 
 --
--- Name: COLUMN player_active_effect.group_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_active_effect.group_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_active_effect.group_id IS 'Groups rows belonging to the same multi-attribute effect instance. NULL = single-row effect.';
 
 
 --
--- Name: player_active_effect_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: player_active_effect_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.player_active_effect_id_seq
@@ -4040,17 +3860,15 @@ CREATE SEQUENCE public.player_active_effect_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.player_active_effect_id_seq OWNER TO postgres;
-
 --
--- Name: player_active_effect_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: player_active_effect_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.player_active_effect_id_seq OWNED BY public.player_active_effect.id;
 
 
 --
--- Name: player_flag; Type: TABLE; Schema: public; Owner: postgres
+-- Name: player_flag; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.player_flag (
@@ -4062,24 +3880,22 @@ CREATE TABLE public.player_flag (
 );
 
 
-ALTER TABLE public.player_flag OWNER TO postgres;
-
 --
--- Name: TABLE player_flag; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE player_flag; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.player_flag IS 'Флаги/счётчики игрока для условной логики диалогов и квестов';
 
 
 --
--- Name: COLUMN player_flag.flag_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_flag.flag_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_flag.flag_key IS 'Имя флага (например, "mila_thanked")';
 
 
 --
--- Name: player_inventory; Type: TABLE; Schema: public; Owner: postgres
+-- Name: player_inventory; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.player_inventory (
@@ -4093,59 +3909,57 @@ CREATE TABLE public.player_inventory (
 );
 
 
-ALTER TABLE public.player_inventory OWNER TO postgres;
-
 --
--- Name: TABLE player_inventory; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE player_inventory; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.player_inventory IS 'Инвентарь персонажа: инстансы предметов с количеством и состоянием. Один ряд = один стак. Экипированные предметы дополнительно присутствуют в character_equipment.';
 
 
 --
--- Name: COLUMN player_inventory.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_inventory.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_inventory.id IS 'Суррогатный PK инстанса предмета в инвентаре.';
 
 
 --
--- Name: COLUMN player_inventory.character_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_inventory.character_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_inventory.character_id IS 'FK → characters.id. Владелец предмета.';
 
 
 --
--- Name: COLUMN player_inventory.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_inventory.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_inventory.item_id IS 'FK → items.id. Шаблон предмета.';
 
 
 --
--- Name: COLUMN player_inventory.quantity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_inventory.quantity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_inventory.quantity IS 'Количество предметов в стаке. DEFAULT 1.';
 
 
 --
--- Name: COLUMN player_inventory.slot_index; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_inventory.slot_index; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_inventory.slot_index IS 'Позиция предмета в сумке (NULL = не назначена)';
 
 
 --
--- Name: COLUMN player_inventory.durability_current; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_inventory.durability_current; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_inventory.durability_current IS 'Текущая прочность (NULL если item.is_durable = false)';
 
 
 --
--- Name: player_inventory_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: player_inventory_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.player_inventory ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -4159,7 +3973,7 @@ ALTER TABLE public.player_inventory ALTER COLUMN id ADD GENERATED ALWAYS AS IDEN
 
 
 --
--- Name: player_quest; Type: TABLE; Schema: public; Owner: postgres
+-- Name: player_quest; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.player_quest (
@@ -4173,45 +3987,43 @@ CREATE TABLE public.player_quest (
 );
 
 
-ALTER TABLE public.player_quest OWNER TO postgres;
-
 --
--- Name: TABLE player_quest; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE player_quest; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.player_quest IS 'Текущее состояние квестов конкретного игрока';
 
 
 --
--- Name: COLUMN player_quest.state; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_quest.state; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_quest.state IS 'offered/active/completed/turned_in/failed';
 
 
 --
--- Name: COLUMN player_quest.current_step; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_quest.current_step; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_quest.current_step IS 'Индекс текущего шага квеста (0-based). Соответствует quest_step.step_index';
 
 
 --
--- Name: COLUMN player_quest.progress; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_quest.progress; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_quest.progress IS 'JSON прогресса текущего шага (например, {"have":3})';
 
 
 --
--- Name: COLUMN player_quest.updated_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN player_quest.updated_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.player_quest.updated_at IS 'Время последнего изменения состояния квеста';
 
 
 --
--- Name: player_skill_cooldown; Type: TABLE; Schema: public; Owner: postgres
+-- Name: player_skill_cooldown; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.player_skill_cooldown (
@@ -4221,17 +4033,15 @@ CREATE TABLE public.player_skill_cooldown (
 );
 
 
-ALTER TABLE public.player_skill_cooldown OWNER TO postgres;
-
 --
--- Name: TABLE player_skill_cooldown; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE player_skill_cooldown; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.player_skill_cooldown IS 'Per-character active skill cooldowns. Upserted every time a skill is used; expired rows cleaned up when the character''s cooldowns are loaded on join.';
 
 
 --
--- Name: quest; Type: TABLE; Schema: public; Owner: postgres
+-- Name: quest; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.quest (
@@ -4249,66 +4059,64 @@ CREATE TABLE public.quest (
 );
 
 
-ALTER TABLE public.quest OWNER TO postgres;
-
 --
--- Name: TABLE quest; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE quest; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.quest IS 'Карточка квеста (без текстов), базовые правила/валидаторы';
 
 
 --
--- Name: COLUMN quest.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.slug IS 'Уникальный ключ квеста';
 
 
 --
--- Name: COLUMN quest.min_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.min_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.min_level IS 'Мин. уровень для взятия квеста';
 
 
 --
--- Name: COLUMN quest.repeatable; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.repeatable; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.repeatable IS 'Можно ли повторять квест';
 
 
 --
--- Name: COLUMN quest.cooldown_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.cooldown_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.cooldown_sec IS 'Кулдаун перед повторным взятием (если repeatable)';
 
 
 --
--- Name: COLUMN quest.giver_npc_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.giver_npc_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.giver_npc_id IS 'NPC, выдающий квест';
 
 
 --
--- Name: COLUMN quest.turnin_npc_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.turnin_npc_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.turnin_npc_id IS 'NPC, принимающий квест';
 
 
 --
--- Name: COLUMN quest.client_quest_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest.client_quest_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest.client_quest_key IS 'Ключ для клиентского UI (название/описание)';
 
 
 --
--- Name: quest_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: quest_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.quest_id_seq
@@ -4319,17 +4127,15 @@ CREATE SEQUENCE public.quest_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.quest_id_seq OWNER TO postgres;
-
 --
--- Name: quest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: quest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.quest_id_seq OWNED BY public.quest.id;
 
 
 --
--- Name: quest_reward; Type: TABLE; Schema: public; Owner: postgres
+-- Name: quest_reward; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.quest_reward (
@@ -4344,52 +4150,50 @@ CREATE TABLE public.quest_reward (
 );
 
 
-ALTER TABLE public.quest_reward OWNER TO postgres;
-
 --
--- Name: TABLE quest_reward; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE quest_reward; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.quest_reward IS 'Награды за сдачу квеста (предметы, опыт, золото)';
 
 
 --
--- Name: COLUMN quest_reward.reward_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_reward.reward_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_reward.reward_type IS 'Тип награды: item / exp / gold';
 
 
 --
--- Name: COLUMN quest_reward.item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_reward.item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_reward.item_id IS 'ID предмета (только если reward_type = item)';
 
 
 --
--- Name: COLUMN quest_reward.quantity; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_reward.quantity; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_reward.quantity IS 'Количество предметов (только если reward_type = item)';
 
 
 --
--- Name: COLUMN quest_reward.amount; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_reward.amount; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_reward.amount IS 'Количество опыта или золота (только если reward_type = exp / gold)';
 
 
 --
--- Name: COLUMN quest_reward.is_hidden; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_reward.is_hidden; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_reward.is_hidden IS 'TRUE = client displays "???" instead of item/amount until quest_turned_in. Revealed in the rewardsReceived array of the quest_turned_in notification.';
 
 
 --
--- Name: quest_reward_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: quest_reward_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.quest_reward_id_seq
@@ -4400,17 +4204,15 @@ CREATE SEQUENCE public.quest_reward_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.quest_reward_id_seq OWNER TO postgres;
-
 --
--- Name: quest_reward_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: quest_reward_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.quest_reward_id_seq OWNED BY public.quest_reward.id;
 
 
 --
--- Name: quest_step; Type: TABLE; Schema: public; Owner: postgres
+-- Name: quest_step; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.quest_step (
@@ -4426,31 +4228,29 @@ CREATE TABLE public.quest_step (
 );
 
 
-ALTER TABLE public.quest_step OWNER TO postgres;
-
 --
--- Name: TABLE quest_step; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE quest_step; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.quest_step IS 'Шаги квеста с параметрами в JSON';
 
 
 --
--- Name: COLUMN quest_step.params; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_step.params; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_step.params IS 'JSON параметров шага (item/count, npcId, зона и т.п.)';
 
 
 --
--- Name: COLUMN quest_step.client_step_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN quest_step.client_step_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.quest_step.client_step_key IS 'Ключ строки цели на клиенте';
 
 
 --
--- Name: quest_step_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: quest_step_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.quest_step_id_seq
@@ -4461,17 +4261,15 @@ CREATE SEQUENCE public.quest_step_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.quest_step_id_seq OWNER TO postgres;
-
 --
--- Name: quest_step_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: quest_step_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.quest_step_id_seq OWNED BY public.quest_step.id;
 
 
 --
--- Name: race; Type: TABLE; Schema: public; Owner: postgres
+-- Name: race; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.race (
@@ -4481,17 +4279,15 @@ CREATE TABLE public.race (
 );
 
 
-ALTER TABLE public.race OWNER TO postgres;
-
 --
--- Name: TABLE race; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE race; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.race IS 'Играбельные расы персонажей';
 
 
 --
--- Name: race_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: race_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.race ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -4505,7 +4301,7 @@ ALTER TABLE public.race ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: respawn_zones; Type: TABLE; Schema: public; Owner: postgres
+-- Name: respawn_zones; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.respawn_zones (
@@ -4530,143 +4326,141 @@ CREATE TABLE public.respawn_zones (
 );
 
 
-ALTER TABLE public.respawn_zones OWNER TO postgres;
-
 --
--- Name: TABLE respawn_zones; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE respawn_zones; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.respawn_zones IS 'Точки возрождения персонажей в зонах. is_default=true — используется при первом входе или смерти без выбранной точки. Несколько точек на зону допустимо.';
 
 
 --
--- Name: COLUMN respawn_zones.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN respawn_zones.name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.name IS 'Отображаемое название точки возрождения.';
 
 
 --
--- Name: COLUMN respawn_zones.x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.x IS 'X-координата точки возрождения.';
 
 
 --
--- Name: COLUMN respawn_zones.y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.y IS 'Y-координата точки возрождения.';
 
 
 --
--- Name: COLUMN respawn_zones.z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.z IS 'Z-координата точки возрождения.';
 
 
 --
--- Name: COLUMN respawn_zones.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.zone_id IS 'FK → zones.id. Зона, к которой принадлежит точка возрождения.';
 
 
 --
--- Name: COLUMN respawn_zones.is_default; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.is_default; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.is_default IS 'TRUE = эта точка используется по умолчанию при первом входе или смерти без явно выбранной точки.';
 
 
 --
--- Name: COLUMN respawn_zones.min_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.min_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.min_x IS 'Минимальная X-координата для случайной точки респавна (0 = bounds не заданы, используется фиксированная точка x).';
 
 
 --
--- Name: COLUMN respawn_zones.max_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.max_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.max_x IS 'Максимальная X-координата для случайной точки респавна.';
 
 
 --
--- Name: COLUMN respawn_zones.min_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.min_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.min_y IS 'Минимальная Y-координата для случайной точки респавна.';
 
 
 --
--- Name: COLUMN respawn_zones.max_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.max_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.max_y IS 'Максимальная Y-координата для случайной точки респавна.';
 
 
 --
--- Name: COLUMN respawn_zones.min_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.min_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.min_z IS 'Минимальная Z-координата для случайной точки респавна.';
 
 
 --
--- Name: COLUMN respawn_zones.max_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.max_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.max_z IS 'Максимальная Z-координата для случайной точки респавна.';
 
 
 --
--- Name: COLUMN respawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.shape_type IS 'Форма зоны: RECT (прямоугольник), CIRCLE (круг), ANNULUS (кольцо). По умолчанию RECT.';
 
 
 --
--- Name: COLUMN respawn_zones.center_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.center_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.center_x IS 'X-центр для круглых/кольцевых зон.';
 
 
 --
--- Name: COLUMN respawn_zones.center_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.center_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.center_y IS 'Y-центр для круглых/кольцевых зон.';
 
 
 --
--- Name: COLUMN respawn_zones.inner_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.inner_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.inner_radius IS 'Внутренний радиус для ANNULUS (0 для CIRCLE).';
 
 
 --
--- Name: COLUMN respawn_zones.outer_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN respawn_zones.outer_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.respawn_zones.outer_radius IS 'Внешний радиус для CIRCLE/ANNULUS.';
 
 
 --
--- Name: respawn_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: respawn_zones_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.respawn_zones_id_seq
@@ -4678,17 +4472,15 @@ CREATE SEQUENCE public.respawn_zones_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.respawn_zones_id_seq OWNER TO postgres;
-
 --
--- Name: respawn_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: respawn_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.respawn_zones_id_seq OWNED BY public.respawn_zones.id;
 
 
 --
--- Name: skill_active_effects; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_active_effects; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_active_effects (
@@ -4703,59 +4495,57 @@ CREATE TABLE public.skill_active_effects (
 );
 
 
-ALTER TABLE public.skill_active_effects OWNER TO postgres;
-
 --
--- Name: TABLE skill_active_effects; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_active_effects; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_active_effects IS 'Timed effects applied when an active skill is cast. Differs from passive_skill_modifiers (always-on) and status effect templates.';
 
 
 --
--- Name: COLUMN skill_active_effects.effect_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_active_effects.effect_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_active_effects.effect_slug IS 'Unique slug for this effect instance, e.g. "battle_cry_phys_atk".';
 
 
 --
--- Name: COLUMN skill_active_effects.effect_type_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_active_effects.effect_type_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_active_effects.effect_type_slug IS '"buff" | "debuff" | "dot" | "hot"';
 
 
 --
--- Name: COLUMN skill_active_effects.attribute_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_active_effects.attribute_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_active_effects.attribute_slug IS 'Which character attribute is modified, e.g. "physical_attack".';
 
 
 --
--- Name: COLUMN skill_active_effects.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_active_effects.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_active_effects.value IS 'Magnitude of the effect (flat additive).';
 
 
 --
--- Name: COLUMN skill_active_effects.duration_seconds; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_active_effects.duration_seconds; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_active_effects.duration_seconds IS 'Effect duration in seconds. 0 = permanent.';
 
 
 --
--- Name: COLUMN skill_active_effects.tick_ms; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_active_effects.tick_ms; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_active_effects.tick_ms IS 'Tick interval in ms for DoT/HoT. 0 = not periodic.';
 
 
 --
--- Name: skill_active_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_active_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.skill_active_effects_id_seq
@@ -4767,17 +4557,15 @@ CREATE SEQUENCE public.skill_active_effects_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.skill_active_effects_id_seq OWNER TO postgres;
-
 --
--- Name: skill_active_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: skill_active_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.skill_active_effects_id_seq OWNED BY public.skill_active_effects.id;
 
 
 --
--- Name: skill_damage_formulas; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_damage_formulas; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_damage_formulas (
@@ -4787,17 +4575,15 @@ CREATE TABLE public.skill_damage_formulas (
 );
 
 
-ALTER TABLE public.skill_damage_formulas OWNER TO postgres;
-
 --
--- Name: TABLE skill_damage_formulas; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_damage_formulas; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_damage_formulas IS 'Определения конкретных эффектов с типом и базовыми параметрами';
 
 
 --
--- Name: skill_damage_types; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_damage_types; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_damage_types (
@@ -4806,17 +4592,15 @@ CREATE TABLE public.skill_damage_types (
 );
 
 
-ALTER TABLE public.skill_damage_types OWNER TO postgres;
-
 --
--- Name: TABLE skill_damage_types; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_damage_types; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_damage_types IS 'Категории эффектов скиллов (урон, исцеление, дебафф и т.д.)';
 
 
 --
--- Name: skill_effect_instances; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_effect_instances; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_effect_instances (
@@ -4827,31 +4611,29 @@ CREATE TABLE public.skill_effect_instances (
 );
 
 
-ALTER TABLE public.skill_effect_instances OWNER TO postgres;
-
 --
--- Name: TABLE skill_effect_instances; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_effect_instances; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_effect_instances IS 'Привязка эффектов к конкретным скиллам с порядком применения';
 
 
 --
--- Name: COLUMN skill_effect_instances.order_idx; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effect_instances.order_idx; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effect_instances.order_idx IS 'Порядок выполнения эффектов внутри одного скилла (меньше = раньше)';
 
 
 --
--- Name: COLUMN skill_effect_instances.target_type_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effect_instances.target_type_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effect_instances.target_type_id IS 'На кого направлен эффект: self / enemy / ally / area';
 
 
 --
--- Name: skill_effect_instances_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_effect_instances_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.skill_effect_instances_id_seq
@@ -4863,17 +4645,15 @@ CREATE SEQUENCE public.skill_effect_instances_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.skill_effect_instances_id_seq OWNER TO postgres;
-
 --
--- Name: skill_effect_instances_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: skill_effect_instances_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.skill_effect_instances_id_seq OWNED BY public.skill_effect_instances.id;
 
 
 --
--- Name: skill_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.skill_effects_id_seq
@@ -4885,17 +4665,15 @@ CREATE SEQUENCE public.skill_effects_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.skill_effects_id_seq OWNER TO postgres;
-
 --
--- Name: skill_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: skill_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.skill_effects_id_seq OWNED BY public.skill_damage_formulas.id;
 
 
 --
--- Name: skill_effects_mapping; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_effects_mapping (
@@ -4910,52 +4688,50 @@ CREATE TABLE public.skill_effects_mapping (
 );
 
 
-ALTER TABLE public.skill_effects_mapping OWNER TO postgres;
-
 --
--- Name: TABLE skill_effects_mapping; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_effects_mapping; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_effects_mapping IS 'Значения эффектов на каждом уровне скилла';
 
 
 --
--- Name: COLUMN skill_effects_mapping.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effects_mapping.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effects_mapping.value IS 'Числовое значение эффекта на данном уровне скилла';
 
 
 --
--- Name: COLUMN skill_effects_mapping.level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effects_mapping.level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effects_mapping.level IS 'Уровень скилла, которому соответствует эта строка';
 
 
 --
--- Name: COLUMN skill_effects_mapping.tick_ms; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effects_mapping.tick_ms; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effects_mapping.tick_ms IS 'Интервал тика DoT/HoT в миллисекундах. 0 = мгновенный эффект (не тиковый).';
 
 
 --
--- Name: COLUMN skill_effects_mapping.duration_ms; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effects_mapping.duration_ms; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effects_mapping.duration_ms IS 'Полная продолжительность эффекта в миллисекундах. 0 = мгновенное применение.';
 
 
 --
--- Name: COLUMN skill_effects_mapping.attribute_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_effects_mapping.attribute_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_effects_mapping.attribute_id IS 'Атрибут-цель эффекта (например hp_regen_per_s для HoT). NULL = стандартный damage/heal без привязки к конкретному атрибуту.';
 
 
 --
--- Name: skill_effects_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.skill_effects_mapping_id_seq
@@ -4967,17 +4743,15 @@ CREATE SEQUENCE public.skill_effects_mapping_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.skill_effects_mapping_id_seq OWNER TO postgres;
-
 --
--- Name: skill_effects_mapping_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.skill_effects_mapping_id_seq OWNED BY public.skill_effects_mapping.id;
 
 
 --
--- Name: skill_effects_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_effects_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.skill_effects_type_id_seq
@@ -4989,17 +4763,15 @@ CREATE SEQUENCE public.skill_effects_type_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.skill_effects_type_id_seq OWNER TO postgres;
-
 --
--- Name: skill_effects_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: skill_effects_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.skill_effects_type_id_seq OWNED BY public.skill_damage_types.id;
 
 
 --
--- Name: skill_properties; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_properties; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_properties (
@@ -5009,17 +4781,15 @@ CREATE TABLE public.skill_properties (
 );
 
 
-ALTER TABLE public.skill_properties OWNER TO postgres;
-
 --
--- Name: TABLE skill_properties; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_properties; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_properties IS 'Справочник свойств скиллов (кулдаун, дальность, стоимость маны и т.д.)';
 
 
 --
--- Name: skill_properties_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_properties_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.skill_properties ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -5033,7 +4803,7 @@ ALTER TABLE public.skill_properties ALTER COLUMN id ADD GENERATED ALWAYS AS IDEN
 
 
 --
--- Name: skill_properties_mapping; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_properties_mapping; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_properties_mapping (
@@ -5045,31 +4815,29 @@ CREATE TABLE public.skill_properties_mapping (
 );
 
 
-ALTER TABLE public.skill_properties_mapping OWNER TO postgres;
-
 --
--- Name: TABLE skill_properties_mapping; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_properties_mapping; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_properties_mapping IS 'Значения свойств скилла на каждом уровне';
 
 
 --
--- Name: COLUMN skill_properties_mapping.skill_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_properties_mapping.skill_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_properties_mapping.skill_level IS 'Уровень скилла, для которого задано значение свойства';
 
 
 --
--- Name: COLUMN skill_properties_mapping.property_value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skill_properties_mapping.property_value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skill_properties_mapping.property_value IS 'Конкретное значение свойства (например, cooldown=3.0)';
 
 
 --
--- Name: skill_scale_type; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_scale_type; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_scale_type (
@@ -5079,17 +4847,15 @@ CREATE TABLE public.skill_scale_type (
 );
 
 
-ALTER TABLE public.skill_scale_type OWNER TO postgres;
-
 --
--- Name: TABLE skill_scale_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_scale_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_scale_type IS 'Типы масштабирования урона скилла (от силы, от интеллекта и т.д.)';
 
 
 --
--- Name: skill_scale_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_scale_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.skill_scale_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -5103,7 +4869,7 @@ ALTER TABLE public.skill_scale_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDEN
 
 
 --
--- Name: skill_school; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skill_school; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skill_school (
@@ -5113,17 +4879,15 @@ CREATE TABLE public.skill_school (
 );
 
 
-ALTER TABLE public.skill_school OWNER TO postgres;
-
 --
--- Name: TABLE skill_school; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skill_school; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skill_school IS 'Магические/боевые школы скиллов (огонь, тьма, физика и т.д.)';
 
 
 --
--- Name: skill_school_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skill_school_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.skill_school ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -5137,7 +4901,7 @@ ALTER TABLE public.skill_school ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY
 
 
 --
--- Name: skills; Type: TABLE; Schema: public; Owner: postgres
+-- Name: skills; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.skills (
@@ -5151,45 +4915,43 @@ CREATE TABLE public.skills (
 );
 
 
-ALTER TABLE public.skills OWNER TO postgres;
-
 --
--- Name: TABLE skills; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE skills; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.skills IS 'Каталог скиллов игры (шаблоны, не привязанные к персонажу)';
 
 
 --
--- Name: COLUMN skills.scale_stat_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skills.scale_stat_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skills.scale_stat_id IS 'Атрибут, от которого масштабируется скилл (FK → skill_scale_type). NULL = без скейла';
 
 
 --
--- Name: COLUMN skills.school_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skills.school_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skills.school_id IS 'Школа скилла (FK → skill_school). NULL = универсальный';
 
 
 --
--- Name: COLUMN skills.animation_name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skills.animation_name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skills.animation_name IS 'Название анимационного клипа (Unity Animator state), проигрываемого на кастере при применении скилла. NULL = клиент использует дефолтную анимацию.';
 
 
 --
--- Name: COLUMN skills.is_passive; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN skills.is_passive; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.skills.is_passive IS 'TRUE = always-on passive; no hotbar slot, never cast actively.';
 
 
 --
--- Name: skills_attributes_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skills_attributes_mapping_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.skill_properties_mapping ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -5203,7 +4965,7 @@ ALTER TABLE public.skill_properties_mapping ALTER COLUMN id ADD GENERATED ALWAYS
 
 
 --
--- Name: skills_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: skills_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.skills ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -5217,7 +4979,7 @@ ALTER TABLE public.skills ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: spawn_zone_mobs; Type: TABLE; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.spawn_zone_mobs (
@@ -5231,24 +4993,22 @@ CREATE TABLE public.spawn_zone_mobs (
 );
 
 
-ALTER TABLE public.spawn_zone_mobs OWNER TO postgres;
-
 --
--- Name: TABLE spawn_zone_mobs; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE spawn_zone_mobs; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.spawn_zone_mobs IS 'Какие мобы спавнятся в зоне, в каком количестве и с каким интервалом. Одна зона может содержать несколько разных мобов.';
 
 
 --
--- Name: COLUMN spawn_zone_mobs.respawn_time; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zone_mobs.respawn_time; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zone_mobs.respawn_time IS 'Интервал до следующего спавна в формате HH:MM:SS';
 
 
 --
--- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.spawn_zone_mobs_id_seq
@@ -5259,17 +5019,15 @@ CREATE SEQUENCE public.spawn_zone_mobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.spawn_zone_mobs_id_seq OWNER TO postgres;
-
 --
--- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.spawn_zone_mobs_id_seq OWNED BY public.spawn_zone_mobs.id;
 
 
 --
--- Name: spawn_zones; Type: TABLE; Schema: public; Owner: postgres
+-- Name: spawn_zones; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.spawn_zones (
@@ -5291,66 +5049,64 @@ CREATE TABLE public.spawn_zones (
 );
 
 
-ALTER TABLE public.spawn_zones OWNER TO postgres;
-
 --
--- Name: TABLE spawn_zones; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE spawn_zones; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.spawn_zones IS 'Defines where mobs may spawn in the world.  Three geometry variants are supported: RECT (AABB), CIRCLE (disc), and ANNULUS (ring).  Mob quotas and respawn timers are configured in spawn_zone_mobs.';
 
 
 --
--- Name: COLUMN spawn_zones.game_zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.game_zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.game_zone_id IS 'Игровой регион (zones), которому принадлежит точка спавна';
 
 
 --
--- Name: COLUMN spawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.shape_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.shape_type IS 'Geometry variant for this spawn zone.  RECT = AABB prism defined by (min_spawn_x/y, max_spawn_x/y).  CIRCLE = filled disc defined by (center_x/y, outer_radius).  ANNULUS = ring/donut defined by (center_x/y, inner_radius, outer_radius).  Use ANNULUS to surround a village or landmark with mobs while leaving the centre empty.';
 
 
 --
--- Name: COLUMN spawn_zones.center_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.center_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.center_x IS 'World X coordinate of zone centre.  Required for CIRCLE and ANNULUS.  For RECT zones this is auto-derived as (min_spawn_x + max_spawn_x) / 2 and used for champion spawn-point resolution.';
 
 
 --
--- Name: COLUMN spawn_zones.center_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.center_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.center_y IS 'World Y coordinate of zone centre.  Mirror of center_x for the Y axis.';
 
 
 --
--- Name: COLUMN spawn_zones.inner_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.inner_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.inner_radius IS 'ANNULUS only.  Spawn candidates whose distance to center is less than inner_radius are rejected.  Set to 0 for RECT and CIRCLE.';
 
 
 --
--- Name: COLUMN spawn_zones.outer_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.outer_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.outer_radius IS 'CIRCLE / ANNULUS.  Maximum distance from center at which mobs may spawn.  Set to 0 for RECT zones (AABB boundary is used instead).';
 
 
 --
--- Name: COLUMN spawn_zones.exclusion_game_zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN spawn_zones.exclusion_game_zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.spawn_zones.exclusion_game_zone_id IS 'Optional FK → zones.id.  Spawn candidates whose position falls inside this game zone are rejected at runtime regardless of the primary shape.  Typical use: prevent mobs spawning inside is_safe_zone=true areas when using RECT.';
 
 
 --
--- Name: spawn_zones_zone_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: spawn_zones_zone_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.spawn_zones_zone_id_seq
@@ -5362,17 +5118,15 @@ CREATE SEQUENCE public.spawn_zones_zone_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.spawn_zones_zone_id_seq OWNER TO postgres;
-
 --
--- Name: spawn_zones_zone_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: spawn_zones_zone_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.spawn_zones_zone_id_seq OWNED BY public.spawn_zones.zone_id;
 
 
 --
--- Name: status_effect_modifiers; Type: TABLE; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.status_effect_modifiers (
@@ -5385,31 +5139,29 @@ CREATE TABLE public.status_effect_modifiers (
 );
 
 
-ALTER TABLE public.status_effect_modifiers OWNER TO postgres;
-
 --
--- Name: TABLE status_effect_modifiers; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE status_effect_modifiers; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.status_effect_modifiers IS 'Stat modifiers attached to a status effect. One row per attribute (or one row with attribute_id=NULL for percent_all).';
 
 
 --
--- Name: COLUMN status_effect_modifiers.modifier_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN status_effect_modifiers.modifier_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.status_effect_modifiers.modifier_type IS 'flat | percent | percent_all';
 
 
 --
--- Name: COLUMN status_effect_modifiers.value; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN status_effect_modifiers.value; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.status_effect_modifiers.value IS 'Numeric magnitude. Negative = penalty. For percent types: -20 means -20%.';
 
 
 --
--- Name: status_effect_modifiers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.status_effect_modifiers_id_seq
@@ -5421,17 +5173,15 @@ CREATE SEQUENCE public.status_effect_modifiers_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.status_effect_modifiers_id_seq OWNER TO postgres;
-
 --
--- Name: status_effect_modifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.status_effect_modifiers_id_seq OWNED BY public.status_effect_modifiers.id;
 
 
 --
--- Name: status_effects; Type: TABLE; Schema: public; Owner: postgres
+-- Name: status_effects; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.status_effects (
@@ -5442,38 +5192,36 @@ CREATE TABLE public.status_effects (
 );
 
 
-ALTER TABLE public.status_effects OWNER TO postgres;
-
 --
--- Name: TABLE status_effects; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE status_effects; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.status_effects IS 'Catalog of named status conditions (buffs, debuffs, DoTs, CC). Not to be confused with skill_damage_formulas.';
 
 
 --
--- Name: COLUMN status_effects.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN status_effects.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.status_effects.slug IS 'Machine-readable identifier, e.g. resurrection_sickness, burning, blessed';
 
 
 --
--- Name: COLUMN status_effects.category; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN status_effects.category; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.status_effects.category IS 'buff | debuff | dot | hot | cc';
 
 
 --
--- Name: COLUMN status_effects.duration_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN status_effects.duration_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.status_effects.duration_sec IS 'Default duration in seconds; NULL = permanent. Chunk server uses this when applying the effect.';
 
 
 --
--- Name: status_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: status_effects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.status_effects_id_seq
@@ -5485,17 +5233,15 @@ CREATE SEQUENCE public.status_effects_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.status_effects_id_seq OWNER TO postgres;
-
 --
--- Name: status_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: status_effects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.status_effects_id_seq OWNED BY public.status_effects.id;
 
 
 --
--- Name: target_type; Type: TABLE; Schema: public; Owner: postgres
+-- Name: target_type; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.target_type (
@@ -5504,17 +5250,15 @@ CREATE TABLE public.target_type (
 );
 
 
-ALTER TABLE public.target_type OWNER TO postgres;
-
 --
--- Name: TABLE target_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE target_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.target_type IS 'Типы целей скиллов: self, enemy, ally, area и т.д.';
 
 
 --
--- Name: target_type_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: target_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.target_type_id_seq
@@ -5526,17 +5270,15 @@ CREATE SEQUENCE public.target_type_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.target_type_id_seq OWNER TO postgres;
-
 --
--- Name: target_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: target_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.target_type_id_seq OWNED BY public.target_type.id;
 
 
 --
--- Name: timed_champion_templates; Type: TABLE; Schema: public; Owner: postgres
+-- Name: timed_champion_templates; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.timed_champion_templates (
@@ -5552,80 +5294,78 @@ CREATE TABLE public.timed_champion_templates (
 );
 
 
-ALTER TABLE public.timed_champion_templates OWNER TO postgres;
-
 --
--- Name: TABLE timed_champion_templates; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE timed_champion_templates; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.timed_champion_templates IS 'Шаблоны мировых чемпионов с таймером спавна. Чемпион — усиленный моб, появляется с заданным интервалом в указанной зоне. next_spawn_at — unix-timestamp следующего спавна.';
 
 
 --
--- Name: COLUMN timed_champion_templates.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN timed_champion_templates.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.slug IS 'Уникальный код шаблона чемпиона.';
 
 
 --
--- Name: COLUMN timed_champion_templates.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.zone_id IS 'FK → zones.id. Зона, в которой появляется чемпион.';
 
 
 --
--- Name: COLUMN timed_champion_templates.mob_template_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.mob_template_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.mob_template_id IS 'FK → mob.id. Шаблон моба, на основе которого создаётся чемпион.';
 
 
 --
--- Name: COLUMN timed_champion_templates.interval_hours; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.interval_hours; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.interval_hours IS 'Интервал между спавнами чемпиона в часах.';
 
 
 --
--- Name: COLUMN timed_champion_templates.window_minutes; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.window_minutes; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.window_minutes IS 'Временное окно (в минутах) в котором чемпион может появиться после истечения интервала.';
 
 
 --
--- Name: COLUMN timed_champion_templates.next_spawn_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.next_spawn_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.next_spawn_at IS 'Unix timestamp (секунды) ближайшего возможного спавна. NULL = ещё не рассчитан.';
 
 
 --
--- Name: COLUMN timed_champion_templates.last_killed_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.last_killed_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.last_killed_at IS 'Временная метка последнего убийства чемпиона.';
 
 
 --
--- Name: COLUMN timed_champion_templates.announcement_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN timed_champion_templates.announcement_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.timed_champion_templates.announcement_key IS 'Ключ строки анонса для клиентского UI при появлении чемпиона. NULL = без анонса.';
 
 
 --
--- Name: timed_champion_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: timed_champion_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.timed_champion_templates_id_seq
@@ -5637,17 +5377,15 @@ CREATE SEQUENCE public.timed_champion_templates_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.timed_champion_templates_id_seq OWNER TO postgres;
-
 --
--- Name: timed_champion_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: timed_champion_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.timed_champion_templates_id_seq OWNED BY public.timed_champion_templates.id;
 
 
 --
--- Name: title_definitions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: title_definitions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.title_definitions (
@@ -5661,59 +5399,57 @@ CREATE TABLE public.title_definitions (
 );
 
 
-ALTER TABLE public.title_definitions OWNER TO postgres;
-
 --
--- Name: TABLE title_definitions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE title_definitions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.title_definitions IS 'Каталог титулов. earn_condition — строковый ключ для логики выдачи на game-server. bonuses — JSON-массив модификаторов атрибутов.';
 
 
 --
--- Name: COLUMN title_definitions.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN title_definitions.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.slug IS 'Уникальный код титула. Используется как FK в character_titles.';
 
 
 --
--- Name: COLUMN title_definitions.display_name; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.display_name; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.display_name IS 'Отображаемое имя титула в UI.';
 
 
 --
--- Name: COLUMN title_definitions.description; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.description; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.description IS 'Описание способа получения/значения титула.';
 
 
 --
--- Name: COLUMN title_definitions.earn_condition; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.earn_condition; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.earn_condition IS 'Строковый ключ условия получения. Обрабатывается логикой game-server (achievement_manager и т.п.).';
 
 
 --
--- Name: COLUMN title_definitions.bonuses; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.bonuses; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.bonuses IS 'JSON-массив бонусов: [{\"attribute\":\"slug\",\"value\":N}]. Применяются при активации титула.';
 
 
 --
--- Name: COLUMN title_definitions.condition_params; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN title_definitions.condition_params; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.title_definitions.condition_params IS 'Data-driven unlock params (JSONB). Fields depend on earn_condition:
@@ -5725,7 +5461,7 @@ COMMENT ON COLUMN public.title_definitions.condition_params IS 'Data-driven unlo
 
 
 --
--- Name: title_definitions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: title_definitions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.title_definitions_id_seq
@@ -5737,17 +5473,15 @@ CREATE SEQUENCE public.title_definitions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.title_definitions_id_seq OWNER TO postgres;
-
 --
--- Name: title_definitions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: title_definitions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.title_definitions_id_seq OWNED BY public.title_definitions.id;
 
 
 --
--- Name: user_bans; Type: TABLE; Schema: public; Owner: postgres
+-- Name: user_bans; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.user_bans (
@@ -5761,24 +5495,22 @@ CREATE TABLE public.user_bans (
 );
 
 
-ALTER TABLE public.user_bans OWNER TO postgres;
-
 --
--- Name: TABLE user_bans; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE user_bans; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.user_bans IS 'Записи блокировок аккаунтов. expires_at = NULL означает перманентный бан';
 
 
 --
--- Name: COLUMN user_bans.expires_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN user_bans.expires_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.user_bans.expires_at IS 'NULL = перманентный бан';
 
 
 --
--- Name: user_bans_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: user_bans_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.user_bans_id_seq
@@ -5789,17 +5521,15 @@ CREATE SEQUENCE public.user_bans_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.user_bans_id_seq OWNER TO postgres;
-
 --
--- Name: user_bans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: user_bans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.user_bans_id_seq OWNED BY public.user_bans.id;
 
 
 --
--- Name: user_roles; Type: TABLE; Schema: public; Owner: postgres
+-- Name: user_roles; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.user_roles (
@@ -5810,17 +5540,15 @@ CREATE TABLE public.user_roles (
 );
 
 
-ALTER TABLE public.user_roles OWNER TO postgres;
-
 --
--- Name: TABLE user_roles; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE user_roles; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.user_roles IS 'Справочник ролей аккаунтов: 0=player, 1=gm, 2=admin';
 
 
 --
--- Name: user_sessions; Type: TABLE; Schema: public; Owner: postgres
+-- Name: user_sessions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.user_sessions (
@@ -5835,17 +5563,15 @@ CREATE TABLE public.user_sessions (
 );
 
 
-ALTER TABLE public.user_sessions OWNER TO postgres;
-
 --
--- Name: TABLE user_sessions; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE user_sessions; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.user_sessions IS 'Сессии пользователей — позволяет мультисессионность и точечный отзыв токена';
 
 
 --
--- Name: user_sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: user_sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.user_sessions_id_seq
@@ -5856,17 +5582,15 @@ CREATE SEQUENCE public.user_sessions_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.user_sessions_id_seq OWNER TO postgres;
-
 --
--- Name: user_sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: user_sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.user_sessions_id_seq OWNED BY public.user_sessions.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.users (
@@ -5881,64 +5605,61 @@ CREATE TABLE public.users (
     failed_login_attempts smallint DEFAULT 0 NOT NULL,
     locked_until timestamp with time zone,
     last_login_ip inet,
-    registration_ip inet,
-    is_email_verified boolean DEFAULT false NOT NULL
+    registration_ip inet
 );
 
 
-ALTER TABLE public.users OWNER TO postgres;
-
 --
--- Name: TABLE users; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE users; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.users IS 'Аккаунты игроков и персонала. Один аккаунт — до неск. персонажей';
 
 
 --
--- Name: COLUMN users.login; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN users.login; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.users.login IS 'Уникальный логин для входа';
 
 
 --
--- Name: COLUMN users.password; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN users.password; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.users.password IS 'Пароль (в реальном проекте — хэш bcrypt)';
 
 
 --
--- Name: COLUMN users.last_login; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN users.last_login; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.users.last_login IS 'Время последнего входа в аккаунт';
 
 
 --
--- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN users.role; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.users.role IS '0=player, 1=GM, 2=администратор. FK → user_roles';
 
 
 --
--- Name: COLUMN users.created_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN users.created_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.users.created_at IS 'Дата регистрации аккаунта';
 
 
 --
--- Name: COLUMN users.is_active; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN users.is_active; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.users.is_active IS 'FALSE = аккаунт заблокирован/отключён администратором';
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -5952,7 +5673,7 @@ ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: vendor_inventory; Type: TABLE; Schema: public; Owner: postgres
+-- Name: vendor_inventory; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.vendor_inventory (
@@ -5968,31 +5689,29 @@ CREATE TABLE public.vendor_inventory (
 );
 
 
-ALTER TABLE public.vendor_inventory OWNER TO postgres;
-
 --
--- Name: TABLE vendor_inventory; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE vendor_inventory; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.vendor_inventory IS 'Ассортимент конкретного торговца с остатком и ценой';
 
 
 --
--- Name: COLUMN vendor_inventory.stock_count; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN vendor_inventory.stock_count; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.vendor_inventory.stock_count IS 'Остаток товара. -1 = бесконечный запас';
 
 
 --
--- Name: COLUMN vendor_inventory.price_override; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN vendor_inventory.price_override; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.vendor_inventory.price_override IS 'Ценовое исключение для этого товара у этого торговца. NULL = стандартная цена';
 
 
 --
--- Name: vendor_inventory_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: vendor_inventory_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.vendor_inventory_id_seq
@@ -6003,17 +5722,15 @@ CREATE SEQUENCE public.vendor_inventory_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.vendor_inventory_id_seq OWNER TO postgres;
-
 --
--- Name: vendor_inventory_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: vendor_inventory_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.vendor_inventory_id_seq OWNED BY public.vendor_inventory.id;
 
 
 --
--- Name: vendor_npc; Type: TABLE; Schema: public; Owner: postgres
+-- Name: vendor_npc; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.vendor_npc (
@@ -6023,24 +5740,22 @@ CREATE TABLE public.vendor_npc (
 );
 
 
-ALTER TABLE public.vendor_npc OWNER TO postgres;
-
 --
--- Name: TABLE vendor_npc; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE vendor_npc; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.vendor_npc IS 'Торговая конфигурация NPC: базовая наценка';
 
 
 --
--- Name: COLUMN vendor_npc.markup_pct; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN vendor_npc.markup_pct; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.vendor_npc.markup_pct IS 'Наценка в % поверх vendor_price_buy предмета. 0 = без наценки';
 
 
 --
--- Name: vendor_npc_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: vendor_npc_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.vendor_npc_id_seq
@@ -6052,17 +5767,15 @@ CREATE SEQUENCE public.vendor_npc_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.vendor_npc_id_seq OWNER TO postgres;
-
 --
--- Name: vendor_npc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: vendor_npc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.vendor_npc_id_seq OWNED BY public.vendor_npc.id;
 
 
 --
--- Name: world_object_states; Type: TABLE; Schema: public; Owner: postgres
+-- Name: world_object_states; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.world_object_states (
@@ -6073,38 +5786,36 @@ CREATE TABLE public.world_object_states (
 );
 
 
-ALTER TABLE public.world_object_states OWNER TO postgres;
-
 --
--- Name: TABLE world_object_states; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE world_object_states; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.world_object_states IS 'Persisted runtime state for global-scope world objects. Per-player state is in player_flags (wio_interacted_<id>).';
 
 
 --
--- Name: COLUMN world_object_states.object_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_object_states.object_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_object_states.object_id IS 'FK to world_objects.id (PK + cascade delete).';
 
 
 --
--- Name: COLUMN world_object_states.state; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_object_states.state; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_object_states.state IS 'Current state: active | depleted | disabled.';
 
 
 --
--- Name: COLUMN world_object_states.depleted_at; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_object_states.depleted_at; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_object_states.depleted_at IS 'Timestamp of last depletion. NULL if never depleted.';
 
 
 --
--- Name: world_objects; Type: TABLE; Schema: public; Owner: postgres
+-- Name: world_objects; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.world_objects (
@@ -6132,150 +5843,148 @@ CREATE TABLE public.world_objects (
 );
 
 
-ALTER TABLE public.world_objects OWNER TO postgres;
-
 --
--- Name: TABLE world_objects; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE world_objects; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.world_objects IS 'Static definitions of world interactive objects (WIO). Mesh binding is performed in UE5 by slug. Loaded by game-server at startup and forwarded to chunk-server.';
 
 
 --
--- Name: COLUMN world_objects.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.id IS 'Primary key, auto-incremented.';
 
 
 --
--- Name: COLUMN world_objects.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.slug IS 'Unique machine-readable identifier. UE5 uses this to look up the static mesh / blueprint asset at runtime.';
 
 
 --
--- Name: COLUMN world_objects.name_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.name_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.name_key IS 'Localisation key forwarded to the client (e.g. wio.forest_tracks_01.name).';
 
 
 --
--- Name: COLUMN world_objects.object_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.object_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.object_type IS 'Interaction type: examine | search | activate | use_with_item | channeled.';
 
 
 --
--- Name: COLUMN world_objects.scope; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.scope; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.scope IS 'State scope: per_player (stored in player_flags) or global (stored in world_object_states).';
 
 
 --
--- Name: COLUMN world_objects.pos_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.pos_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.pos_x IS 'World X position (Unreal Engine units).';
 
 
 --
--- Name: COLUMN world_objects.pos_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.pos_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.pos_y IS 'World Y position.';
 
 
 --
--- Name: COLUMN world_objects.pos_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.pos_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.pos_z IS 'World Z position.';
 
 
 --
--- Name: COLUMN world_objects.rot_z; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.rot_z; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.rot_z IS 'Yaw rotation around Z axis (degrees).';
 
 
 --
--- Name: COLUMN world_objects.zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.zone_id IS 'FK to zones.id. NULL = global / not zone-specific.';
 
 
 --
--- Name: COLUMN world_objects.dialogue_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.dialogue_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.dialogue_id IS 'FK to dialogue.id. NULL = no dialogue.';
 
 
 --
--- Name: COLUMN world_objects.loot_table_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.loot_table_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.loot_table_id IS 'Synthetic mob_id for loot gen. No FK by design. NULL = no loot.';
 
 
 --
--- Name: COLUMN world_objects.required_item_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.required_item_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.required_item_id IS 'FK to items.id. NULL = no requirement.';
 
 
 --
--- Name: COLUMN world_objects.interaction_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.interaction_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.interaction_radius IS 'Max distance (UE units) for interaction trigger.';
 
 
 --
--- Name: COLUMN world_objects.channel_time_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.channel_time_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.channel_time_sec IS 'Channeling duration in seconds. 0 = instant.';
 
 
 --
--- Name: COLUMN world_objects.respawn_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.respawn_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.respawn_sec IS 'Seconds before object resets after depletion. 0 = never.';
 
 
 --
--- Name: COLUMN world_objects.is_active_by_default; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.is_active_by_default; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.is_active_by_default IS 'Initial enabled state when no state row exists yet.';
 
 
 --
--- Name: COLUMN world_objects.min_level; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.min_level; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.min_level IS 'Minimum character level required. 0 = unrestricted.';
 
 
 --
--- Name: COLUMN world_objects.condition_group; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN world_objects.condition_group; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.world_objects.condition_group IS 'JSONB condition tree (dialogue schema). null = always allowed.';
 
 
 --
--- Name: world_objects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: world_objects_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.world_objects_id_seq
@@ -6287,17 +5996,15 @@ CREATE SEQUENCE public.world_objects_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.world_objects_id_seq OWNER TO postgres;
-
 --
--- Name: world_objects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: world_objects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.world_objects_id_seq OWNED BY public.world_objects.id;
 
 
 --
--- Name: zone_event_templates; Type: TABLE; Schema: public; Owner: postgres
+-- Name: zone_event_templates; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.zone_event_templates (
@@ -6320,129 +6027,127 @@ CREATE TABLE public.zone_event_templates (
 );
 
 
-ALTER TABLE public.zone_event_templates OWNER TO postgres;
-
 --
--- Name: TABLE zone_event_templates; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE zone_event_templates; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.zone_event_templates IS 'Шаблоны мировых событий (вторжения, праздники, осады). При срабатывании trigger_type chunk-server клонирует шаблон в активное событие. invasion_* поля задают волну мобов.';
 
 
 --
--- Name: COLUMN zone_event_templates.id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.id IS 'Суррогатный PK.';
 
 
 --
--- Name: COLUMN zone_event_templates.slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.slug IS 'Уникальный код шаблона события.';
 
 
 --
--- Name: COLUMN zone_event_templates.game_zone_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.game_zone_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.game_zone_id IS 'FK → zones.id. Зона, в которой происходит событие. NULL = глобальное событие.';
 
 
 --
--- Name: COLUMN zone_event_templates.trigger_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.trigger_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.trigger_type IS 'Способ запуска: manual (GM-команда), timed (по расписанию), random (случайный по вероятности).';
 
 
 --
--- Name: COLUMN zone_event_templates.duration_sec; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.duration_sec; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.duration_sec IS 'Продолжительность активного события в секундах.';
 
 
 --
--- Name: COLUMN zone_event_templates.loot_multiplier; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.loot_multiplier; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.loot_multiplier IS 'Множитель вероятности дропа во время события (1.0 = норма).';
 
 
 --
--- Name: COLUMN zone_event_templates.spawn_rate_multiplier; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.spawn_rate_multiplier; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.spawn_rate_multiplier IS 'Множитель скорости спавна мобов (1.0 = норма).';
 
 
 --
--- Name: COLUMN zone_event_templates.mob_speed_multiplier; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.mob_speed_multiplier; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.mob_speed_multiplier IS 'Множитель скорости движения мобов (1.0 = норма).';
 
 
 --
--- Name: COLUMN zone_event_templates.announce_key; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.announce_key; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.announce_key IS 'Ключ строки анонса для клиентского UI при старте события. NULL = без анонса.';
 
 
 --
--- Name: COLUMN zone_event_templates.interval_hours; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.interval_hours; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.interval_hours IS 'Интервал повторения события в часах (0 = не повторяется). Применяется при trigger_type=timed.';
 
 
 --
--- Name: COLUMN zone_event_templates.random_chance_per_hour; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.random_chance_per_hour; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.random_chance_per_hour IS 'Вероятность случайного запуска в час (0.0–1.0). Применяется при trigger_type=random.';
 
 
 --
--- Name: COLUMN zone_event_templates.has_invasion_wave; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.has_invasion_wave; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.has_invasion_wave IS 'TRUE = событие сопровождается волной вторжения мобов.';
 
 
 --
--- Name: COLUMN zone_event_templates.invasion_mob_template_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.invasion_mob_template_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.invasion_mob_template_id IS 'FK → mob.id. Шаблон моба-захватчика. NULL = нет вторжения.';
 
 
 --
--- Name: COLUMN zone_event_templates.invasion_wave_count; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.invasion_wave_count; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.invasion_wave_count IS 'Количество волн вторжения.';
 
 
 --
--- Name: COLUMN zone_event_templates.invasion_champion_template_id; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.invasion_champion_template_id; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.invasion_champion_template_id IS 'FK → timed_champion_templates.id. Чемпион, появляющийся в финальной волне. NULL = без чемпиона.';
 
 
 --
--- Name: COLUMN zone_event_templates.invasion_champion_slug; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zone_event_templates.invasion_champion_slug; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zone_event_templates.invasion_champion_slug IS 'Slug чемпиона (дублирует FK для runtime без JOIN). NULL = без чемпиона.';
 
 
 --
--- Name: zone_event_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: zone_event_templates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.zone_event_templates_id_seq
@@ -6454,17 +6159,15 @@ CREATE SEQUENCE public.zone_event_templates_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.zone_event_templates_id_seq OWNER TO postgres;
-
 --
--- Name: zone_event_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: zone_event_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.zone_event_templates_id_seq OWNED BY public.zone_event_templates.id;
 
 
 --
--- Name: zones; Type: TABLE; Schema: public; Owner: postgres
+-- Name: zones; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.zones (
@@ -6489,52 +6192,50 @@ CREATE TABLE public.zones (
 );
 
 
-ALTER TABLE public.zones OWNER TO postgres;
-
 --
--- Name: TABLE zones; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: TABLE zones; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON TABLE public.zones IS 'Игровые зоны/карты. Без zone_id координаты позиций теряют смысл';
 
 
 --
--- Name: COLUMN zones.shape_type; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zones.shape_type; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zones.shape_type IS 'Zone boundary shape: RECT (AABB), CIRCLE (center + outer_radius), ANNULUS (center + inner_radius + outer_radius)';
 
 
 --
--- Name: COLUMN zones.center_x; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zones.center_x; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zones.center_x IS 'World-space X of zone centre. For RECT this equals (min_x+max_x)/2';
 
 
 --
--- Name: COLUMN zones.center_y; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zones.center_y; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zones.center_y IS 'World-space Y of zone centre. For RECT this equals (min_y+max_y)/2';
 
 
 --
--- Name: COLUMN zones.inner_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zones.inner_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zones.inner_radius IS 'Inner exclusion radius (ANNULUS only). Zero for RECT/CIRCLE';
 
 
 --
--- Name: COLUMN zones.outer_radius; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: COLUMN zones.outer_radius; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON COLUMN public.zones.outer_radius IS 'Outer boundary radius for CIRCLE/ANNULUS. Zero for RECT (use AABB instead)';
 
 
 --
--- Name: zones_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: zones_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE public.zones_id_seq
@@ -6546,361 +6247,351 @@ CREATE SEQUENCE public.zones_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.zones_id_seq OWNER TO postgres;
-
 --
--- Name: zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: zones_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE public.zones_id_seq OWNED BY public.zones.id;
 
 
 --
--- Name: character_emotes id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: character_emotes id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_emotes ALTER COLUMN id SET DEFAULT nextval('public.character_emotes_id_seq'::regclass);
 
 
 --
--- Name: character_equipment id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: character_equipment id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_equipment ALTER COLUMN id SET DEFAULT nextval('public.character_equipment_id_seq'::regclass);
 
 
 --
--- Name: character_skills id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: character_skills id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skills ALTER COLUMN id SET DEFAULT nextval('public.character_skills_id_seq1'::regclass);
 
 
 --
--- Name: class_skill_tree id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: class_skill_tree id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree ALTER COLUMN id SET DEFAULT nextval('public.class_skill_tree_id_seq'::regclass);
 
 
 --
--- Name: class_spawn_zones id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: class_spawn_zones id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_spawn_zones ALTER COLUMN id SET DEFAULT nextval('public.class_spawn_zones_id_seq'::regclass);
 
 
 --
--- Name: class_starter_items id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: class_starter_items id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_starter_items ALTER COLUMN id SET DEFAULT nextval('public.class_starter_items_id_seq'::regclass);
 
 
 --
--- Name: currency_transactions id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: currency_transactions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.currency_transactions ALTER COLUMN id SET DEFAULT nextval('public.currency_transactions_id_seq'::regclass);
 
 
 --
--- Name: dialogue id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: dialogue id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue ALTER COLUMN id SET DEFAULT nextval('public.dialogue_id_seq'::regclass);
 
 
 --
--- Name: dialogue_edge id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: dialogue_edge id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_edge ALTER COLUMN id SET DEFAULT nextval('public.dialogue_edge_id_seq'::regclass);
 
 
 --
--- Name: dialogue_node id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: dialogue_node id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_node ALTER COLUMN id SET DEFAULT nextval('public.dialogue_node_id_seq'::regclass);
 
 
 --
--- Name: emote_definitions id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: emote_definitions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.emote_definitions ALTER COLUMN id SET DEFAULT nextval('public.emote_definitions_id_seq'::regclass);
 
 
 --
--- Name: factions id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: factions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.factions ALTER COLUMN id SET DEFAULT nextval('public.factions_id_seq'::regclass);
 
 
 --
--- Name: game_analytics id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: game_analytics id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_analytics ALTER COLUMN id SET DEFAULT nextval('public.game_analytics_id_seq'::regclass);
 
 
 --
--- Name: gm_action_log id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: gm_action_log id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.gm_action_log ALTER COLUMN id SET DEFAULT nextval('public.gm_action_log_id_seq'::regclass);
 
 
 --
--- Name: item_set_bonuses id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: item_set_bonuses id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_bonuses ALTER COLUMN id SET DEFAULT nextval('public.item_set_bonuses_id_seq'::regclass);
 
 
 --
--- Name: item_sets id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: item_sets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_sets ALTER COLUMN id SET DEFAULT nextval('public.item_sets_id_seq'::regclass);
 
 
 --
--- Name: item_use_effects id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: item_use_effects id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_use_effects ALTER COLUMN id SET DEFAULT nextval('public.item_use_effects_id_seq'::regclass);
 
 
 --
--- Name: mob_skills id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: mob_skills id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_skills ALTER COLUMN id SET DEFAULT nextval('public.mob_skills_id_seq'::regclass);
 
 
 --
--- Name: npc_ambient_speech_configs id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_configs ALTER COLUMN id SET DEFAULT nextval('public.npc_ambient_speech_configs_id_seq'::regclass);
 
 
 --
--- Name: npc_ambient_speech_lines id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_lines ALTER COLUMN id SET DEFAULT nextval('public.npc_ambient_speech_lines_id_seq'::regclass);
 
 
 --
--- Name: npc_placements id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: npc_placements id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_placements ALTER COLUMN id SET DEFAULT nextval('public.npc_placements_id_seq'::regclass);
 
 
 --
--- Name: npc_skills id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: npc_skills id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_skills ALTER COLUMN id SET DEFAULT nextval('public.npc_skills_id_seq'::regclass);
 
 
 --
--- Name: npc_trainer_class id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: npc_trainer_class id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_trainer_class ALTER COLUMN id SET DEFAULT nextval('public.npc_trainer_class_id_seq'::regclass);
 
 
 --
--- Name: passive_skill_modifiers id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.passive_skill_modifiers ALTER COLUMN id SET DEFAULT nextval('public.passive_skill_modifiers_id_seq'::regclass);
 
 
 --
--- Name: player_active_effect id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: player_active_effect id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_active_effect ALTER COLUMN id SET DEFAULT nextval('public.player_active_effect_id_seq'::regclass);
 
 
 --
--- Name: quest id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: quest id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest ALTER COLUMN id SET DEFAULT nextval('public.quest_id_seq'::regclass);
 
 
 --
--- Name: quest_reward id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: quest_reward id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_reward ALTER COLUMN id SET DEFAULT nextval('public.quest_reward_id_seq'::regclass);
 
 
 --
--- Name: quest_step id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: quest_step id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_step ALTER COLUMN id SET DEFAULT nextval('public.quest_step_id_seq'::regclass);
 
 
 --
--- Name: respawn_zones id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: respawn_zones id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.respawn_zones ALTER COLUMN id SET DEFAULT nextval('public.respawn_zones_id_seq'::regclass);
 
 
 --
--- Name: skill_active_effects id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: skill_active_effects id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_active_effects ALTER COLUMN id SET DEFAULT nextval('public.skill_active_effects_id_seq'::regclass);
 
 
 --
--- Name: skill_damage_formulas id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: skill_damage_formulas id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_formulas ALTER COLUMN id SET DEFAULT nextval('public.skill_effects_id_seq'::regclass);
 
 
 --
--- Name: skill_damage_types id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: skill_damage_types id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_types ALTER COLUMN id SET DEFAULT nextval('public.skill_effects_type_id_seq'::regclass);
 
 
 --
--- Name: skill_effect_instances id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: skill_effect_instances id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effect_instances ALTER COLUMN id SET DEFAULT nextval('public.skill_effect_instances_id_seq'::regclass);
 
 
 --
--- Name: skill_effects_mapping id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effects_mapping ALTER COLUMN id SET DEFAULT nextval('public.skill_effects_mapping_id_seq'::regclass);
 
 
 --
--- Name: spawn_zone_mobs id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zone_mobs ALTER COLUMN id SET DEFAULT nextval('public.spawn_zone_mobs_id_seq'::regclass);
 
 
 --
--- Name: spawn_zones zone_id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: spawn_zones zone_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zones ALTER COLUMN zone_id SET DEFAULT nextval('public.spawn_zones_zone_id_seq'::regclass);
 
 
 --
--- Name: status_effect_modifiers id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effect_modifiers ALTER COLUMN id SET DEFAULT nextval('public.status_effect_modifiers_id_seq'::regclass);
 
 
 --
--- Name: status_effects id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: status_effects id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effects ALTER COLUMN id SET DEFAULT nextval('public.status_effects_id_seq'::regclass);
 
 
 --
--- Name: target_type id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: target_type id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.target_type ALTER COLUMN id SET DEFAULT nextval('public.target_type_id_seq'::regclass);
 
 
 --
--- Name: timed_champion_templates id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: timed_champion_templates id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.timed_champion_templates ALTER COLUMN id SET DEFAULT nextval('public.timed_champion_templates_id_seq'::regclass);
 
 
 --
--- Name: title_definitions id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: title_definitions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.title_definitions ALTER COLUMN id SET DEFAULT nextval('public.title_definitions_id_seq'::regclass);
 
 
 --
--- Name: user_bans id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: user_bans id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_bans ALTER COLUMN id SET DEFAULT nextval('public.user_bans_id_seq'::regclass);
 
 
 --
--- Name: user_sessions id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: user_sessions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_sessions ALTER COLUMN id SET DEFAULT nextval('public.user_sessions_id_seq'::regclass);
 
 
 --
--- Name: vendor_inventory id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: vendor_inventory id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_inventory ALTER COLUMN id SET DEFAULT nextval('public.vendor_inventory_id_seq'::regclass);
 
 
 --
--- Name: vendor_npc id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: vendor_npc id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_npc ALTER COLUMN id SET DEFAULT nextval('public.vendor_npc_id_seq'::regclass);
 
 
 --
--- Name: world_objects id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: world_objects id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_objects ALTER COLUMN id SET DEFAULT nextval('public.world_objects_id_seq'::regclass);
 
 
 --
--- Name: zone_event_templates id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: zone_event_templates id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zone_event_templates ALTER COLUMN id SET DEFAULT nextval('public.zone_event_templates_id_seq'::regclass);
 
 
 --
--- Name: zones id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: zones id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zones ALTER COLUMN id SET DEFAULT nextval('public.zones_id_seq'::regclass);
 
 
 --
--- Data for Name: character_bestiary; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_bestiary (character_id, mob_template_id, kill_count) FROM stdin;
-\.
-
-
---
--- Data for Name: character_class; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: character_class; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.character_class (id, name, slug, description) FROM stdin;
@@ -6910,31 +6601,7 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 
 
 --
--- Data for Name: character_current_state; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-\.
-
-
---
--- Data for Name: character_emotes; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_emotes (id, character_id, emote_slug, unlocked_at) FROM stdin;
-\.
-
-
---
--- Data for Name: character_equipment; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_equipment (id, character_id, equip_slot_id, inventory_item_id, equipped_at) FROM stdin;
-\.
-
-
---
--- Data for Name: character_genders; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: character_genders; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.character_genders (id, name, label) FROM stdin;
@@ -6944,79 +6611,7 @@ COPY public.character_genders (id, name, label) FROM stdin;
 
 
 --
--- Data for Name: character_permanent_modifiers; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_permanent_modifiers (id, character_id, attribute_id, value, source_type, source_id) FROM stdin;
-\.
-
-
---
--- Data for Name: character_pity; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
-\.
-
-
---
--- Data for Name: character_position; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
-\.
-
-
---
--- Data for Name: character_reputation; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_reputation (character_id, faction_slug, value) FROM stdin;
-\.
-
-
---
--- Data for Name: character_skill_bar; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_skill_bar (character_id, slot_index, skill_slug) FROM stdin;
-\.
-
-
---
--- Data for Name: character_skill_mastery; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_skill_mastery (character_id, mastery_slug, value) FROM stdin;
-\.
-
-
---
--- Data for Name: character_skills; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_skills (id, character_id, skill_id, current_level) FROM stdin;
-\.
-
-
---
--- Data for Name: character_titles; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.character_titles (character_id, title_slug, equipped, earned_at) FROM stdin;
-\.
-
-
---
--- Data for Name: characters; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.characters (id, name, owner_id, class_id, race_id, experience_points, level, radius, free_skill_points, gender, account_slot, created_at, last_online_at, deleted_at, play_time_sec, bind_zone_id, bind_x, bind_y, bind_z, appearance, experience_debt) FROM stdin;
-\.
-
-
---
--- Data for Name: class_skill_tree; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: class_skill_tree; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.class_skill_tree (id, class_id, skill_id, required_level, is_default, prerequisite_skill_id, skill_point_cost, gold_cost, max_level, requires_book, skill_book_item_id) FROM stdin;
@@ -7041,7 +6636,7 @@ COPY public.class_skill_tree (id, class_id, skill_id, required_level, is_default
 
 
 --
--- Data for Name: class_spawn_zones; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: class_spawn_zones; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.class_spawn_zones (id, class_id, zone_id, min_x, max_x, min_y, max_y, min_z, max_z, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
@@ -7051,7 +6646,7 @@ COPY public.class_spawn_zones (id, class_id, zone_id, min_x, max_x, min_y, max_y
 
 
 --
--- Data for Name: class_starter_items; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: class_starter_items; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.class_starter_items (id, class_id, item_id, quantity, slot_index, durability_current) FROM stdin;
@@ -7059,7 +6654,7 @@ COPY public.class_starter_items (id, class_id, item_id, quantity, slot_index, du
 
 
 --
--- Data for Name: class_stat_formula; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: class_stat_formula; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, exponent) FROM stdin;
@@ -7123,15 +6718,7 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 
 
 --
--- Data for Name: currency_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.currency_transactions (id, character_id, amount, reason_type, source_id, created_at) FROM stdin;
-\.
-
-
---
--- Data for Name: damage_elements; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: damage_elements; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.damage_elements (slug) FROM stdin;
@@ -7147,7 +6734,7 @@ ice
 
 
 --
--- Data for Name: dialogue; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: dialogue; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.dialogue (id, slug, version, start_node_id) FROM stdin;
@@ -7163,7 +6750,7 @@ COPY public.dialogue (id, slug, version, start_node_id) FROM stdin;
 
 
 --
--- Data for Name: dialogue_edge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: dialogue_edge; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_choice_key, condition_group, action_group, hide_if_locked) FROM stdin;
@@ -7247,7 +6834,7 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 
 
 --
--- Data for Name: dialogue_node; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: dialogue_node; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.dialogue_node (id, dialogue_id, type, speaker_npc_id, client_node_key, condition_group, action_group, jump_target_node_id) FROM stdin;
@@ -7307,7 +6894,7 @@ COPY public.dialogue_node (id, dialogue_id, type, speaker_npc_id, client_node_ke
 
 
 --
--- Data for Name: emote_definitions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: emote_definitions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.emote_definitions (id, slug, display_name, animation_name, category, is_default, sort_order, created_at) FROM stdin;
@@ -7328,7 +6915,7 @@ COPY public.emote_definitions (id, slug, display_name, animation_name, category,
 
 
 --
--- Data for Name: entity_attributes; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: entity_attributes; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.entity_attributes (id, name, slug, is_percentage) FROM stdin;
@@ -7364,7 +6951,7 @@ COPY public.entity_attributes (id, name, slug, is_percentage) FROM stdin;
 
 
 --
--- Data for Name: equip_slot; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: equip_slot; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.equip_slot (id, slug, name) FROM stdin;
@@ -7383,7 +6970,7 @@ COPY public.equip_slot (id, slug, name) FROM stdin;
 
 
 --
--- Data for Name: exp_for_level; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: exp_for_level; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.exp_for_level (id, level, experience_points) FROM stdin;
@@ -7401,7 +6988,7 @@ COPY public.exp_for_level (id, level, experience_points) FROM stdin;
 
 
 --
--- Data for Name: factions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: factions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.factions (id, slug, name) FROM stdin;
@@ -7414,15 +7001,7 @@ COPY public.factions (id, slug, name) FROM stdin;
 
 
 --
--- Data for Name: game_analytics; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.game_analytics (id, event_type, character_id, session_id, level, zone_id, payload, created_at) FROM stdin;
-\.
-
-
---
--- Data for Name: game_config; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: game_config; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.game_config (key, value, value_type, description, updated_at) FROM stdin;
@@ -7508,15 +7087,7 @@ combat.cast_speed_base_divisor	100	float	cast_speed divisor. effectiveCastMs = b
 
 
 --
--- Data for Name: gm_action_log; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.gm_action_log (id, gm_user_id, action_type, target_type, target_id, old_value, new_value, created_at) FROM stdin;
-\.
-
-
---
--- Data for Name: item_attributes_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_attributes_mapping; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_attributes_mapping (id, item_id, attribute_id, value, apply_on) FROM stdin;
@@ -7547,7 +7118,7 @@ COPY public.item_attributes_mapping (id, item_id, attribute_id, value, apply_on)
 
 
 --
--- Data for Name: item_class_restrictions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_class_restrictions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_class_restrictions (item_id, class_id) FROM stdin;
@@ -7567,7 +7138,7 @@ COPY public.item_class_restrictions (item_id, class_id) FROM stdin;
 
 
 --
--- Data for Name: item_set_bonuses; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_set_bonuses; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_set_bonuses (id, set_id, pieces_required, attribute_id, bonus_value) FROM stdin;
@@ -7575,7 +7146,7 @@ COPY public.item_set_bonuses (id, set_id, pieces_required, attribute_id, bonus_v
 
 
 --
--- Data for Name: item_set_members; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_set_members; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_set_members (set_id, item_id) FROM stdin;
@@ -7583,7 +7154,7 @@ COPY public.item_set_members (set_id, item_id) FROM stdin;
 
 
 --
--- Data for Name: item_sets; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_sets; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_sets (id, name, slug) FROM stdin;
@@ -7591,7 +7162,7 @@ COPY public.item_sets (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: item_types; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_types; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_types (id, name, slug) FROM stdin;
@@ -7609,7 +7180,7 @@ COPY public.item_types (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: item_use_effects; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: item_use_effects; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.item_use_effects (id, item_id, effect_slug, attribute_slug, value, is_instant, duration_seconds, tick_ms, cooldown_seconds) FROM stdin;
@@ -7630,7 +7201,7 @@ COPY public.item_use_effects (id, item_id, effect_slug, attribute_slug, value, i
 
 
 --
--- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: items; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.items (id, name, slug, description, is_quest_item, item_type, weight, rarity_id, stack_max, is_container, is_durable, is_tradable, durability_max, vendor_price_buy, vendor_price_sell, equip_slot, level_requirement, is_equippable, is_harvest, is_usable, is_two_handed, mastery_slug) FROM stdin;
@@ -7696,7 +7267,7 @@ COPY public.items (id, name, slug, description, is_quest_item, item_type, weight
 
 
 --
--- Data for Name: items_rarity; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: items_rarity; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.items_rarity (id, name, color_hex, slug) FROM stdin;
@@ -7709,7 +7280,7 @@ COPY public.items_rarity (id, name, color_hex, slug) FROM stdin;
 
 
 --
--- Data for Name: mastery_definitions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mastery_definitions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mastery_definitions (slug, name, weapon_type_slug, max_value) FROM stdin;
@@ -7722,7 +7293,7 @@ unarmed_mastery	Рукопашный бой	\N	100
 
 
 --
--- Data for Name: mob; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressive, is_dead, slug, radius, base_xp, rank_id, aggro_range, attack_range, attack_cooldown, chase_multiplier, patrol_speed, is_social, chase_duration, flee_hp_threshold, ai_archetype, can_evolve, is_rare, rare_spawn_chance, rare_spawn_condition, faction_slug, rep_delta_per_kill, biome_slug, mob_type_slug, patrol_radius) FROM stdin;
@@ -7738,15 +7309,7 @@ COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressi
 
 
 --
--- Data for Name: mob_active_effect; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.mob_active_effect (id, mob_uid, effect_id, attribute_id, value, source_type, source_player_id, applied_at, expires_at, tick_ms) FROM stdin;
-\.
-
-
---
--- Data for Name: mob_loot_info; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_loot_info; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_loot_info (id, mob_id, item_id, drop_chance, is_harvest_only, min_quantity, max_quantity, loot_tier) FROM stdin;
@@ -7821,7 +7384,7 @@ COPY public.mob_loot_info (id, mob_id, item_id, drop_chance, is_harvest_only, mi
 
 
 --
--- Data for Name: mob_position; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_position; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_position (id, mob_id, x, y, z, rot_z, zone_id) FROM stdin;
@@ -7829,7 +7392,7 @@ COPY public.mob_position (id, mob_id, x, y, z, rot_z, zone_id) FROM stdin;
 
 
 --
--- Data for Name: mob_race; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_race; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_race (id, name) FROM stdin;
@@ -7840,7 +7403,7 @@ COPY public.mob_race (id, name) FROM stdin;
 
 
 --
--- Data for Name: mob_ranks; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_ranks; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_ranks (rank_id, code, mult) FROM stdin;
@@ -7854,7 +7417,7 @@ COPY public.mob_ranks (rank_id, code, mult) FROM stdin;
 
 
 --
--- Data for Name: mob_resistances; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_resistances; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_resistances (mob_id, element_slug) FROM stdin;
@@ -7862,7 +7425,7 @@ COPY public.mob_resistances (mob_id, element_slug) FROM stdin;
 
 
 --
--- Data for Name: mob_skills; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_skills; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_skills (id, mob_id, skill_id, current_level) FROM stdin;
@@ -7878,7 +7441,7 @@ COPY public.mob_skills (id, mob_id, skill_id, current_level) FROM stdin;
 
 
 --
--- Data for Name: mob_stat; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_stat; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent) FROM stdin;
@@ -8110,7 +7673,7 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 
 
 --
--- Data for Name: mob_weaknesses; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mob_weaknesses; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.mob_weaknesses (mob_id, element_slug) FROM stdin;
@@ -8118,7 +7681,7 @@ COPY public.mob_weaknesses (mob_id, element_slug) FROM stdin;
 
 
 --
--- Data for Name: npc; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead, slug, radius, is_interactable, npc_type, faction_slug) FROM stdin;
@@ -8132,7 +7695,7 @@ COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead
 
 
 --
--- Data for Name: npc_ambient_speech_configs; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_ambient_speech_configs; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_ambient_speech_configs (id, npc_id, min_interval_sec, max_interval_sec) FROM stdin;
@@ -8141,7 +7704,7 @@ COPY public.npc_ambient_speech_configs (id, npc_id, min_interval_sec, max_interv
 
 
 --
--- Data for Name: npc_ambient_speech_lines; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_ambient_speech_lines; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_ambient_speech_lines (id, npc_id, line_key, trigger_type, trigger_radius, priority, weight, cooldown_sec, condition_group) FROM stdin;
@@ -8152,7 +7715,7 @@ COPY public.npc_ambient_speech_lines (id, npc_id, line_key, trigger_type, trigge
 
 
 --
--- Data for Name: npc_attributes; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_attributes; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_attributes (id, npc_id, attribute_id, value) FROM stdin;
@@ -8172,7 +7735,7 @@ COPY public.npc_attributes (id, npc_id, attribute_id, value) FROM stdin;
 
 
 --
--- Data for Name: npc_dialogue; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_dialogue; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_dialogue (npc_id, dialogue_id, priority, condition_group) FROM stdin;
@@ -8188,7 +7751,7 @@ COPY public.npc_dialogue (npc_id, dialogue_id, priority, condition_group) FROM s
 
 
 --
--- Data for Name: npc_placements; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_placements; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_placements (id, npc_id, zone_id, x, y, z, rot_z) FROM stdin;
@@ -8202,7 +7765,7 @@ COPY public.npc_placements (id, npc_id, zone_id, x, y, z, rot_z) FROM stdin;
 
 
 --
--- Data for Name: npc_skills; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_skills; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_skills (id, npc_id, skill_id, current_level) FROM stdin;
@@ -8213,7 +7776,7 @@ COPY public.npc_skills (id, npc_id, skill_id, current_level) FROM stdin;
 
 
 --
--- Data for Name: npc_trainer_class; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_trainer_class; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_trainer_class (id, npc_id, class_id) FROM stdin;
@@ -8223,7 +7786,7 @@ COPY public.npc_trainer_class (id, npc_id, class_id) FROM stdin;
 
 
 --
--- Data for Name: npc_type; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: npc_type; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.npc_type (id, name, slug) FROM stdin;
@@ -8237,7 +7800,7 @@ COPY public.npc_type (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: passive_skill_modifiers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: passive_skill_modifiers; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.passive_skill_modifiers (id, skill_id, attribute_slug, modifier_type, value) FROM stdin;
@@ -8249,47 +7812,7 @@ COPY public.passive_skill_modifiers (id, skill_id, attribute_slug, modifier_type
 
 
 --
--- Data for Name: player_active_effect; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.player_active_effect (id, player_id, status_effect_id, source_type, source_id, value, applied_at, expires_at, attribute_id, tick_ms, group_id) FROM stdin;
-\.
-
-
---
--- Data for Name: player_flag; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.player_flag (player_id, flag_key, int_value, bool_value, updated_at) FROM stdin;
-\.
-
-
---
--- Data for Name: player_inventory; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.player_inventory (id, character_id, item_id, quantity, slot_index, durability_current, kill_count) FROM stdin;
-\.
-
-
---
--- Data for Name: player_quest; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.player_quest (player_id, quest_id, state, current_step, progress, updated_at) FROM stdin;
-\.
-
-
---
--- Data for Name: player_skill_cooldown; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.player_skill_cooldown (character_id, skill_slug, cooldown_ends_at) FROM stdin;
-\.
-
-
---
--- Data for Name: quest; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: quest; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.quest (id, slug, min_level, repeatable, cooldown_sec, giver_npc_id, turnin_npc_id, client_quest_key, reputation_faction_slug, reputation_on_complete, reputation_on_fail) FROM stdin;
@@ -8298,7 +7821,7 @@ COPY public.quest (id, slug, min_level, repeatable, cooldown_sec, giver_npc_id, 
 
 
 --
--- Data for Name: quest_reward; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: quest_reward; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount, is_hidden) FROM stdin;
@@ -8309,7 +7832,7 @@ COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount, 
 
 
 --
--- Data for Name: quest_step; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: quest_step; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.quest_step (id, quest_id, step_index, step_type, params, client_step_key, completion_mode) FROM stdin;
@@ -8320,7 +7843,7 @@ COPY public.quest_step (id, quest_id, step_index, step_type, params, client_step
 
 
 --
--- Data for Name: race; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: race; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.race (id, name, slug) FROM stdin;
@@ -8329,7 +7852,7 @@ COPY public.race (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: respawn_zones; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: respawn_zones; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.respawn_zones (id, name, x, y, z, zone_id, is_default, min_x, max_x, min_y, max_y, min_z, max_z, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
@@ -8338,7 +7861,7 @@ COPY public.respawn_zones (id, name, x, y, z, zone_id, is_default, min_x, max_x,
 
 
 --
--- Data for Name: skill_active_effects; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_active_effects; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_active_effects (id, skill_id, effect_slug, effect_type_slug, attribute_slug, value, duration_seconds, tick_ms) FROM stdin;
@@ -8347,7 +7870,7 @@ COPY public.skill_active_effects (id, skill_id, effect_slug, effect_type_slug, a
 
 
 --
--- Data for Name: skill_damage_formulas; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_damage_formulas; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_damage_formulas (id, slug, effect_type_id) FROM stdin;
@@ -8362,7 +7885,7 @@ COPY public.skill_damage_formulas (id, slug, effect_type_id) FROM stdin;
 
 
 --
--- Data for Name: skill_damage_types; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_damage_types; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_damage_types (id, slug) FROM stdin;
@@ -8377,7 +7900,7 @@ COPY public.skill_damage_types (id, slug) FROM stdin;
 
 
 --
--- Data for Name: skill_effect_instances; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_effect_instances; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_effect_instances (id, skill_id, order_idx, target_type_id) FROM stdin;
@@ -8401,7 +7924,7 @@ COPY public.skill_effect_instances (id, skill_id, order_idx, target_type_id) FRO
 
 
 --
--- Data for Name: skill_effects_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_effects_mapping; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_effects_mapping (id, effect_instance_id, effect_id, value, level, tick_ms, duration_ms, attribute_id) FROM stdin;
@@ -8433,7 +7956,7 @@ COPY public.skill_effects_mapping (id, effect_instance_id, effect_id, value, lev
 
 
 --
--- Data for Name: skill_properties; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_properties; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_properties (id, name, slug) FROM stdin;
@@ -8448,7 +7971,7 @@ COPY public.skill_properties (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: skill_properties_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_properties_mapping; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_properties_mapping (id, skill_id, skill_level, property_id, property_value) FROM stdin;
@@ -8520,7 +8043,7 @@ COPY public.skill_properties_mapping (id, skill_id, skill_level, property_id, pr
 
 
 --
--- Data for Name: skill_scale_type; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_scale_type; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_scale_type (id, name, slug) FROM stdin;
@@ -8531,7 +8054,7 @@ COPY public.skill_scale_type (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: skill_school; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skill_school; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skill_school (id, name, slug) FROM stdin;
@@ -8548,7 +8071,7 @@ COPY public.skill_school (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: skills; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: skills; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.skills (id, name, slug, scale_stat_id, school_id, animation_name, is_passive) FROM stdin;
@@ -8571,7 +8094,7 @@ COPY public.skills (id, name, slug, scale_stat_id, school_id, animation_name, is
 
 
 --
--- Data for Name: spawn_zone_mobs; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: spawn_zone_mobs; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_time) FROM stdin;
@@ -8585,7 +8108,7 @@ COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_tim
 
 
 --
--- Data for Name: spawn_zones; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: spawn_zones; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.spawn_zones (zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn_z, max_spawn_x, max_spawn_y, max_spawn_z, game_zone_id, shape_type, center_x, center_y, inner_radius, outer_radius, exclusion_game_zone_id) FROM stdin;
@@ -8599,7 +8122,7 @@ COPY public.spawn_zones (zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn
 
 
 --
--- Data for Name: status_effect_modifiers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: status_effect_modifiers; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.status_effect_modifiers (id, status_effect_id, attribute_id, modifier_type, value) FROM stdin;
@@ -8609,7 +8132,7 @@ COPY public.status_effect_modifiers (id, status_effect_id, attribute_id, modifie
 
 
 --
--- Data for Name: status_effects; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: status_effects; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.status_effects (id, slug, category, duration_sec) FROM stdin;
@@ -8620,7 +8143,7 @@ COPY public.status_effects (id, slug, category, duration_sec) FROM stdin;
 
 
 --
--- Data for Name: target_type; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: target_type; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.target_type (id, slug) FROM stdin;
@@ -8631,7 +8154,7 @@ COPY public.target_type (id, slug) FROM stdin;
 
 
 --
--- Data for Name: timed_champion_templates; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: timed_champion_templates; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interval_hours, window_minutes, next_spawn_at, last_killed_at, announcement_key) FROM stdin;
@@ -8639,7 +8162,7 @@ COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interv
 
 
 --
--- Data for Name: title_definitions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: title_definitions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.title_definitions (id, slug, display_name, description, earn_condition, bonuses, condition_params) FROM stdin;
@@ -8659,15 +8182,7 @@ COPY public.title_definitions (id, slug, display_name, description, earn_conditi
 
 
 --
--- Data for Name: user_bans; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.user_bans (id, user_id, banned_by_user_id, reason, created_at, expires_at, is_active) FROM stdin;
-\.
-
-
---
--- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.user_roles (id, name, label, is_staff) FROM stdin;
@@ -8678,23 +8193,7 @@ COPY public.user_roles (id, name, label, is_staff) FROM stdin;
 
 
 --
--- Data for Name: user_sessions; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, expires_at, revoked_at) FROM stdin;
-\.
-
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
-\.
-
-
---
--- Data for Name: vendor_inventory; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: vendor_inventory; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.vendor_inventory (id, vendor_npc_id, item_id, stock_count, price_override, restock_amount, stock_max, restock_interval_sec, last_restock_at) FROM stdin;
@@ -8745,7 +8244,7 @@ COPY public.vendor_inventory (id, vendor_npc_id, item_id, stock_count, price_ove
 
 
 --
--- Data for Name: vendor_npc; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: vendor_npc; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.vendor_npc (id, npc_id, markup_pct) FROM stdin;
@@ -8758,7 +8257,7 @@ COPY public.vendor_npc (id, npc_id, markup_pct) FROM stdin;
 
 
 --
--- Data for Name: world_object_states; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: world_object_states; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.world_object_states (object_id, state, depleted_at) FROM stdin;
@@ -8766,7 +8265,7 @@ COPY public.world_object_states (object_id, state, depleted_at) FROM stdin;
 
 
 --
--- Data for Name: world_objects; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: world_objects; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.world_objects (id, slug, name_key, object_type, scope, pos_x, pos_y, pos_z, rot_z, zone_id, dialogue_id, loot_table_id, required_item_id, interaction_radius, channel_time_sec, respawn_sec, is_active_by_default, min_level, condition_group) FROM stdin;
@@ -8774,7 +8273,7 @@ COPY public.world_objects (id, slug, name_key, object_type, scope, pos_x, pos_y,
 
 
 --
--- Data for Name: zone_event_templates; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: zone_event_templates; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration_sec, loot_multiplier, spawn_rate_multiplier, mob_speed_multiplier, announce_key, interval_hours, random_chance_per_hour, has_invasion_wave, invasion_mob_template_id, invasion_wave_count, invasion_champion_template_id, invasion_champion_slug) FROM stdin;
@@ -8785,7 +8284,7 @@ COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration
 
 
 --
--- Data for Name: zones; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: zones; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.zones (id, slug, name, min_level, max_level, is_pvp, is_safe_zone, min_x, max_x, min_y, max_y, exploration_xp_reward, champion_threshold_kills, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
@@ -8796,525 +8295,525 @@ COPY public.zones (id, slug, name, min_level, max_level, is_pvp, is_safe_zone, m
 
 
 --
--- Name: character_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.character_attributes_id_seq', 1, false);
 
 
 --
--- Name: character_attributes_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_attributes_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.character_attributes_id_seq1', 26, true);
 
 
 --
--- Name: character_class_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_class_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 
 
 --
--- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 1, true);
-
-
---
--- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 1, false);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 53, true);
 
 
 --
--- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_position_id_seq', 1, true);
-
-
---
--- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 1, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 6, true);
 
 
 --
--- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.characters_id_seq', 1, true);
+SELECT pg_catalog.setval('public.character_position_id_seq', 3, true);
 
 
 --
--- Name: class_skill_tree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 3, true);
+
+
+--
+-- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.characters_id_seq', 3, true);
+
+
+--
+-- Name: class_skill_tree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.class_skill_tree_id_seq', 26, true);
 
 
 --
--- Name: class_spawn_zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: class_spawn_zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.class_spawn_zones_id_seq', 4, true);
 
 
 --
--- Name: class_starter_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: class_starter_items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.class_starter_items_id_seq', 2, true);
 
 
 --
--- Name: currency_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: currency_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.currency_transactions_id_seq', 1, false);
 
 
 --
--- Name: dialogue_edge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: dialogue_edge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 224, true);
 
 
 --
--- Name: dialogue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: dialogue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.dialogue_id_seq', 8, true);
 
 
 --
--- Name: dialogue_node_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: dialogue_node_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.dialogue_node_id_seq', 699, true);
 
 
 --
--- Name: emote_definitions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: emote_definitions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.emote_definitions_id_seq', 13, true);
 
 
 --
--- Name: exp_for_level_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: exp_for_level_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.exp_for_level_id_seq', 10, true);
 
 
 --
--- Name: factions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: factions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 
 
 --
--- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 2, true);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 113, true);
 
 
 --
--- Name: gm_action_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: gm_action_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.gm_action_log_id_seq', 1, false);
 
 
 --
--- Name: item_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: item_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.item_attributes_mapping_id_seq', 37, true);
 
 
 --
--- Name: item_set_bonuses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: item_set_bonuses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.item_set_bonuses_id_seq', 1, false);
 
 
 --
--- Name: item_sets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: item_sets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.item_sets_id_seq', 1, false);
 
 
 --
--- Name: item_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: item_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.item_types_id_seq', 10, true);
 
 
 --
--- Name: item_use_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: item_use_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.item_use_effects_id_seq', 17, true);
 
 
 --
--- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.items_id_seq', 75, true);
 
 
 --
--- Name: mob_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_active_effect_id_seq', 1, false);
 
 
 --
--- Name: mob_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_id_seq', 10, true);
 
 
 --
--- Name: mob_loot_info_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_loot_info_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_loot_info_id_seq', 106, true);
 
 
 --
--- Name: mob_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_position_id_seq', 1, false);
 
 
 --
--- Name: mob_race_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_race_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_race_id_seq', 3, true);
 
 
 --
--- Name: mob_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_skills_id_seq', 13, true);
 
 
 --
--- Name: mob_stat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mob_stat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.mob_stat_id_seq', 423, true);
 
 
 --
--- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_ambient_speech_configs_id_seq', 1, true);
 
 
 --
--- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_ambient_speech_lines_id_seq', 3, true);
 
 
 --
--- Name: npc_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_attributes_id_seq', 13, true);
 
 
 --
--- Name: npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_id_seq', 6, true);
 
 
 --
--- Name: npc_placements_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_placements_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_placements_id_seq', 12, true);
 
 
 --
--- Name: npc_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_skills_id_seq', 2, true);
 
 
 --
--- Name: npc_trainer_class_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_trainer_class_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_trainer_class_id_seq', 3, true);
 
 
 --
--- Name: npc_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: npc_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.npc_type_id_seq', 6, true);
 
 
 --
--- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 1, false);
 
 
 --
--- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1, false);
 
 
 --
--- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 1, false);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 6, true);
 
 
 --
--- Name: quest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: quest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.quest_id_seq', 2, true);
 
 
 --
--- Name: quest_reward_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: quest_reward_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.quest_reward_id_seq', 6, true);
 
 
 --
--- Name: quest_step_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: quest_step_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.quest_step_id_seq', 10, true);
 
 
 --
--- Name: race_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: race_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.race_id_seq', 2, true);
 
 
 --
--- Name: respawn_zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: respawn_zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.respawn_zones_id_seq', 1, true);
 
 
 --
--- Name: skill_active_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_active_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_active_effects_id_seq', 1, true);
 
 
 --
--- Name: skill_effect_instances_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_effect_instances_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_effect_instances_id_seq', 3, true);
 
 
 --
--- Name: skill_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_effects_id_seq', 7, true);
 
 
 --
--- Name: skill_effects_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_effects_mapping_id_seq', 6, true);
 
 
 --
--- Name: skill_effects_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_effects_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_effects_type_id_seq', 7, true);
 
 
 --
--- Name: skill_properties_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_properties_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_properties_id_seq', 8, true);
 
 
 --
--- Name: skill_scale_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_scale_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_scale_type_id_seq', 4, true);
 
 
 --
--- Name: skill_school_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skill_school_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skill_school_id_seq', 4, true);
 
 
 --
--- Name: skills_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skills_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skills_attributes_mapping_id_seq', 50, true);
 
 
 --
--- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.skills_id_seq', 12, true);
 
 
 --
--- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.spawn_zone_mobs_id_seq', 6, true);
 
 
 --
--- Name: spawn_zones_zone_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: spawn_zones_zone_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.spawn_zones_zone_id_seq', 6, true);
 
 
 --
--- Name: status_effect_modifiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.status_effect_modifiers_id_seq', 3, true);
 
 
 --
--- Name: status_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: status_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.status_effects_id_seq', 4, true);
 
 
 --
--- Name: target_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: target_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.target_type_id_seq', 6, true);
 
 
 --
--- Name: timed_champion_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: timed_champion_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.timed_champion_templates_id_seq', 1, false);
 
 
 --
--- Name: title_definitions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: title_definitions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.title_definitions_id_seq', 12, true);
 
 
 --
--- Name: user_bans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: user_bans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 
 
 --
--- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 2, true);
-
-
---
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.users_id_seq', 1, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 59, true);
 
 
 --
--- Name: vendor_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 2, true);
+
+
+--
+-- Name: vendor_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.vendor_inventory_id_seq', 92, true);
 
 
 --
--- Name: vendor_npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: vendor_npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.vendor_npc_id_seq', 5, true);
 
 
 --
--- Name: world_objects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: world_objects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.world_objects_id_seq', 1, false);
 
 
 --
--- Name: zone_event_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: zone_event_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.zone_event_templates_id_seq', 3, true);
 
 
 --
--- Name: zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.zones_id_seq', 6, true);
 
 
 --
--- Name: character_permanent_modifiers character_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_permanent_modifiers character_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_permanent_modifiers
@@ -9322,7 +8821,7 @@ ALTER TABLE ONLY public.character_permanent_modifiers
 
 
 --
--- Name: entity_attributes character_attributes_pkey1; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: entity_attributes character_attributes_pkey1; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.entity_attributes
@@ -9330,7 +8829,7 @@ ALTER TABLE ONLY public.entity_attributes
 
 
 --
--- Name: character_bestiary character_bestiary_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_bestiary character_bestiary_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_bestiary
@@ -9338,7 +8837,7 @@ ALTER TABLE ONLY public.character_bestiary
 
 
 --
--- Name: character_class character_class_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_class character_class_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_class
@@ -9346,7 +8845,7 @@ ALTER TABLE ONLY public.character_class
 
 
 --
--- Name: character_current_state character_current_state_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_current_state character_current_state_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_current_state
@@ -9354,7 +8853,7 @@ ALTER TABLE ONLY public.character_current_state
 
 
 --
--- Name: character_emotes character_emotes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_emotes character_emotes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_emotes
@@ -9362,7 +8861,7 @@ ALTER TABLE ONLY public.character_emotes
 
 
 --
--- Name: character_equipment character_equipment_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_equipment character_equipment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_equipment
@@ -9370,7 +8869,7 @@ ALTER TABLE ONLY public.character_equipment
 
 
 --
--- Name: character_genders character_genders_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_genders character_genders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_genders
@@ -9378,7 +8877,7 @@ ALTER TABLE ONLY public.character_genders
 
 
 --
--- Name: character_pity character_pity_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_pity character_pity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_pity
@@ -9386,7 +8885,7 @@ ALTER TABLE ONLY public.character_pity
 
 
 --
--- Name: character_position character_position_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_position character_position_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_position
@@ -9394,7 +8893,7 @@ ALTER TABLE ONLY public.character_position
 
 
 --
--- Name: character_reputation character_reputation_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_reputation character_reputation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_reputation
@@ -9402,7 +8901,7 @@ ALTER TABLE ONLY public.character_reputation
 
 
 --
--- Name: character_skill_bar character_skill_bar_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skill_bar character_skill_bar_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skill_bar
@@ -9410,7 +8909,7 @@ ALTER TABLE ONLY public.character_skill_bar
 
 
 --
--- Name: character_skill_mastery character_skill_mastery_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skill_mastery character_skill_mastery_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skill_mastery
@@ -9418,7 +8917,7 @@ ALTER TABLE ONLY public.character_skill_mastery
 
 
 --
--- Name: character_skills character_skills_pkey1; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skills character_skills_pkey1; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skills
@@ -9426,7 +8925,7 @@ ALTER TABLE ONLY public.character_skills
 
 
 --
--- Name: character_titles character_titles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_titles character_titles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_titles
@@ -9434,7 +8933,7 @@ ALTER TABLE ONLY public.character_titles
 
 
 --
--- Name: characters characters_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: characters characters_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
@@ -9442,7 +8941,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: class_skill_tree class_skill_tree_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_skill_tree class_skill_tree_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree
@@ -9450,7 +8949,7 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
--- Name: class_spawn_zones class_spawn_zones_class_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_spawn_zones class_spawn_zones_class_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_spawn_zones
@@ -9458,7 +8957,7 @@ ALTER TABLE ONLY public.class_spawn_zones
 
 
 --
--- Name: class_spawn_zones class_spawn_zones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_spawn_zones class_spawn_zones_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_spawn_zones
@@ -9466,7 +8965,7 @@ ALTER TABLE ONLY public.class_spawn_zones
 
 
 --
--- Name: class_starter_items class_starter_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_starter_items class_starter_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_starter_items
@@ -9474,7 +8973,7 @@ ALTER TABLE ONLY public.class_starter_items
 
 
 --
--- Name: class_stat_formula class_stat_formula_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_stat_formula class_stat_formula_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_stat_formula
@@ -9482,7 +8981,7 @@ ALTER TABLE ONLY public.class_stat_formula
 
 
 --
--- Name: currency_transactions currency_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: currency_transactions currency_transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.currency_transactions
@@ -9490,7 +8989,7 @@ ALTER TABLE ONLY public.currency_transactions
 
 
 --
--- Name: damage_elements damage_elements_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: damage_elements damage_elements_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.damage_elements
@@ -9498,7 +8997,7 @@ ALTER TABLE ONLY public.damage_elements
 
 
 --
--- Name: dialogue_edge dialogue_edge_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_edge dialogue_edge_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_edge
@@ -9506,7 +9005,7 @@ ALTER TABLE ONLY public.dialogue_edge
 
 
 --
--- Name: dialogue_node dialogue_node_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_node dialogue_node_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_node
@@ -9514,7 +9013,7 @@ ALTER TABLE ONLY public.dialogue_node
 
 
 --
--- Name: dialogue dialogue_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue dialogue_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue
@@ -9522,7 +9021,7 @@ ALTER TABLE ONLY public.dialogue
 
 
 --
--- Name: dialogue dialogue_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue dialogue_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue
@@ -9530,7 +9029,7 @@ ALTER TABLE ONLY public.dialogue
 
 
 --
--- Name: emote_definitions emote_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: emote_definitions emote_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.emote_definitions
@@ -9538,7 +9037,7 @@ ALTER TABLE ONLY public.emote_definitions
 
 
 --
--- Name: emote_definitions emote_definitions_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: emote_definitions emote_definitions_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.emote_definitions
@@ -9546,7 +9045,7 @@ ALTER TABLE ONLY public.emote_definitions
 
 
 --
--- Name: equip_slot equip_slot_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: equip_slot equip_slot_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.equip_slot
@@ -9554,7 +9053,7 @@ ALTER TABLE ONLY public.equip_slot
 
 
 --
--- Name: equip_slot equip_slot_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: equip_slot equip_slot_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.equip_slot
@@ -9562,7 +9061,7 @@ ALTER TABLE ONLY public.equip_slot
 
 
 --
--- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.factions
@@ -9570,7 +9069,7 @@ ALTER TABLE ONLY public.factions
 
 
 --
--- Name: factions factions_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: factions factions_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.factions
@@ -9578,7 +9077,7 @@ ALTER TABLE ONLY public.factions
 
 
 --
--- Name: game_analytics game_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: game_analytics game_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_analytics
@@ -9586,7 +9085,7 @@ ALTER TABLE ONLY public.game_analytics
 
 
 --
--- Name: game_config game_config_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: game_config game_config_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_config
@@ -9594,7 +9093,7 @@ ALTER TABLE ONLY public.game_config
 
 
 --
--- Name: gm_action_log gm_action_log_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: gm_action_log gm_action_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.gm_action_log
@@ -9602,7 +9101,7 @@ ALTER TABLE ONLY public.gm_action_log
 
 
 --
--- Name: item_attributes_mapping item_attributes_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_attributes_mapping item_attributes_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_attributes_mapping
@@ -9610,7 +9109,7 @@ ALTER TABLE ONLY public.item_attributes_mapping
 
 
 --
--- Name: item_class_restrictions item_class_restrictions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_class_restrictions item_class_restrictions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_class_restrictions
@@ -9618,7 +9117,7 @@ ALTER TABLE ONLY public.item_class_restrictions
 
 
 --
--- Name: item_set_bonuses item_set_bonuses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_set_bonuses item_set_bonuses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_bonuses
@@ -9626,7 +9125,7 @@ ALTER TABLE ONLY public.item_set_bonuses
 
 
 --
--- Name: item_set_members item_set_members_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_set_members item_set_members_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_members
@@ -9634,7 +9133,7 @@ ALTER TABLE ONLY public.item_set_members
 
 
 --
--- Name: item_sets item_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_sets item_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_sets
@@ -9642,7 +9141,7 @@ ALTER TABLE ONLY public.item_sets
 
 
 --
--- Name: item_sets item_sets_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_sets item_sets_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_sets
@@ -9650,7 +9149,7 @@ ALTER TABLE ONLY public.item_sets
 
 
 --
--- Name: item_types item_types_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_types item_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_types
@@ -9658,7 +9157,7 @@ ALTER TABLE ONLY public.item_types
 
 
 --
--- Name: item_use_effects item_use_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_use_effects item_use_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_use_effects
@@ -9666,7 +9165,7 @@ ALTER TABLE ONLY public.item_use_effects
 
 
 --
--- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items
@@ -9674,7 +9173,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: mastery_definitions mastery_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mastery_definitions mastery_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mastery_definitions
@@ -9682,7 +9181,7 @@ ALTER TABLE ONLY public.mastery_definitions
 
 
 --
--- Name: mob_active_effect mob_active_effect_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_active_effect mob_active_effect_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_active_effect
@@ -9690,7 +9189,7 @@ ALTER TABLE ONLY public.mob_active_effect
 
 
 --
--- Name: mob_loot_info mob_loot_info_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_loot_info mob_loot_info_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_loot_info
@@ -9698,7 +9197,7 @@ ALTER TABLE ONLY public.mob_loot_info
 
 
 --
--- Name: mob mob_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob mob_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob
@@ -9706,7 +9205,7 @@ ALTER TABLE ONLY public.mob
 
 
 --
--- Name: mob_position mob_position_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_position mob_position_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_position
@@ -9714,7 +9213,7 @@ ALTER TABLE ONLY public.mob_position
 
 
 --
--- Name: mob_race mob_race_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_race mob_race_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_race
@@ -9722,7 +9221,7 @@ ALTER TABLE ONLY public.mob_race
 
 
 --
--- Name: mob_ranks mob_ranks_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_ranks mob_ranks_code_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_ranks
@@ -9730,7 +9229,7 @@ ALTER TABLE ONLY public.mob_ranks
 
 
 --
--- Name: mob_ranks mob_ranks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_ranks mob_ranks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_ranks
@@ -9738,7 +9237,7 @@ ALTER TABLE ONLY public.mob_ranks
 
 
 --
--- Name: mob_resistances mob_resistances_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_resistances mob_resistances_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_resistances
@@ -9746,7 +9245,7 @@ ALTER TABLE ONLY public.mob_resistances
 
 
 --
--- Name: mob_skills mob_skills_pkey1; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_skills mob_skills_pkey1; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_skills
@@ -9754,7 +9253,7 @@ ALTER TABLE ONLY public.mob_skills
 
 
 --
--- Name: mob mob_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob mob_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob
@@ -9762,7 +9261,7 @@ ALTER TABLE ONLY public.mob
 
 
 --
--- Name: mob_stat mob_stat_mob_attr_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_stat mob_stat_mob_attr_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_stat
@@ -9770,7 +9269,7 @@ ALTER TABLE ONLY public.mob_stat
 
 
 --
--- Name: mob_stat mob_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_stat mob_stat_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_stat
@@ -9778,7 +9277,7 @@ ALTER TABLE ONLY public.mob_stat
 
 
 --
--- Name: mob_weaknesses mob_weaknesses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_weaknesses mob_weaknesses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_weaknesses
@@ -9786,7 +9285,7 @@ ALTER TABLE ONLY public.mob_weaknesses
 
 
 --
--- Name: npc_ambient_speech_configs npc_ambient_speech_configs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs npc_ambient_speech_configs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_configs
@@ -9794,7 +9293,7 @@ ALTER TABLE ONLY public.npc_ambient_speech_configs
 
 
 --
--- Name: npc_ambient_speech_lines npc_ambient_speech_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines npc_ambient_speech_lines_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_lines
@@ -9802,7 +9301,7 @@ ALTER TABLE ONLY public.npc_ambient_speech_lines
 
 
 --
--- Name: npc_attributes npc_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_attributes npc_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_attributes
@@ -9810,7 +9309,7 @@ ALTER TABLE ONLY public.npc_attributes
 
 
 --
--- Name: npc_dialogue npc_dialogue_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_dialogue npc_dialogue_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_dialogue
@@ -9818,7 +9317,7 @@ ALTER TABLE ONLY public.npc_dialogue
 
 
 --
--- Name: npc npc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc npc_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc
@@ -9826,7 +9325,7 @@ ALTER TABLE ONLY public.npc
 
 
 --
--- Name: npc_placements npc_placements_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_placements npc_placements_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_placements
@@ -9834,7 +9333,7 @@ ALTER TABLE ONLY public.npc_placements
 
 
 --
--- Name: npc_skills npc_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_skills npc_skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_skills
@@ -9842,7 +9341,7 @@ ALTER TABLE ONLY public.npc_skills
 
 
 --
--- Name: npc npc_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc npc_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc
@@ -9850,7 +9349,7 @@ ALTER TABLE ONLY public.npc
 
 
 --
--- Name: npc_trainer_class npc_trainer_class_npc_id_class_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_trainer_class npc_trainer_class_npc_id_class_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_trainer_class
@@ -9858,7 +9357,7 @@ ALTER TABLE ONLY public.npc_trainer_class
 
 
 --
--- Name: npc_trainer_class npc_trainer_class_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_trainer_class npc_trainer_class_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_trainer_class
@@ -9866,7 +9365,7 @@ ALTER TABLE ONLY public.npc_trainer_class
 
 
 --
--- Name: npc_type npc_type_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_type npc_type_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_type
@@ -9874,7 +9373,7 @@ ALTER TABLE ONLY public.npc_type
 
 
 --
--- Name: passive_skill_modifiers passive_skill_modifiers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers passive_skill_modifiers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.passive_skill_modifiers
@@ -9882,7 +9381,7 @@ ALTER TABLE ONLY public.passive_skill_modifiers
 
 
 --
--- Name: player_active_effect player_active_effect_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_active_effect player_active_effect_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_active_effect
@@ -9890,7 +9389,7 @@ ALTER TABLE ONLY public.player_active_effect
 
 
 --
--- Name: player_flag player_flag_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_flag player_flag_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_flag
@@ -9898,7 +9397,7 @@ ALTER TABLE ONLY public.player_flag
 
 
 --
--- Name: player_inventory player_inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_inventory player_inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_inventory
@@ -9906,7 +9405,7 @@ ALTER TABLE ONLY public.player_inventory
 
 
 --
--- Name: player_quest player_quest_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_quest player_quest_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_quest
@@ -9914,7 +9413,7 @@ ALTER TABLE ONLY public.player_quest
 
 
 --
--- Name: player_skill_cooldown player_skill_cooldown_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_skill_cooldown player_skill_cooldown_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_skill_cooldown
@@ -9922,7 +9421,7 @@ ALTER TABLE ONLY public.player_skill_cooldown
 
 
 --
--- Name: quest quest_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest quest_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest
@@ -9930,7 +9429,7 @@ ALTER TABLE ONLY public.quest
 
 
 --
--- Name: quest_reward quest_reward_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest_reward quest_reward_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_reward
@@ -9938,7 +9437,7 @@ ALTER TABLE ONLY public.quest_reward
 
 
 --
--- Name: quest quest_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest quest_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest
@@ -9946,7 +9445,7 @@ ALTER TABLE ONLY public.quest
 
 
 --
--- Name: quest_step quest_step_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest_step quest_step_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_step
@@ -9954,7 +9453,7 @@ ALTER TABLE ONLY public.quest_step
 
 
 --
--- Name: quest_step quest_step_quest_id_step_index_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest_step quest_step_quest_id_step_index_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_step
@@ -9962,7 +9461,7 @@ ALTER TABLE ONLY public.quest_step
 
 
 --
--- Name: race race_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: race race_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.race
@@ -9970,7 +9469,7 @@ ALTER TABLE ONLY public.race
 
 
 --
--- Name: items_rarity rarity_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: items_rarity rarity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items_rarity
@@ -9978,7 +9477,7 @@ ALTER TABLE ONLY public.items_rarity
 
 
 --
--- Name: respawn_zones respawn_zones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: respawn_zones respawn_zones_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.respawn_zones
@@ -9986,7 +9485,7 @@ ALTER TABLE ONLY public.respawn_zones
 
 
 --
--- Name: skill_active_effects skill_active_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_active_effects skill_active_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_active_effects
@@ -9994,7 +9493,7 @@ ALTER TABLE ONLY public.skill_active_effects
 
 
 --
--- Name: skill_effect_instances skill_effect_instances_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effect_instances skill_effect_instances_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effect_instances
@@ -10002,7 +9501,7 @@ ALTER TABLE ONLY public.skill_effect_instances
 
 
 --
--- Name: skill_effect_instances skill_effect_instances_skill_id_order_idx_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effect_instances skill_effect_instances_skill_id_order_idx_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effect_instances
@@ -10010,7 +9509,7 @@ ALTER TABLE ONLY public.skill_effect_instances
 
 
 --
--- Name: skill_effects_mapping skill_effects_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping skill_effects_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effects_mapping
@@ -10018,7 +9517,7 @@ ALTER TABLE ONLY public.skill_effects_mapping
 
 
 --
--- Name: skill_damage_formulas skill_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_damage_formulas skill_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_formulas
@@ -10026,7 +9525,7 @@ ALTER TABLE ONLY public.skill_damage_formulas
 
 
 --
--- Name: skill_damage_formulas skill_effects_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_damage_formulas skill_effects_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_formulas
@@ -10034,7 +9533,7 @@ ALTER TABLE ONLY public.skill_damage_formulas
 
 
 --
--- Name: skill_damage_types skill_effects_type_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_damage_types skill_effects_type_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_types
@@ -10042,7 +9541,7 @@ ALTER TABLE ONLY public.skill_damage_types
 
 
 --
--- Name: skill_damage_types skill_effects_type_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_damage_types skill_effects_type_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_types
@@ -10050,7 +9549,7 @@ ALTER TABLE ONLY public.skill_damage_types
 
 
 --
--- Name: skill_properties skill_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_properties skill_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_properties
@@ -10058,7 +9557,7 @@ ALTER TABLE ONLY public.skill_properties
 
 
 --
--- Name: skill_scale_type skill_scale_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_scale_type skill_scale_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_scale_type
@@ -10066,7 +9565,7 @@ ALTER TABLE ONLY public.skill_scale_type
 
 
 --
--- Name: skill_school skill_school_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_school skill_school_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_school
@@ -10074,7 +9573,7 @@ ALTER TABLE ONLY public.skill_school
 
 
 --
--- Name: skill_properties_mapping skills_attributes_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_properties_mapping skills_attributes_mapping_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_properties_mapping
@@ -10082,7 +9581,7 @@ ALTER TABLE ONLY public.skill_properties_mapping
 
 
 --
--- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skills skills_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skills
@@ -10090,7 +9589,7 @@ ALTER TABLE ONLY public.skills
 
 
 --
--- Name: spawn_zone_mobs spawn_zone_mobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs spawn_zone_mobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zone_mobs
@@ -10098,7 +9597,7 @@ ALTER TABLE ONLY public.spawn_zone_mobs
 
 
 --
--- Name: spawn_zone_mobs spawn_zone_mobs_spawn_zone_id_mob_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs spawn_zone_mobs_spawn_zone_id_mob_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zone_mobs
@@ -10106,7 +9605,7 @@ ALTER TABLE ONLY public.spawn_zone_mobs
 
 
 --
--- Name: spawn_zones spawn_zones_pkey1; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zones spawn_zones_pkey1; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zones
@@ -10114,7 +9613,7 @@ ALTER TABLE ONLY public.spawn_zones
 
 
 --
--- Name: status_effect_modifiers status_effect_modifiers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers status_effect_modifiers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effect_modifiers
@@ -10122,7 +9621,7 @@ ALTER TABLE ONLY public.status_effect_modifiers
 
 
 --
--- Name: status_effects status_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: status_effects status_effects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effects
@@ -10130,7 +9629,7 @@ ALTER TABLE ONLY public.status_effects
 
 
 --
--- Name: status_effects status_effects_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: status_effects status_effects_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effects
@@ -10138,7 +9637,7 @@ ALTER TABLE ONLY public.status_effects
 
 
 --
--- Name: target_type target_type_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: target_type target_type_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.target_type
@@ -10146,7 +9645,7 @@ ALTER TABLE ONLY public.target_type
 
 
 --
--- Name: target_type target_type_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: target_type target_type_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.target_type
@@ -10154,7 +9653,7 @@ ALTER TABLE ONLY public.target_type
 
 
 --
--- Name: timed_champion_templates timed_champion_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: timed_champion_templates timed_champion_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.timed_champion_templates
@@ -10162,7 +9661,7 @@ ALTER TABLE ONLY public.timed_champion_templates
 
 
 --
--- Name: timed_champion_templates timed_champion_templates_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: timed_champion_templates timed_champion_templates_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.timed_champion_templates
@@ -10170,7 +9669,7 @@ ALTER TABLE ONLY public.timed_champion_templates
 
 
 --
--- Name: title_definitions title_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: title_definitions title_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.title_definitions
@@ -10178,7 +9677,7 @@ ALTER TABLE ONLY public.title_definitions
 
 
 --
--- Name: title_definitions title_definitions_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: title_definitions title_definitions_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.title_definitions
@@ -10186,7 +9685,7 @@ ALTER TABLE ONLY public.title_definitions
 
 
 --
--- Name: character_emotes uq_character_emote; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_emotes uq_character_emote; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_emotes
@@ -10194,7 +9693,7 @@ ALTER TABLE ONLY public.character_emotes
 
 
 --
--- Name: character_equipment uq_character_equip_slot; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_equipment uq_character_equip_slot; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_equipment
@@ -10202,7 +9701,7 @@ ALTER TABLE ONLY public.character_equipment
 
 
 --
--- Name: class_skill_tree uq_class_skill; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_skill_tree uq_class_skill; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree
@@ -10210,7 +9709,7 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
--- Name: npc_ambient_speech_configs uq_npc_ambient_config; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs uq_npc_ambient_config; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_configs
@@ -10218,7 +9717,7 @@ ALTER TABLE ONLY public.npc_ambient_speech_configs
 
 
 --
--- Name: passive_skill_modifiers uq_psm_skill_attr; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers uq_psm_skill_attr; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.passive_skill_modifiers
@@ -10226,7 +9725,7 @@ ALTER TABLE ONLY public.passive_skill_modifiers
 
 
 --
--- Name: status_effect_modifiers uq_sem_effect_attr; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers uq_sem_effect_attr; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effect_modifiers
@@ -10234,7 +9733,7 @@ ALTER TABLE ONLY public.status_effect_modifiers
 
 
 --
--- Name: vendor_inventory uq_vendor_item; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_inventory uq_vendor_item; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_inventory
@@ -10242,7 +9741,7 @@ ALTER TABLE ONLY public.vendor_inventory
 
 
 --
--- Name: user_bans user_bans_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_bans user_bans_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_bans
@@ -10250,7 +9749,7 @@ ALTER TABLE ONLY public.user_bans
 
 
 --
--- Name: user_roles user_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_roles user_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_roles
@@ -10258,7 +9757,7 @@ ALTER TABLE ONLY public.user_roles
 
 
 --
--- Name: user_sessions user_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_sessions user_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_sessions
@@ -10266,7 +9765,7 @@ ALTER TABLE ONLY public.user_sessions
 
 
 --
--- Name: user_sessions user_sessions_token_hash_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_sessions user_sessions_token_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_sessions
@@ -10274,7 +9773,7 @@ ALTER TABLE ONLY public.user_sessions
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -10282,7 +9781,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: vendor_inventory vendor_inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_inventory vendor_inventory_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_inventory
@@ -10290,7 +9789,7 @@ ALTER TABLE ONLY public.vendor_inventory
 
 
 --
--- Name: vendor_npc vendor_npc_npc_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_npc vendor_npc_npc_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_npc
@@ -10298,7 +9797,7 @@ ALTER TABLE ONLY public.vendor_npc
 
 
 --
--- Name: vendor_npc vendor_npc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_npc vendor_npc_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_npc
@@ -10306,7 +9805,7 @@ ALTER TABLE ONLY public.vendor_npc
 
 
 --
--- Name: world_object_states world_object_states_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_object_states world_object_states_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_object_states
@@ -10314,7 +9813,7 @@ ALTER TABLE ONLY public.world_object_states
 
 
 --
--- Name: world_objects world_objects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_objects world_objects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_objects
@@ -10322,7 +9821,7 @@ ALTER TABLE ONLY public.world_objects
 
 
 --
--- Name: world_objects world_objects_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_objects world_objects_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_objects
@@ -10330,7 +9829,7 @@ ALTER TABLE ONLY public.world_objects
 
 
 --
--- Name: zone_event_templates zone_event_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zone_event_templates zone_event_templates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zone_event_templates
@@ -10338,7 +9837,7 @@ ALTER TABLE ONLY public.zone_event_templates
 
 
 --
--- Name: zone_event_templates zone_event_templates_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zone_event_templates zone_event_templates_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zone_event_templates
@@ -10346,7 +9845,7 @@ ALTER TABLE ONLY public.zone_event_templates
 
 
 --
--- Name: zones zones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zones zones_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zones
@@ -10354,7 +9853,7 @@ ALTER TABLE ONLY public.zones
 
 
 --
--- Name: zones zones_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zones zones_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zones
@@ -10362,840 +9861,847 @@ ALTER TABLE ONLY public.zones
 
 
 --
--- Name: idx_ambient_lines_npc_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_ambient_lines_npc_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_ambient_lines_npc_id ON public.npc_ambient_speech_lines USING btree (npc_id);
 
 
 --
--- Name: idx_char_mastery_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_char_mastery_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_char_mastery_char ON public.character_skill_mastery USING btree (character_id);
 
 
 --
--- Name: idx_char_rep_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_char_rep_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_char_rep_char ON public.character_reputation USING btree (character_id);
 
 
 --
--- Name: idx_char_titles_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_char_titles_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_char_titles_char ON public.character_titles USING btree (character_id);
 
 
 --
--- Name: idx_character_bestiary_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_character_bestiary_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_character_bestiary_char ON public.character_bestiary USING btree (character_id);
 
 
 --
--- Name: idx_character_emotes_character_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_character_emotes_character_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_character_emotes_character_id ON public.character_emotes USING btree (character_id);
 
 
 --
--- Name: idx_character_pity_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_character_pity_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_character_pity_char ON public.character_pity USING btree (character_id);
 
 
 --
--- Name: idx_class_spawn_zones_class; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_characters_is_online; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_characters_is_online ON public.characters USING btree (is_online) WHERE (is_online = true);
+
+
+--
+-- Name: idx_class_spawn_zones_class; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_class_spawn_zones_class ON public.class_spawn_zones USING btree (class_id);
 
 
 --
--- Name: idx_class_starter_items_class; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_class_starter_items_class; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_class_starter_items_class ON public.class_starter_items USING btree (class_id);
 
 
 --
--- Name: idx_ga_character; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_ga_character; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_ga_character ON public.game_analytics USING btree (character_id, created_at DESC);
 
 
 --
--- Name: idx_ga_created_at; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_ga_created_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_ga_created_at ON public.game_analytics USING btree (created_at DESC);
 
 
 --
--- Name: idx_ga_event_type; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_ga_event_type; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_ga_event_type ON public.game_analytics USING btree (event_type, created_at DESC);
 
 
 --
--- Name: idx_ga_payload; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_ga_payload; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_ga_payload ON public.game_analytics USING gin (payload);
 
 
 --
--- Name: idx_ga_session; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_ga_session; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_ga_session ON public.game_analytics USING btree (session_id);
 
 
 --
--- Name: idx_item_set_bonuses_set; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_item_set_bonuses_set; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_item_set_bonuses_set ON public.item_set_bonuses USING btree (set_id);
 
 
 --
--- Name: idx_item_set_members_item; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_item_set_members_item; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_item_set_members_item ON public.item_set_members USING btree (item_id);
 
 
 --
--- Name: idx_item_use_effects_item_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_item_use_effects_item_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_item_use_effects_item_id ON public.item_use_effects USING btree (item_id);
 
 
 --
--- Name: idx_mob_active_effect_expires_at; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_active_effect_expires_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_active_effect_expires_at ON public.mob_active_effect USING btree (expires_at) WHERE (expires_at IS NOT NULL);
 
 
 --
--- Name: idx_mob_active_effect_mob_uid; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_active_effect_mob_uid; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_active_effect_mob_uid ON public.mob_active_effect USING btree (mob_uid);
 
 
 --
--- Name: idx_mob_loot_info_mob; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_loot_info_mob; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_loot_info_mob ON public.mob_loot_info USING btree (mob_id);
 
 
 --
--- Name: idx_mob_loot_tier; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_loot_tier; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_loot_tier ON public.mob_loot_info USING btree (mob_id, loot_tier);
 
 
 --
--- Name: idx_mob_mob_type_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_mob_type_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_mob_type_slug ON public.mob USING btree (mob_type_slug);
 
 
 --
--- Name: idx_mob_position_mob; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_position_mob; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_position_mob ON public.mob_position USING btree (mob_id);
 
 
 --
--- Name: idx_mob_resistances_mob; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_resistances_mob; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_resistances_mob ON public.mob_resistances USING btree (mob_id);
 
 
 --
--- Name: idx_mob_stat_mob_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_stat_mob_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_stat_mob_id ON public.mob_stat USING btree (mob_id);
 
 
 --
--- Name: idx_mob_weaknesses_mob; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_mob_weaknesses_mob; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_mob_weaknesses_mob ON public.mob_weaknesses USING btree (mob_id);
 
 
 --
--- Name: idx_npc_dialogue_npc; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_npc_dialogue_npc; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_npc_dialogue_npc ON public.npc_dialogue USING btree (npc_id);
 
 
 --
--- Name: idx_npc_placements_npc; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_npc_placements_npc; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_npc_placements_npc ON public.npc_placements USING btree (npc_id);
 
 
 --
--- Name: idx_npc_placements_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_npc_placements_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_npc_placements_zone ON public.npc_placements USING btree (zone_id);
 
 
 --
--- Name: idx_player_active_effect_expires; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_player_active_effect_expires; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_player_active_effect_expires ON public.player_active_effect USING btree (expires_at) WHERE (expires_at IS NOT NULL);
 
 
 --
--- Name: idx_player_active_effect_player; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_player_active_effect_player; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_player_active_effect_player ON public.player_active_effect USING btree (player_id);
 
 
 --
--- Name: idx_player_inventory_char_item; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_player_inventory_char_item; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_player_inventory_char_item ON public.player_inventory USING btree (character_id, item_id);
 
 
 --
--- Name: idx_player_inventory_character; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_player_inventory_character; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_player_inventory_character ON public.player_inventory USING btree (character_id);
 
 
 --
--- Name: idx_player_inventory_ground; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_player_inventory_ground; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_player_inventory_ground ON public.player_inventory USING btree (id) WHERE (character_id IS NULL);
 
 
 --
--- Name: idx_quest_reward_quest; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_quest_reward_quest; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_quest_reward_quest ON public.quest_reward USING btree (quest_id);
 
 
 --
--- Name: idx_skill_bar_character; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_skill_bar_character; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_skill_bar_character ON public.character_skill_bar USING btree (character_id);
 
 
 --
--- Name: idx_spawn_zone_mobs_mob; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_spawn_zone_mobs_mob; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_spawn_zone_mobs_mob ON public.spawn_zone_mobs USING btree (mob_id);
 
 
 --
--- Name: idx_spawn_zone_mobs_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_spawn_zone_mobs_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_spawn_zone_mobs_zone ON public.spawn_zone_mobs USING btree (spawn_zone_id);
 
 
 --
--- Name: idx_spawn_zones_game_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_spawn_zones_game_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_spawn_zones_game_zone ON public.spawn_zones USING btree (game_zone_id);
 
 
 --
--- Name: idx_timed_champion_next; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_timed_champion_next; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_timed_champion_next ON public.timed_champion_templates USING btree (next_spawn_at);
 
 
 --
--- Name: idx_timed_champion_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_timed_champion_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_timed_champion_zone ON public.timed_champion_templates USING btree (zone_id);
 
 
 --
--- Name: idx_world_object_states_state; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_world_object_states_state; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_world_object_states_state ON public.world_object_states USING btree (state);
 
 
 --
--- Name: idx_world_objects_type_scope; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_world_objects_type_scope; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_world_objects_type_scope ON public.world_objects USING btree (object_type, scope);
 
 
 --
--- Name: idx_world_objects_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: idx_world_objects_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_world_objects_zone ON public.world_objects USING btree (zone_id);
 
 
 --
--- Name: ix_char_perm_mod_character; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_char_perm_mod_character; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_char_perm_mod_character ON public.character_permanent_modifiers USING btree (character_id);
 
 
 --
--- Name: ix_char_perm_mod_source; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_char_perm_mod_source; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_char_perm_mod_source ON public.character_permanent_modifiers USING btree (source_type, source_id) WHERE (source_id IS NOT NULL);
 
 
 --
--- Name: ix_character_attributes_char_attr; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_character_attributes_char_attr; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_character_attributes_char_attr ON public.character_permanent_modifiers USING btree (character_id, attribute_id);
 
 
 --
--- Name: ix_character_class_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_character_class_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_character_class_slug ON public.character_class USING btree (slug) WHERE (slug IS NOT NULL);
 
 
 --
--- Name: ix_character_equipment_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_character_equipment_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_character_equipment_char ON public.character_equipment USING btree (character_id);
 
 
 --
--- Name: ix_character_equipment_inv_item; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_character_equipment_inv_item; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_character_equipment_inv_item ON public.character_equipment USING btree (inventory_item_id);
 
 
 --
--- Name: ix_character_position_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_character_position_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_character_position_zone ON public.character_position USING btree (zone_id);
 
 
 --
--- Name: ix_characters_deleted; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_characters_deleted; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_characters_deleted ON public.characters USING btree (deleted_at) WHERE (deleted_at IS NOT NULL);
 
 
 --
--- Name: ix_characters_owner_slot; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_characters_owner_slot; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_characters_owner_slot ON public.characters USING btree (owner_id, account_slot);
 
 
 --
--- Name: ix_class_skill_tree_class; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_class_skill_tree_class; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_class_skill_tree_class ON public.class_skill_tree USING btree (class_id);
 
 
 --
--- Name: ix_class_stat_formula_class; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_class_stat_formula_class; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_class_stat_formula_class ON public.class_stat_formula USING btree (class_id);
 
 
 --
--- Name: ix_currency_transactions_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_currency_transactions_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_currency_transactions_char ON public.currency_transactions USING btree (character_id);
 
 
 --
--- Name: ix_currency_transactions_created; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_currency_transactions_created; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_currency_transactions_created ON public.currency_transactions USING btree (created_at DESC);
 
 
 --
--- Name: ix_currency_transactions_reason; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_currency_transactions_reason; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_currency_transactions_reason ON public.currency_transactions USING btree (reason_type);
 
 
 --
--- Name: ix_dialogue_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_dialogue_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_dialogue_slug ON public.dialogue USING btree (slug);
 
 
 --
--- Name: ix_edge_act_gin; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_edge_act_gin; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_edge_act_gin ON public.dialogue_edge USING gin (action_group);
 
 
 --
--- Name: ix_edge_cond_gin; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_edge_cond_gin; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_edge_cond_gin ON public.dialogue_edge USING gin (condition_group);
 
 
 --
--- Name: INDEX ix_edge_cond_gin; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: INDEX ix_edge_cond_gin; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON INDEX public.ix_edge_cond_gin IS 'GIN по условиям ребра (jsonb)';
 
 
 --
--- Name: ix_edge_from; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_edge_from; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_edge_from ON public.dialogue_edge USING btree (from_node_id);
 
 
 --
--- Name: ix_edge_to; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_edge_to; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_edge_to ON public.dialogue_edge USING btree (to_node_id);
 
 
 --
--- Name: ix_gm_action_log_created; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_gm_action_log_created; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_gm_action_log_created ON public.gm_action_log USING btree (created_at DESC);
 
 
 --
--- Name: ix_gm_action_log_gm; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_gm_action_log_gm; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_gm_action_log_gm ON public.gm_action_log USING btree (gm_user_id);
 
 
 --
--- Name: ix_gm_action_log_target; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_gm_action_log_target; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_gm_action_log_target ON public.gm_action_log USING btree (target_type, target_id);
 
 
 --
--- Name: ix_iam_attribute_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_iam_attribute_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_iam_attribute_id ON public.item_attributes_mapping USING btree (attribute_id);
 
 
 --
--- Name: ix_iam_item_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_iam_item_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_iam_item_id ON public.item_attributes_mapping USING btree (item_id);
 
 
 --
--- Name: ix_items_item_type; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_items_item_type; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_items_item_type ON public.items USING btree (item_type);
 
 
 --
--- Name: ix_items_mastery_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_items_mastery_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_items_mastery_slug ON public.items USING btree (mastery_slug) WHERE (mastery_slug IS NOT NULL);
 
 
 --
--- Name: ix_mob_active_effect_src_player; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_mob_active_effect_src_player; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_mob_active_effect_src_player ON public.mob_active_effect USING btree (source_player_id) WHERE (source_player_id IS NOT NULL);
 
 
 --
--- Name: ix_mob_faction_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_mob_faction_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_mob_faction_slug ON public.mob USING btree (faction_slug) WHERE (faction_slug IS NOT NULL);
 
 
 --
--- Name: ix_mob_position_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_mob_position_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_mob_position_zone ON public.mob_position USING btree (zone_id);
 
 
 --
--- Name: ix_node_act_gin; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_node_act_gin; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_node_act_gin ON public.dialogue_node USING gin (action_group);
 
 
 --
--- Name: ix_node_cond_gin; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_node_cond_gin; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_node_cond_gin ON public.dialogue_node USING gin (condition_group);
 
 
 --
--- Name: INDEX ix_node_cond_gin; Type: COMMENT; Schema: public; Owner: postgres
+-- Name: INDEX ix_node_cond_gin; Type: COMMENT; Schema: public; Owner: -
 --
 
 COMMENT ON INDEX public.ix_node_cond_gin IS 'GIN по условиям узла (jsonb)';
 
 
 --
--- Name: ix_node_dialogue; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_node_dialogue; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_node_dialogue ON public.dialogue_node USING btree (dialogue_id);
 
 
 --
--- Name: ix_npc_attributes_npc_attr; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_npc_attributes_npc_attr; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_npc_attributes_npc_attr ON public.npc_attributes USING btree (npc_id, attribute_id);
 
 
 --
--- Name: ix_npc_dialogue_cond_gin; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_npc_dialogue_cond_gin; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_npc_dialogue_cond_gin ON public.npc_dialogue USING gin (condition_group) WHERE (condition_group IS NOT NULL);
 
 
 --
--- Name: ix_npc_faction_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_npc_faction_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_npc_faction_slug ON public.npc USING btree (faction_slug) WHERE (faction_slug IS NOT NULL);
 
 
 --
--- Name: ix_pae_attribute_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_pae_attribute_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_pae_attribute_id ON public.player_active_effect USING btree (attribute_id) WHERE (attribute_id IS NOT NULL);
 
 
 --
--- Name: ix_pae_effect_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_pae_effect_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_pae_effect_id ON public.player_active_effect USING btree (status_effect_id);
 
 
 --
--- Name: ix_player_flag_bool; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_player_flag_bool; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_player_flag_bool ON public.player_flag USING btree (player_id, flag_key, bool_value);
 
 
 --
--- Name: ix_player_flag_int; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_player_flag_int; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_player_flag_int ON public.player_flag USING btree (player_id, flag_key, int_value);
 
 
 --
--- Name: ix_player_inventory_item_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_player_inventory_item_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_player_inventory_item_id ON public.player_inventory USING btree (item_id);
 
 
 --
--- Name: ix_player_quest_state; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_player_quest_state; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_player_quest_state ON public.player_quest USING btree (player_id, state);
 
 
 --
--- Name: ix_psc_char; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_psc_char; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_psc_char ON public.player_skill_cooldown USING btree (character_id);
 
 
 --
--- Name: ix_quest_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_quest_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_quest_slug ON public.quest USING btree (slug);
 
 
 --
--- Name: ix_quest_step_q; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_quest_step_q; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_quest_step_q ON public.quest_step USING btree (quest_id, step_index);
 
 
 --
--- Name: ix_respawn_zones_default; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_respawn_zones_default; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_respawn_zones_default ON public.respawn_zones USING btree (zone_id, is_default) WHERE (is_default = true);
 
 
 --
--- Name: ix_respawn_zones_zone_id; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_respawn_zones_zone_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_respawn_zones_zone_id ON public.respawn_zones USING btree (zone_id);
 
 
 --
--- Name: ix_timed_champion_mob_tpl; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_timed_champion_mob_tpl; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_timed_champion_mob_tpl ON public.timed_champion_templates USING btree (mob_template_id);
 
 
 --
--- Name: ix_user_bans_active; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_user_bans_active; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_user_bans_active ON public.user_bans USING btree (is_active, expires_at);
 
 
 --
--- Name: ix_user_bans_user; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_user_bans_user; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_user_bans_user ON public.user_bans USING btree (user_id) WHERE (is_active = true);
 
 
 --
--- Name: ix_user_sessions_expires; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_user_sessions_expires; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_user_sessions_expires ON public.user_sessions USING btree (expires_at) WHERE (revoked_at IS NULL);
 
 
 --
--- Name: ix_user_sessions_user; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_user_sessions_user; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_user_sessions_user ON public.user_sessions USING btree (user_id);
 
 
 --
--- Name: ix_vendor_inventory_vendor; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_vendor_inventory_vendor; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_vendor_inventory_vendor ON public.vendor_inventory USING btree (vendor_npc_id);
 
 
 --
--- Name: ix_zone_event_game_zone; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_zone_event_game_zone; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_zone_event_game_zone ON public.zone_event_templates USING btree (game_zone_id) WHERE (game_zone_id IS NOT NULL);
 
 
 --
--- Name: ix_zone_event_invasion_mob; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_zone_event_invasion_mob; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_zone_event_invasion_mob ON public.zone_event_templates USING btree (invasion_mob_template_id) WHERE (invasion_mob_template_id IS NOT NULL);
 
 
 --
--- Name: ix_zone_event_trigger_type; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_zone_event_trigger_type; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_zone_event_trigger_type ON public.zone_event_templates USING btree (trigger_type);
 
 
 --
--- Name: ix_zones_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: ix_zones_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_zones_slug ON public.zones USING btree (slug);
 
 
 --
--- Name: uq_character_skills; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_character_skills; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_character_skills ON public.character_skills USING btree (character_id, skill_id);
 
 
 --
--- Name: uq_effects_map; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_effects_map; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_effects_map ON public.skill_effects_mapping USING btree (effect_instance_id, level, effect_id);
 
 
 --
--- Name: uq_entity_attributes_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_entity_attributes_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_entity_attributes_slug ON public.entity_attributes USING btree (slug);
 
 
 --
--- Name: uq_inventory_slot; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_inventory_slot; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_inventory_slot ON public.player_inventory USING btree (character_id, slot_index) WHERE (slot_index IS NOT NULL);
 
 
 --
--- Name: uq_item_types_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_item_types_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_item_types_slug ON public.item_types USING btree (slug);
 
 
 --
--- Name: uq_items_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_items_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_items_slug ON public.items USING btree (slug);
 
 
 --
--- Name: uq_mob_skills; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_mob_skills; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_mob_skills ON public.mob_skills USING btree (mob_id, skill_id);
 
 
 --
--- Name: uq_npc_skills; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_npc_skills; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_npc_skills ON public.npc_skills USING btree (npc_id, skill_id);
 
 
 --
--- Name: uq_skill_effects_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skill_effects_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skill_effects_slug ON public.skill_damage_formulas USING btree (slug);
 
 
 --
--- Name: uq_skill_effects_type_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skill_effects_type_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skill_effects_type_slug ON public.skill_damage_types USING btree (slug);
 
 
 --
--- Name: uq_skill_properties_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skill_properties_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skill_properties_slug ON public.skill_properties USING btree (slug);
 
 
 --
--- Name: uq_skill_props_map; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skill_props_map; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skill_props_map ON public.skill_properties_mapping USING btree (skill_id, skill_level, property_id);
 
 
 --
--- Name: uq_skill_scale_type_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skill_scale_type_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skill_scale_type_slug ON public.skill_scale_type USING btree (slug);
 
 
 --
--- Name: uq_skill_school_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skill_school_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skill_school_slug ON public.skill_school USING btree (slug);
 
 
 --
--- Name: uq_skills_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_skills_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_skills_slug ON public.skills USING btree (slug);
 
 
 --
--- Name: uq_target_type_slug; Type: INDEX; Schema: public; Owner: postgres
+-- Name: uq_target_type_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uq_target_type_slug ON public.target_type USING btree (slug);
 
 
 --
--- Name: game_config trg_game_config_updated_at; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: game_config trg_game_config_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER trg_game_config_updated_at BEFORE UPDATE ON public.game_config FOR EACH ROW EXECUTE FUNCTION public.game_config_set_updated_at();
 
 
 --
--- Name: character_permanent_modifiers character_attributes_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_permanent_modifiers character_attributes_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_permanent_modifiers
@@ -11203,7 +10709,7 @@ ALTER TABLE ONLY public.character_permanent_modifiers
 
 
 --
--- Name: character_permanent_modifiers character_attributes_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_permanent_modifiers character_attributes_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_permanent_modifiers
@@ -11211,7 +10717,7 @@ ALTER TABLE ONLY public.character_permanent_modifiers
 
 
 --
--- Name: character_bestiary character_bestiary_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_bestiary character_bestiary_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_bestiary
@@ -11219,7 +10725,7 @@ ALTER TABLE ONLY public.character_bestiary
 
 
 --
--- Name: character_bestiary character_bestiary_mob_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_bestiary character_bestiary_mob_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_bestiary
@@ -11227,7 +10733,7 @@ ALTER TABLE ONLY public.character_bestiary
 
 
 --
--- Name: character_emotes character_emotes_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_emotes character_emotes_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_emotes
@@ -11235,7 +10741,7 @@ ALTER TABLE ONLY public.character_emotes
 
 
 --
--- Name: character_emotes character_emotes_emote_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_emotes character_emotes_emote_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_emotes
@@ -11243,7 +10749,7 @@ ALTER TABLE ONLY public.character_emotes
 
 
 --
--- Name: character_equipment character_equipment_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_equipment character_equipment_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_equipment
@@ -11251,7 +10757,7 @@ ALTER TABLE ONLY public.character_equipment
 
 
 --
--- Name: character_equipment character_equipment_equip_slot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_equipment character_equipment_equip_slot_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_equipment
@@ -11259,7 +10765,7 @@ ALTER TABLE ONLY public.character_equipment
 
 
 --
--- Name: character_equipment character_equipment_inventory_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_equipment character_equipment_inventory_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_equipment
@@ -11267,7 +10773,7 @@ ALTER TABLE ONLY public.character_equipment
 
 
 --
--- Name: character_pity character_pity_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_pity character_pity_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_pity
@@ -11275,7 +10781,7 @@ ALTER TABLE ONLY public.character_pity
 
 
 --
--- Name: character_pity character_pity_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_pity character_pity_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_pity
@@ -11283,7 +10789,7 @@ ALTER TABLE ONLY public.character_pity
 
 
 --
--- Name: character_position character_position_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_position character_position_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_position
@@ -11291,7 +10797,7 @@ ALTER TABLE ONLY public.character_position
 
 
 --
--- Name: character_position character_position_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_position character_position_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_position
@@ -11299,7 +10805,7 @@ ALTER TABLE ONLY public.character_position
 
 
 --
--- Name: character_reputation character_reputation_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_reputation character_reputation_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_reputation
@@ -11307,7 +10813,7 @@ ALTER TABLE ONLY public.character_reputation
 
 
 --
--- Name: character_reputation character_reputation_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_reputation character_reputation_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_reputation
@@ -11315,7 +10821,7 @@ ALTER TABLE ONLY public.character_reputation
 
 
 --
--- Name: character_skill_bar character_skill_bar_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skill_bar character_skill_bar_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skill_bar
@@ -11323,7 +10829,7 @@ ALTER TABLE ONLY public.character_skill_bar
 
 
 --
--- Name: character_skill_mastery character_skill_mastery_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skill_mastery character_skill_mastery_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skill_mastery
@@ -11331,7 +10837,7 @@ ALTER TABLE ONLY public.character_skill_mastery
 
 
 --
--- Name: character_skill_mastery character_skill_mastery_mastery_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skill_mastery character_skill_mastery_mastery_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skill_mastery
@@ -11339,7 +10845,7 @@ ALTER TABLE ONLY public.character_skill_mastery
 
 
 --
--- Name: character_skills character_skills_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skills character_skills_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skills
@@ -11347,7 +10853,7 @@ ALTER TABLE ONLY public.character_skills
 
 
 --
--- Name: character_skills character_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_skills character_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_skills
@@ -11355,7 +10861,7 @@ ALTER TABLE ONLY public.character_skills
 
 
 --
--- Name: character_titles character_titles_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_titles character_titles_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_titles
@@ -11363,7 +10869,7 @@ ALTER TABLE ONLY public.character_titles
 
 
 --
--- Name: character_titles character_titles_title_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_titles character_titles_title_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_titles
@@ -11371,7 +10877,7 @@ ALTER TABLE ONLY public.character_titles
 
 
 --
--- Name: characters characters_bind_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: characters characters_bind_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
@@ -11379,7 +10885,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: characters characters_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: characters characters_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
@@ -11387,7 +10893,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: characters characters_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: characters characters_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
@@ -11395,7 +10901,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: characters characters_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: characters characters_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
@@ -11403,7 +10909,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: class_skill_tree class_skill_tree_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_skill_tree class_skill_tree_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree
@@ -11411,7 +10917,7 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
--- Name: class_skill_tree class_skill_tree_prerequisite_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_skill_tree class_skill_tree_prerequisite_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree
@@ -11419,7 +10925,7 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
--- Name: class_skill_tree class_skill_tree_skill_book_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_skill_tree class_skill_tree_skill_book_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree
@@ -11427,7 +10933,7 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
--- Name: class_skill_tree class_skill_tree_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_skill_tree class_skill_tree_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_skill_tree
@@ -11435,7 +10941,7 @@ ALTER TABLE ONLY public.class_skill_tree
 
 
 --
--- Name: class_spawn_zones class_spawn_zones_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_spawn_zones class_spawn_zones_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_spawn_zones
@@ -11443,7 +10949,7 @@ ALTER TABLE ONLY public.class_spawn_zones
 
 
 --
--- Name: class_spawn_zones class_spawn_zones_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_spawn_zones class_spawn_zones_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_spawn_zones
@@ -11451,7 +10957,7 @@ ALTER TABLE ONLY public.class_spawn_zones
 
 
 --
--- Name: class_starter_items class_starter_items_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_starter_items class_starter_items_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_starter_items
@@ -11459,7 +10965,7 @@ ALTER TABLE ONLY public.class_starter_items
 
 
 --
--- Name: class_starter_items class_starter_items_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_starter_items class_starter_items_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_starter_items
@@ -11467,7 +10973,7 @@ ALTER TABLE ONLY public.class_starter_items
 
 
 --
--- Name: class_stat_formula class_stat_formula_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_stat_formula class_stat_formula_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_stat_formula
@@ -11475,7 +10981,7 @@ ALTER TABLE ONLY public.class_stat_formula
 
 
 --
--- Name: class_stat_formula class_stat_formula_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: class_stat_formula class_stat_formula_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.class_stat_formula
@@ -11483,7 +10989,7 @@ ALTER TABLE ONLY public.class_stat_formula
 
 
 --
--- Name: currency_transactions currency_transactions_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: currency_transactions currency_transactions_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.currency_transactions
@@ -11491,7 +10997,7 @@ ALTER TABLE ONLY public.currency_transactions
 
 
 --
--- Name: dialogue_edge dialogue_edge_from_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_edge dialogue_edge_from_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_edge
@@ -11499,7 +11005,7 @@ ALTER TABLE ONLY public.dialogue_edge
 
 
 --
--- Name: dialogue_edge dialogue_edge_to_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_edge dialogue_edge_to_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_edge
@@ -11507,7 +11013,7 @@ ALTER TABLE ONLY public.dialogue_edge
 
 
 --
--- Name: dialogue_node dialogue_node_dialogue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_node dialogue_node_dialogue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_node
@@ -11515,7 +11021,7 @@ ALTER TABLE ONLY public.dialogue_node
 
 
 --
--- Name: dialogue_node dialogue_node_jump_target_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_node dialogue_node_jump_target_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_node
@@ -11523,7 +11029,7 @@ ALTER TABLE ONLY public.dialogue_node
 
 
 --
--- Name: dialogue_node dialogue_node_speaker_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: dialogue_node dialogue_node_speaker_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.dialogue_node
@@ -11531,7 +11037,7 @@ ALTER TABLE ONLY public.dialogue_node
 
 
 --
--- Name: character_current_state fk_char_current_state; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: character_current_state fk_char_current_state; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.character_current_state
@@ -11539,7 +11045,7 @@ ALTER TABLE ONLY public.character_current_state
 
 
 --
--- Name: characters fk_characters_gender; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: characters fk_characters_gender; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.characters
@@ -11547,7 +11053,7 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: mob_position fk_mob_position_mob; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_position fk_mob_position_mob; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_position
@@ -11555,7 +11061,7 @@ ALTER TABLE ONLY public.mob_position
 
 
 --
--- Name: mob_position fk_mob_position_zone; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_position fk_mob_position_zone; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_position
@@ -11563,7 +11069,7 @@ ALTER TABLE ONLY public.mob_position
 
 
 --
--- Name: users fk_users_role; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: users fk_users_role; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.users
@@ -11571,7 +11077,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: game_analytics game_analytics_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: game_analytics game_analytics_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.game_analytics
@@ -11579,7 +11085,7 @@ ALTER TABLE ONLY public.game_analytics
 
 
 --
--- Name: gm_action_log gm_action_log_gm_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: gm_action_log gm_action_log_gm_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.gm_action_log
@@ -11587,7 +11093,7 @@ ALTER TABLE ONLY public.gm_action_log
 
 
 --
--- Name: item_attributes_mapping item_attributes_mapping_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_attributes_mapping item_attributes_mapping_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_attributes_mapping
@@ -11595,7 +11101,7 @@ ALTER TABLE ONLY public.item_attributes_mapping
 
 
 --
--- Name: item_attributes_mapping item_attributes_mapping_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_attributes_mapping item_attributes_mapping_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_attributes_mapping
@@ -11603,7 +11109,7 @@ ALTER TABLE ONLY public.item_attributes_mapping
 
 
 --
--- Name: item_class_restrictions item_class_restrictions_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_class_restrictions item_class_restrictions_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_class_restrictions
@@ -11611,7 +11117,7 @@ ALTER TABLE ONLY public.item_class_restrictions
 
 
 --
--- Name: item_class_restrictions item_class_restrictions_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_class_restrictions item_class_restrictions_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_class_restrictions
@@ -11619,7 +11125,7 @@ ALTER TABLE ONLY public.item_class_restrictions
 
 
 --
--- Name: item_set_bonuses item_set_bonuses_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_set_bonuses item_set_bonuses_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_bonuses
@@ -11627,7 +11133,7 @@ ALTER TABLE ONLY public.item_set_bonuses
 
 
 --
--- Name: item_set_bonuses item_set_bonuses_set_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_set_bonuses item_set_bonuses_set_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_bonuses
@@ -11635,7 +11141,7 @@ ALTER TABLE ONLY public.item_set_bonuses
 
 
 --
--- Name: item_set_members item_set_members_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_set_members item_set_members_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_members
@@ -11643,7 +11149,7 @@ ALTER TABLE ONLY public.item_set_members
 
 
 --
--- Name: item_set_members item_set_members_set_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_set_members item_set_members_set_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_set_members
@@ -11651,7 +11157,7 @@ ALTER TABLE ONLY public.item_set_members
 
 
 --
--- Name: item_use_effects item_use_effects_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: item_use_effects item_use_effects_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.item_use_effects
@@ -11659,7 +11165,7 @@ ALTER TABLE ONLY public.item_use_effects
 
 
 --
--- Name: items items_equip_slot_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: items items_equip_slot_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items
@@ -11667,7 +11173,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: items items_item_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: items items_item_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items
@@ -11675,7 +11181,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: items items_mastery_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: items items_mastery_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items
@@ -11683,7 +11189,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: items items_rarity_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: items items_rarity_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.items
@@ -11691,7 +11197,7 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: mob_active_effect mob_active_effect_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_active_effect mob_active_effect_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_active_effect
@@ -11699,7 +11205,7 @@ ALTER TABLE ONLY public.mob_active_effect
 
 
 --
--- Name: mob_active_effect mob_active_effect_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_active_effect mob_active_effect_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_active_effect
@@ -11707,7 +11213,7 @@ ALTER TABLE ONLY public.mob_active_effect
 
 
 --
--- Name: mob_active_effect mob_active_effect_source_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_active_effect mob_active_effect_source_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_active_effect
@@ -11715,7 +11221,7 @@ ALTER TABLE ONLY public.mob_active_effect
 
 
 --
--- Name: mob mob_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob mob_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob
@@ -11723,7 +11229,7 @@ ALTER TABLE ONLY public.mob
 
 
 --
--- Name: mob_loot_info mob_loot_info_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_loot_info mob_loot_info_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_loot_info
@@ -11731,7 +11237,7 @@ ALTER TABLE ONLY public.mob_loot_info
 
 
 --
--- Name: mob_loot_info mob_loot_info_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_loot_info mob_loot_info_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_loot_info
@@ -11739,7 +11245,7 @@ ALTER TABLE ONLY public.mob_loot_info
 
 
 --
--- Name: mob mob_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob mob_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob
@@ -11747,7 +11253,7 @@ ALTER TABLE ONLY public.mob
 
 
 --
--- Name: mob mob_rank_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob mob_rank_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob
@@ -11755,7 +11261,7 @@ ALTER TABLE ONLY public.mob
 
 
 --
--- Name: mob_resistances mob_resistances_element_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_resistances mob_resistances_element_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_resistances
@@ -11763,7 +11269,7 @@ ALTER TABLE ONLY public.mob_resistances
 
 
 --
--- Name: mob_resistances mob_resistances_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_resistances mob_resistances_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_resistances
@@ -11771,7 +11277,7 @@ ALTER TABLE ONLY public.mob_resistances
 
 
 --
--- Name: mob_skills mob_skills_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_skills mob_skills_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_skills
@@ -11779,7 +11285,7 @@ ALTER TABLE ONLY public.mob_skills
 
 
 --
--- Name: mob_skills mob_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_skills mob_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_skills
@@ -11787,7 +11293,7 @@ ALTER TABLE ONLY public.mob_skills
 
 
 --
--- Name: mob_stat mob_stat_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_stat mob_stat_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_stat
@@ -11795,7 +11301,7 @@ ALTER TABLE ONLY public.mob_stat
 
 
 --
--- Name: mob_stat mob_stat_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_stat mob_stat_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_stat
@@ -11803,7 +11309,7 @@ ALTER TABLE ONLY public.mob_stat
 
 
 --
--- Name: mob_weaknesses mob_weaknesses_element_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_weaknesses mob_weaknesses_element_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_weaknesses
@@ -11811,7 +11317,7 @@ ALTER TABLE ONLY public.mob_weaknesses
 
 
 --
--- Name: mob_weaknesses mob_weaknesses_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mob_weaknesses mob_weaknesses_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.mob_weaknesses
@@ -11819,7 +11325,7 @@ ALTER TABLE ONLY public.mob_weaknesses
 
 
 --
--- Name: npc_ambient_speech_configs npc_ambient_speech_configs_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_configs npc_ambient_speech_configs_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_configs
@@ -11827,7 +11333,7 @@ ALTER TABLE ONLY public.npc_ambient_speech_configs
 
 
 --
--- Name: npc_ambient_speech_lines npc_ambient_speech_lines_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_ambient_speech_lines npc_ambient_speech_lines_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_ambient_speech_lines
@@ -11835,7 +11341,7 @@ ALTER TABLE ONLY public.npc_ambient_speech_lines
 
 
 --
--- Name: npc_attributes npc_attributes_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_attributes npc_attributes_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_attributes
@@ -11843,7 +11349,7 @@ ALTER TABLE ONLY public.npc_attributes
 
 
 --
--- Name: npc_attributes npc_attributes_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_attributes npc_attributes_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_attributes
@@ -11851,7 +11357,7 @@ ALTER TABLE ONLY public.npc_attributes
 
 
 --
--- Name: npc_dialogue npc_dialogue_dialogue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_dialogue npc_dialogue_dialogue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_dialogue
@@ -11859,7 +11365,7 @@ ALTER TABLE ONLY public.npc_dialogue
 
 
 --
--- Name: npc_dialogue npc_dialogue_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_dialogue npc_dialogue_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_dialogue
@@ -11867,7 +11373,7 @@ ALTER TABLE ONLY public.npc_dialogue
 
 
 --
--- Name: npc npc_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc npc_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc
@@ -11875,7 +11381,7 @@ ALTER TABLE ONLY public.npc
 
 
 --
--- Name: npc npc_npc_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc npc_npc_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc
@@ -11883,7 +11389,7 @@ ALTER TABLE ONLY public.npc
 
 
 --
--- Name: npc_placements npc_placements_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_placements npc_placements_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_placements
@@ -11891,7 +11397,7 @@ ALTER TABLE ONLY public.npc_placements
 
 
 --
--- Name: npc_placements npc_placements_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_placements npc_placements_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_placements
@@ -11899,7 +11405,7 @@ ALTER TABLE ONLY public.npc_placements
 
 
 --
--- Name: npc npc_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc npc_race_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc
@@ -11907,7 +11413,7 @@ ALTER TABLE ONLY public.npc
 
 
 --
--- Name: npc_skills npc_skills_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_skills npc_skills_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_skills
@@ -11915,7 +11421,7 @@ ALTER TABLE ONLY public.npc_skills
 
 
 --
--- Name: npc_skills npc_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_skills npc_skills_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_skills
@@ -11923,7 +11429,7 @@ ALTER TABLE ONLY public.npc_skills
 
 
 --
--- Name: npc_trainer_class npc_trainer_class_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_trainer_class npc_trainer_class_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_trainer_class
@@ -11931,7 +11437,7 @@ ALTER TABLE ONLY public.npc_trainer_class
 
 
 --
--- Name: npc_trainer_class npc_trainer_class_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: npc_trainer_class npc_trainer_class_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.npc_trainer_class
@@ -11939,7 +11445,7 @@ ALTER TABLE ONLY public.npc_trainer_class
 
 
 --
--- Name: passive_skill_modifiers passive_skill_modifiers_attribute_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers passive_skill_modifiers_attribute_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.passive_skill_modifiers
@@ -11947,7 +11453,7 @@ ALTER TABLE ONLY public.passive_skill_modifiers
 
 
 --
--- Name: passive_skill_modifiers passive_skill_modifiers_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: passive_skill_modifiers passive_skill_modifiers_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.passive_skill_modifiers
@@ -11955,7 +11461,7 @@ ALTER TABLE ONLY public.passive_skill_modifiers
 
 
 --
--- Name: player_active_effect player_active_effect_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_active_effect player_active_effect_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_active_effect
@@ -11963,7 +11469,7 @@ ALTER TABLE ONLY public.player_active_effect
 
 
 --
--- Name: player_active_effect player_active_effect_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_active_effect player_active_effect_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_active_effect
@@ -11971,7 +11477,7 @@ ALTER TABLE ONLY public.player_active_effect
 
 
 --
--- Name: player_active_effect player_active_effect_status_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_active_effect player_active_effect_status_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_active_effect
@@ -11979,7 +11485,7 @@ ALTER TABLE ONLY public.player_active_effect
 
 
 --
--- Name: player_flag player_flag_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_flag player_flag_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_flag
@@ -11987,7 +11493,7 @@ ALTER TABLE ONLY public.player_flag
 
 
 --
--- Name: player_inventory player_inventory_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_inventory player_inventory_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_inventory
@@ -11995,7 +11501,7 @@ ALTER TABLE ONLY public.player_inventory
 
 
 --
--- Name: player_inventory player_inventory_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_inventory player_inventory_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_inventory
@@ -12003,7 +11509,7 @@ ALTER TABLE ONLY public.player_inventory
 
 
 --
--- Name: player_quest player_quest_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_quest player_quest_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_quest
@@ -12011,7 +11517,7 @@ ALTER TABLE ONLY public.player_quest
 
 
 --
--- Name: player_quest player_quest_quest_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_quest player_quest_quest_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_quest
@@ -12019,7 +11525,7 @@ ALTER TABLE ONLY public.player_quest
 
 
 --
--- Name: player_skill_cooldown player_skill_cooldown_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: player_skill_cooldown player_skill_cooldown_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_skill_cooldown
@@ -12027,7 +11533,7 @@ ALTER TABLE ONLY public.player_skill_cooldown
 
 
 --
--- Name: quest quest_giver_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest quest_giver_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest
@@ -12035,7 +11541,7 @@ ALTER TABLE ONLY public.quest
 
 
 --
--- Name: quest_reward quest_reward_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest_reward quest_reward_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_reward
@@ -12043,7 +11549,7 @@ ALTER TABLE ONLY public.quest_reward
 
 
 --
--- Name: quest_reward quest_reward_quest_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest_reward quest_reward_quest_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_reward
@@ -12051,7 +11557,7 @@ ALTER TABLE ONLY public.quest_reward
 
 
 --
--- Name: quest_step quest_step_quest_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest_step quest_step_quest_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest_step
@@ -12059,7 +11565,7 @@ ALTER TABLE ONLY public.quest_step
 
 
 --
--- Name: quest quest_turnin_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: quest quest_turnin_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.quest
@@ -12067,7 +11573,7 @@ ALTER TABLE ONLY public.quest
 
 
 --
--- Name: respawn_zones respawn_zones_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: respawn_zones respawn_zones_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.respawn_zones
@@ -12075,7 +11581,7 @@ ALTER TABLE ONLY public.respawn_zones
 
 
 --
--- Name: skill_active_effects skill_active_effects_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_active_effects skill_active_effects_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_active_effects
@@ -12083,7 +11589,7 @@ ALTER TABLE ONLY public.skill_active_effects
 
 
 --
--- Name: skill_effect_instances skill_effect_instances_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effect_instances skill_effect_instances_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effect_instances
@@ -12091,7 +11597,7 @@ ALTER TABLE ONLY public.skill_effect_instances
 
 
 --
--- Name: skill_effect_instances skill_effect_instances_target_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effect_instances skill_effect_instances_target_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effect_instances
@@ -12099,7 +11605,7 @@ ALTER TABLE ONLY public.skill_effect_instances
 
 
 --
--- Name: skill_damage_formulas skill_effects_effect_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_damage_formulas skill_effects_effect_type_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_damage_formulas
@@ -12107,7 +11613,7 @@ ALTER TABLE ONLY public.skill_damage_formulas
 
 
 --
--- Name: skill_effects_mapping skill_effects_mapping_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping skill_effects_mapping_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effects_mapping
@@ -12115,7 +11621,7 @@ ALTER TABLE ONLY public.skill_effects_mapping
 
 
 --
--- Name: skill_effects_mapping skill_effects_mapping_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping skill_effects_mapping_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effects_mapping
@@ -12123,7 +11629,7 @@ ALTER TABLE ONLY public.skill_effects_mapping
 
 
 --
--- Name: skill_effects_mapping skill_effects_mapping_instance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_effects_mapping skill_effects_mapping_instance_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_effects_mapping
@@ -12131,7 +11637,7 @@ ALTER TABLE ONLY public.skill_effects_mapping
 
 
 --
--- Name: skill_properties_mapping skill_properties_mapping_property_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_properties_mapping skill_properties_mapping_property_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_properties_mapping
@@ -12139,7 +11645,7 @@ ALTER TABLE ONLY public.skill_properties_mapping
 
 
 --
--- Name: skill_properties_mapping skill_properties_mapping_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skill_properties_mapping skill_properties_mapping_skill_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skill_properties_mapping
@@ -12147,7 +11653,7 @@ ALTER TABLE ONLY public.skill_properties_mapping
 
 
 --
--- Name: skills skills_scale_stat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skills skills_scale_stat_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skills
@@ -12155,7 +11661,7 @@ ALTER TABLE ONLY public.skills
 
 
 --
--- Name: skills skills_school_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: skills skills_school_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.skills
@@ -12163,7 +11669,7 @@ ALTER TABLE ONLY public.skills
 
 
 --
--- Name: spawn_zone_mobs spawn_zone_mobs_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs spawn_zone_mobs_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zone_mobs
@@ -12171,7 +11677,7 @@ ALTER TABLE ONLY public.spawn_zone_mobs
 
 
 --
--- Name: spawn_zone_mobs spawn_zone_mobs_spawn_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zone_mobs spawn_zone_mobs_spawn_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zone_mobs
@@ -12179,7 +11685,7 @@ ALTER TABLE ONLY public.spawn_zone_mobs
 
 
 --
--- Name: spawn_zones spawn_zones_exclusion_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zones spawn_zones_exclusion_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zones
@@ -12187,7 +11693,7 @@ ALTER TABLE ONLY public.spawn_zones
 
 
 --
--- Name: spawn_zones spawn_zones_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: spawn_zones spawn_zones_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.spawn_zones
@@ -12195,7 +11701,7 @@ ALTER TABLE ONLY public.spawn_zones
 
 
 --
--- Name: status_effect_modifiers status_effect_modifiers_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers status_effect_modifiers_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effect_modifiers
@@ -12203,7 +11709,7 @@ ALTER TABLE ONLY public.status_effect_modifiers
 
 
 --
--- Name: status_effect_modifiers status_effect_modifiers_status_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: status_effect_modifiers status_effect_modifiers_status_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.status_effect_modifiers
@@ -12211,7 +11717,7 @@ ALTER TABLE ONLY public.status_effect_modifiers
 
 
 --
--- Name: timed_champion_templates timed_champion_templates_mob_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: timed_champion_templates timed_champion_templates_mob_template_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.timed_champion_templates
@@ -12219,7 +11725,7 @@ ALTER TABLE ONLY public.timed_champion_templates
 
 
 --
--- Name: timed_champion_templates timed_champion_templates_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: timed_champion_templates timed_champion_templates_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.timed_champion_templates
@@ -12227,7 +11733,7 @@ ALTER TABLE ONLY public.timed_champion_templates
 
 
 --
--- Name: user_bans user_bans_banned_by_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_bans user_bans_banned_by_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_bans
@@ -12235,7 +11741,7 @@ ALTER TABLE ONLY public.user_bans
 
 
 --
--- Name: user_bans user_bans_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_bans user_bans_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_bans
@@ -12243,7 +11749,7 @@ ALTER TABLE ONLY public.user_bans
 
 
 --
--- Name: user_sessions user_sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: user_sessions user_sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.user_sessions
@@ -12251,7 +11757,7 @@ ALTER TABLE ONLY public.user_sessions
 
 
 --
--- Name: vendor_inventory vendor_inventory_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_inventory vendor_inventory_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_inventory
@@ -12259,7 +11765,7 @@ ALTER TABLE ONLY public.vendor_inventory
 
 
 --
--- Name: vendor_inventory vendor_inventory_vendor_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_inventory vendor_inventory_vendor_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_inventory
@@ -12267,7 +11773,7 @@ ALTER TABLE ONLY public.vendor_inventory
 
 
 --
--- Name: vendor_npc vendor_npc_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: vendor_npc vendor_npc_npc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.vendor_npc
@@ -12275,7 +11781,7 @@ ALTER TABLE ONLY public.vendor_npc
 
 
 --
--- Name: world_object_states world_object_states_object_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_object_states world_object_states_object_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_object_states
@@ -12283,7 +11789,7 @@ ALTER TABLE ONLY public.world_object_states
 
 
 --
--- Name: world_objects world_objects_dialogue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_objects world_objects_dialogue_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_objects
@@ -12291,7 +11797,7 @@ ALTER TABLE ONLY public.world_objects
 
 
 --
--- Name: world_objects world_objects_required_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_objects world_objects_required_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_objects
@@ -12299,7 +11805,7 @@ ALTER TABLE ONLY public.world_objects
 
 
 --
--- Name: world_objects world_objects_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: world_objects world_objects_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.world_objects
@@ -12307,7 +11813,7 @@ ALTER TABLE ONLY public.world_objects
 
 
 --
--- Name: zone_event_templates zone_event_templates_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zone_event_templates zone_event_templates_game_zone_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zone_event_templates
@@ -12315,7 +11821,7 @@ ALTER TABLE ONLY public.zone_event_templates
 
 
 --
--- Name: zone_event_templates zone_event_templates_invasion_champion_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zone_event_templates zone_event_templates_invasion_champion_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zone_event_templates
@@ -12323,7 +11829,7 @@ ALTER TABLE ONLY public.zone_event_templates
 
 
 --
--- Name: zone_event_templates zone_event_templates_invasion_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zone_event_templates zone_event_templates_invasion_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.zone_event_templates
@@ -12334,3 +11840,7 @@ ALTER TABLE ONLY public.zone_event_templates
 -- PostgreSQL database dump complete
 --
 
+
+-- ── Hybrid-table runtime state reset ──────────────────────────────────────
+UPDATE public.timed_champion_templates SET next_spawn_at = NULL, last_killed_at = NULL;
+UPDATE public.world_object_states SET state = 'active', depleted_at = NULL;
