@@ -8,9 +8,9 @@ services:
     image: postgres:15.5
     container_name: mmorpg_prototype_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: mmo_prototype
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-root}
+      POSTGRES_DB: ${DB_NAME:-mmo_prototype}
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./mmo_prototype_dump.sql:/docker-entrypoint-initdb.d/mmo_prototype_dump.sql
@@ -38,11 +38,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "27014:27014"
+    env_file:
+      - .env
     environment:
-      - LOG_LEVEL=info
-      - LOG_LEVEL_NETWORK=warn
-      - LOG_LEVEL_GAMELOOP=warn
-      - LOG_LEVEL_EVENTS=warn
+      - DB_HOST=db
     restart: unless-stopped
     depends_on:
       db:

@@ -6914,7 +6914,6 @@ COPY public.character_class (id, name, slug, description) FROM stdin;
 --
 
 COPY public.character_current_state (character_id, current_health, current_mana, is_dead, updated_at) FROM stdin;
-1	88	225	f	2026-06-12 07:26:00.234137+00
 \.
 
 
@@ -6923,7 +6922,6 @@ COPY public.character_current_state (character_id, current_health, current_mana,
 --
 
 COPY public.character_emotes (id, character_id, emote_slug, unlocked_at) FROM stdin;
-1	1	wave	2026-06-12 07:24:08.141166+00
 \.
 
 
@@ -6966,7 +6964,6 @@ COPY public.character_pity (character_id, item_id, kill_count) FROM stdin;
 --
 
 COPY public.character_position (id, character_id, x, y, z, zone_id, rot_z) FROM stdin;
-1	1	18507.07	-18297.59	1558.39	1	149.950012
 \.
 
 
@@ -6999,7 +6996,6 @@ COPY public.character_skill_mastery (character_id, mastery_slug, value) FROM std
 --
 
 COPY public.character_skills (id, character_id, skill_id, current_level) FROM stdin;
-1	1	1	1
 \.
 
 
@@ -7016,7 +7012,6 @@ COPY public.character_titles (character_id, title_slug, equipped, earned_at) FRO
 --
 
 COPY public.characters (id, name, owner_id, class_id, race_id, experience_points, level, radius, free_skill_points, gender, account_slot, created_at, last_online_at, deleted_at, play_time_sec, bind_zone_id, bind_x, bind_y, bind_z, appearance, experience_debt) FROM stdin;
-1	DS	1	1	1	0	1	100	0	0	1	2026-06-11 16:56:27.622404+00	\N	\N	0	\N	\N	\N	\N	\N	0
 \.
 
 
@@ -7423,8 +7418,6 @@ COPY public.factions (id, slug, name) FROM stdin;
 --
 
 COPY public.game_analytics (id, event_type, character_id, session_id, level, zone_id, payload, created_at) FROM stdin;
-1	session_start	1	sess_1_1781249048118	1	0	{}	2026-06-12 07:24:08.119377+00
-2	session_end	1	sess_1_1781249048118	1	0	{}	2026-06-12 07:26:00.236607+00
 \.
 
 
@@ -8689,8 +8682,6 @@ COPY public.user_roles (id, name, label, is_staff) FROM stdin;
 --
 
 COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, expires_at, revoked_at) FROM stdin;
-1	1	8fb02bc8-84a1-487f-b10e-775b217ed6d1	\N	\N	2026-06-11 16:56:19.966534+00	2026-07-11 16:56:19.966534+00	\N
-2	1	8e9ca63e-d065-47c8-9c99-96d698f56d62	\N	\N	2026-06-12 07:24:00.483234+00	2026-07-12 07:24:00.483234+00	\N
 \.
 
 
@@ -8699,7 +8690,6 @@ COPY public.user_sessions (id, user_id, token_hash, ip, user_agent, created_at, 
 --
 
 COPY public.users (id, login, password, last_login, email, role, created_at, is_active, failed_login_attempts, locked_until, last_login_ip, registration_ip, is_email_verified) FROM stdin;
-1	denissined	a93b3e0cfe9ae955ed502648a98a4cba9c724c200ec68032006b29ef30ff49b6	2026-06-12 07:24:00.475403+00	admin@admin.com	2	2026-06-11 16:56:19.966534+00	t	0	\N	127.0.0.1	172.23.0.1	f
 \.
 
 

@@ -19,7 +19,6 @@ WORKDIR /usr/src/app
 COPY CMakeLists.txt ./
 COPY src ./src
 COPY include ./include
-COPY config.json ./config.json
 
 RUN mkdir -p build
 

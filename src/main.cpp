@@ -23,7 +23,7 @@ int main()
         Config config;
 
         // Parse the config file
-        auto configs = config.parseConfig("config.json");
+        auto configs = config.parseConfig();
 
         // Initialize ClientData
         ClientData clientData;
