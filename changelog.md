@@ -11,6 +11,21 @@ DB:
 - `characters.radius` удалён (не использовался; у мобов свой `mob.radius`).
 - Миграции: `071_character_online_playtime.sql`, `072_cleanup_columns.sql`.
 
+**Управление дампом БД — скрипты dump_db.sh и load_dump.sh.**
+- `scripts/dump_db.sh` — выгружает контентные таблицы из запущенного Docker-контейнера, вырезает данные игроков/персонажей/аналитики, сбрасывает runtime-состояние гибридных таблиц.
+- `scripts/load_dump.sh` — заливает дамп в контейнер (DROP + CREATE DATABASE + psql -f), с проверкой активных соединений и подтверждением.
+- Оба скрипта используют `mmorpg_prototype_db` как имя контейнера по умолчанию (из `container_name` в compose).
+
+New:
+
+**Online-статус и время игры персонажа.**
+- `characters.play_time_sec` переименован в `total_play_time_sec`.
+- Добавлены колонки `last_session_play_time_sec` (bigint), `is_online` (boolean).
+- Добавлен индекс `idx_characters_is_online ON characters (is_online) WHERE is_online = true`.
+- `users.is_email_verified` удалён (не использовался в коде).
+- `characters.radius` удалён (не использовался; у мобов свой `mob.radius`).
+- Миграции: `071_character_online_playtime.sql`, `072_cleanup_columns.sql`.
+
 New:
 
 **isOnline в списке персонажей.**
