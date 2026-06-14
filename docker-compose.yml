@@ -15,7 +15,7 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./mmo_prototype_dump.sql:/docker-entrypoint-initdb.d/mmo_prototype_dump.sql
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     networks:
       - mmo_network
     healthcheck:
