@@ -1,14 +1,13 @@
 #!/bin/bash
 # load_dump.sh — Restore a database dump into a running Docker PostgreSQL container.
-# Drops and recreates the database, then loads the SQL dump.
+# Drops and recreates the database (using PG 13+ WITH FORCE), then loads the SQL dump.
 #
 # Usage:
-#   ./tools/load_dump.sh                          # default container + default dump
-#   ./tools/load_dump.sh --file path/to/dump.sql   # custom dump file
-#   CONTAINER=my-db ./tools/load_dump.sh           # custom container name
+#   scripts/load_dump.sh                          # default container + default dump
+#   scripts/load_dump.sh --file path/to/dump.sql   # custom dump file
+#   CONTAINER=my-db scripts/load_dump.sh           # custom container name
 #
 # WARNING: Destructive — drops the database and all its data.
-#          Stop game-server and chunk-server before running.
 
 set -euo pipefail
 
@@ -35,7 +34,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [--container NAME] [--file FILE] [--yes]"
             echo ""
             echo "Drops and recreates the database from a SQL dump file."
-            echo "Game-server and chunk-server must be stopped."
+            echo "Active connections are terminated automatically via DROP DATABASE ... WITH (FORCE)."
             echo ""
             echo "Options:"
             echo "  --container NAME  Docker container name (default: $CONTAINER)"
@@ -67,17 +66,6 @@ echo "[INFO] Container : $CONTAINER"
 echo "[INFO] Database  : $DB_NAME"
 echo "[INFO] Dump file : $DUMP_FILE ($(wc -c < "$DUMP_FILE") bytes)"
 
-# ── Check active connections ────────────────────────────────────────────────
-ACTIVE=$(docker exec "$CONTAINER" psql -U "$DB_USER" -tAc \
-    "SELECT count(*) FROM pg_stat_activity WHERE datname='$DB_NAME' AND pid <> pg_backend_pid();" 2>/dev/null || echo "0")
-if [ "$ACTIVE" -gt 0 ] 2>/dev/null; then
-    echo "[ERROR] $ACTIVE active connection(s) to '$DB_NAME'."
-    echo "        Stop game-server and chunk-server first:"
-    echo "          cd mmorpg-prototype-game-server && docker-compose down"
-    echo "          cd mmorpg-prototype-chunk-server-new && docker-compose down"
-    exit 1
-fi
-
 # ── Confirmation ────────────────────────────────────────────────────────────
 echo ""
 echo "[WARN] This will DROP database '$DB_NAME' and recreate it."
@@ -94,7 +82,7 @@ fi
 
 # ── Drop + recreate + load ──────────────────────────────────────────────────
 echo "[INFO] Dropping database '$DB_NAME' ..."
-docker exec "$CONTAINER" psql -U "$DB_USER" -c "DROP DATABASE IF EXISTS \"$DB_NAME\";" 2>&1
+docker exec "$CONTAINER" psql -U "$DB_USER" -c "DROP DATABASE IF EXISTS \"$DB_NAME\" WITH (FORCE);" 2>&1
 
 echo "[INFO] Creating database '$DB_NAME' ..."
 docker exec "$CONTAINER" psql -U "$DB_USER" -c "CREATE DATABASE \"$DB_NAME\" OWNER \"$DB_USER\";" 2>&1
