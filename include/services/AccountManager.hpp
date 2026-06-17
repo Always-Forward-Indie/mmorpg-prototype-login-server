@@ -33,6 +33,7 @@ public:
     /// @param password      Raw password string from client (will be hashed here)
     /// @param email         Optional email (pass empty string to skip)
     /// @param registrationIp  Client IP address string for audit
+    /// @param clientVersion   Client version string (e.g. "0.1.0") for analytics
     /// @param outUserId     [out] new user ID on success
     /// @param outHash       [out] session token on success
     AccountRegisterResult registerAccount(pqxx::connection &conn,
@@ -41,6 +42,7 @@ public:
                                           const std::string &password,
                                           const std::string &email,
                                           const std::string &registrationIp,
+                                          const std::string &clientVersion,
                                           int &outUserId,
                                           std::string &outHash);
 

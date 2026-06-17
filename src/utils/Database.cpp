@@ -91,15 +91,18 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "WHERE login = $1;");
     conn.prepare("reset_failed_logins",
                  "UPDATE users "
-                 "SET failed_login_attempts = 0, locked_until = NULL, last_login = now(), last_login_ip = $2::inet "
+                 "SET failed_login_attempts = 0, locked_until = NULL, last_login = now(), last_login_ip = $2::inet, client_version = $3 "
                  "WHERE id = $1;");
     conn.prepare("create_user_session",
-                 "INSERT INTO user_sessions (user_id, token_hash, created_at, expires_at) "
-                 "VALUES ($1, $2, now(), now() + interval '30 days') "
+                 "INSERT INTO user_sessions (user_id, token_hash, client_version, created_at, expires_at) "
+                 "VALUES ($1, $2, $3, now(), now() + interval '30 days') "
                  "ON CONFLICT (token_hash) DO NOTHING;");
     conn.prepare("cleanup_expired_sessions",
                  "DELETE FROM user_sessions "
                  "WHERE expires_at < NOW() AND revoked_at IS NULL;");
+    conn.prepare("revoke_user_sessions",
+                 "UPDATE user_sessions SET revoked_at = now() "
+                 "WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > NOW();");
 
     conn.prepare("get_characters_list",
                  "SELECT c.id AS character_id, c.level AS character_lvl, "
@@ -218,10 +221,10 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "SELECT 1 FROM users WHERE lower(login) = lower($1) LIMIT 1;");
 
     // register_user — create a new account (password must already be hashed by the application)
-    // Params: $1=login, $2=password_hash, $3=email (may be empty), $4=registration_ip
+    // Params: $1=login, $2=password_hash, $3=email (may be empty), $4=registration_ip, $5=client_version
     conn.prepare("register_user",
-                 "INSERT INTO users (login, password, email, registration_ip, is_active) "
-                 "VALUES ($1, $2, NULLIF($3, ''), $4::inet, true) "
+                 "INSERT INTO users (login, password, email, registration_ip, client_version, is_active) "
+                 "VALUES ($1, $2, NULLIF($3, ''), $4::inet, $5, true) "
                  "RETURNING id;");
 }
 

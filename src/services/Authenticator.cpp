@@ -7,7 +7,7 @@
 #include <pqxx/pqxx>
 #include <iostream>
 
-int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password, const std::string &clientIp)
+int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password, const std::string &clientIp, const std::string &clientVersion)
 {
     try
     {
@@ -38,7 +38,7 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
 
         // Step 3: reset failed login counter and update last_login
         const std::string ipStr = clientIp.empty() ? "127.0.0.1" : clientIp;
-        transaction.exec_prepared("reset_failed_logins", userID, ipStr);
+        transaction.exec_prepared("reset_failed_logins", userID, ipStr, clientVersion);
         transaction.commit();
 
         // Step 4: generate session token
@@ -46,9 +46,11 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         std::string uniqueHash = boost::uuids::to_string(uuid);
 
         pqxx::work sessionTxn(conn);
-        // Clean up expired sessions before creating a new one to prevent unbounded growth.
+        // Revoke all existing active sessions for this user before creating a new one.
+        sessionTxn.exec_prepared("revoke_user_sessions", userID);
+        // Clean up expired sessions to prevent unbounded growth.
         sessionTxn.exec_prepared("cleanup_expired_sessions");
-        sessionTxn.exec_prepared("create_user_session", userID, uniqueHash);
+        sessionTxn.exec_prepared("create_user_session", userID, uniqueHash, clientVersion);
         sessionTxn.commit();
 
         // Step 5: store in-memory client data
@@ -57,6 +59,7 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         clientDataStruct.login = login;
         clientDataStruct.hash = uniqueHash;
         clientDataStruct.role = role;
+        clientDataStruct.clientVersion = clientVersion;
 
         clientData.storeClientData(clientDataStruct);
         return userID;

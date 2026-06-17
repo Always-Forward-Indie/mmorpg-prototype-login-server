@@ -164,6 +164,14 @@ ClientDataStruct JSONParser::parseClientData(const std::array<char, max_length> 
         clientData.password = jsonData["body"]["password"].get<std::string>();
     }
 
+    if (jsonData.contains("body") &&
+        jsonData["body"].is_object() &&
+        jsonData["body"].contains("clientVersion") &&
+        jsonData["body"]["clientVersion"].is_string())
+    {
+        clientData.clientVersion = jsonData["body"]["clientVersion"].get<std::string>();
+    }
+
     return clientData;
 }
 

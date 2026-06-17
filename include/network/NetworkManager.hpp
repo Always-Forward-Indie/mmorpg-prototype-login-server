@@ -29,6 +29,8 @@ private:
     void startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
     void handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::array<char, max_length> &dataBuffer, size_t bytes_transferred);
     void processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message);
+    bool checkClientVersion(const std::string &clientVersion, const std::string &eventType,
+                            std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
 
     boost::asio::io_context io_context_;
     boost::asio::ip::tcp::acceptor acceptor_;

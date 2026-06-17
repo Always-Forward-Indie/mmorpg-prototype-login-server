@@ -75,6 +75,7 @@ void LoginServer::mainEventLoop()
 {
     log_->info("Add Tasks To Login Server Scheduler...");
     constexpr int BATCH_SIZE = 10;
+    constexpr int CLEANUP_INTERVAL_MS = 60000; // 60 seconds
 
     try
     {
@@ -82,9 +83,24 @@ void LoginServer::mainEventLoop()
         while (running_)
         {
             std::vector<Event> eventsBatch;
-            if (eventQueueLoginServer_.popBatch(eventsBatch, BATCH_SIZE))
+            if (eventQueueLoginServer_.tryPopBatch(eventsBatch, BATCH_SIZE, CLEANUP_INTERVAL_MS))
             {
                 processBatch(eventsBatch);
+            }
+            else
+            {
+                // Timeout: run periodic session cleanup
+                try
+                {
+                    auto poolGuard = pool_.acquire();
+                    pqxx::work txn(poolGuard.get());
+                    txn.exec_prepared("cleanup_expired_sessions");
+                    txn.commit();
+                }
+                catch (const std::exception &ex)
+                {
+                    log_->warn("Periodic session cleanup failed: " + std::string(ex.what()));
+                }
             }
         }
     }

@@ -91,7 +91,7 @@ INSERT INTO public.class_stat_formula (class_id, attribute_id, base_value, multi
     -- Utility
     (1, 10, 1.00,  0.2000, 1.0000),  -- hp_regen_per_s
     (1, 11, 2.00,  0.8000, 1.0500),  -- mp_regen_per_s   (mage high mana regen)
-    (1, 18, 5.00,  0.0000, 1.0000),  -- move_speed       (flat 5)
+    (1, 18, 7.00,  0.0000, 1.0000),  -- move_speed       (flat 7)
     (1, 19, 5.00,  0.2000, 1.0000),  -- attack_speed
     (1, 20, 7.00,  0.4000, 1.0000),  -- cast_speed       (mage fast cast)
     -- Elemental resistances (mage has innate magic affinity)
@@ -127,7 +127,7 @@ INSERT INTO public.class_stat_formula (class_id, attribute_id, base_value, multi
     -- Utility
     (2, 10, 1.00,  0.4000, 1.0000),  -- hp_regen_per_s   (high sturdy regen)
     (2, 11, 0.50,  0.2000, 1.0000),  -- mp_regen_per_s   (low)
-    (2, 18, 5.00,  0.0000, 1.0000),  -- move_speed        (flat 5)
+    (2, 18, 7.00,  0.0000, 1.0000),  -- move_speed        (flat 7)
     (2, 19, 5.00,  0.3000, 1.0000),  -- attack_speed
     (2, 20, 3.00,  0.1000, 1.0000),  -- cast_speed        (warrior has slow casts)
     -- Elemental resistances (warrior has lower magic resist)

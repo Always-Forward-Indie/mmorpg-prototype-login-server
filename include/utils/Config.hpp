@@ -16,6 +16,8 @@ struct LoginServerConfig {
     std::string host;
     short port;
     short max_clients;
+    std::string minClientVersion = "0.1.0";
+    std::string maxClientVersion = "0.1.0";
 };
 
 class Config {

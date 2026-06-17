@@ -5559,7 +5559,8 @@ CREATE TABLE public.user_sessions (
     user_agent text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     expires_at timestamp with time zone NOT NULL,
-    revoked_at timestamp with time zone
+    revoked_at timestamp with time zone,
+    client_version character varying(32)
 );
 
 
@@ -5605,7 +5606,8 @@ CREATE TABLE public.users (
     failed_login_attempts smallint DEFAULT 0 NOT NULL,
     locked_until timestamp with time zone,
     last_login_ip inet,
-    registration_ip inet
+    registration_ip inet,
+    client_version character varying(32)
 );
 
 
@@ -6677,7 +6679,6 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 1	17	0.00	0.0000	1.0000
 1	10	1.00	0.2000	1.0000
 1	11	2.00	0.8000	1.0500
-1	18	5.00	0.0000	1.0000
 1	19	5.00	0.2000	1.0000
 1	20	7.00	0.4000	1.0000
 1	30	0.00	0.3000	1.0000
@@ -6705,7 +6706,6 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 2	17	3.00	1.0000	1.0500
 2	10	1.00	0.4000	1.0000
 2	11	0.50	0.2000	1.0000
-2	18	5.00	0.0000	1.0000
 2	19	5.00	0.3000	1.0000
 2	20	3.00	0.1000	1.0000
 2	30	0.00	0.2000	1.0000
@@ -6714,6 +6714,8 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 2	33	0.00	0.2000	1.0000
 2	34	0.00	0.2000	1.0000
 2	35	0.00	0.2000	1.0000
+1	18	7.00	0.0000	1.0000
+2	18	7.00	0.0000	1.0000
 \.
 
 
@@ -6974,6 +6976,16 @@ COPY public.equip_slot (id, slug, name) FROM stdin;
 --
 
 COPY public.exp_for_level (id, level, experience_points) FROM stdin;
+1	1	100
+2	2	500
+3	3	1000
+4	4	2000
+5	5	4000
+6	6	8000
+7	7	15000
+8	8	25000
+9	9	40000
+10	10	60000
 1	1	100
 2	2	500
 3	3	1000
@@ -8774,7 +8786,7 @@ SELECT pg_catalog.setval('public.user_sessions_id_seq', 59, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 2, true);
+SELECT pg_catalog.setval('public.users_id_seq', 3, true);
 
 
 --
@@ -10103,6 +10115,13 @@ CREATE INDEX idx_player_inventory_character ON public.player_inventory USING btr
 --
 
 CREATE INDEX idx_player_inventory_ground ON public.player_inventory USING btree (id) WHERE (character_id IS NULL);
+
+
+--
+-- Name: idx_player_inventory_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_player_inventory_unique ON public.player_inventory USING btree (character_id, item_id);
 
 
 --

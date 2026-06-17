@@ -61,6 +61,28 @@ bool EventQueue::popBatch(std::vector<Event> &events, int batchSize)
     return !events.empty();
 }
 
+bool EventQueue::tryPopBatch(std::vector<Event> &events, int batchSize, int timeoutMs)
+{
+    std::unique_lock<std::mutex> lock(mtx);
+    if (!cv.wait_for(lock, std::chrono::milliseconds(timeoutMs), [this]
+            { return !queue.empty(); }))
+    {
+        return false;
+    }
+
+    int actualSize = std::min(batchSize, static_cast<int>(queue.size()));
+    events.reserve(events.size() + actualSize);
+
+    while (!queue.empty() && batchSize > 0)
+    {
+        events.push_back(std::move(queue.front()));
+        queue.pop();
+        batchSize--;
+    }
+
+    return !events.empty();
+}
+
 bool EventQueue::empty()
 {
     std::unique_lock<std::mutex> lock(mtx);

@@ -12,6 +12,7 @@ public:
 
     void pushBatch(const std::vector<Event> &events);
     bool popBatch(std::vector<Event> &events, int batchSize);
+    bool tryPopBatch(std::vector<Event> &events, int batchSize, int timeoutMs);
     bool empty();
 
 private:

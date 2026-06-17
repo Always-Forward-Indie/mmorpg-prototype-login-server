@@ -20,7 +20,9 @@ std::tuple<DatabaseConfig, LoginServerConfig> Config::parseConfig() {
     LoginServerConfig LSConfig;
     LSConfig.host        = getEnvOrDefault("SERVER_HOST", "0.0.0.0");
     LSConfig.port        = static_cast<short>(std::stoi(getEnvOrDefault("SERVER_PORT", "27014")));
-    LSConfig.max_clients = static_cast<short>(std::stoi(getEnvOrDefault("SERVER_MAX_CLIENTS", "3000")));
+    LSConfig.max_clients      = static_cast<short>(std::stoi(getEnvOrDefault("SERVER_MAX_CLIENTS", "3000")));
+    LSConfig.minClientVersion = getEnvOrDefault("MIN_CLIENT_VERSION", "0.1.0");
+    LSConfig.maxClientVersion = getEnvOrDefault("MAX_CLIENT_VERSION", "0.1.0");
 
     return std::make_tuple(DBConfig, LSConfig);
 }

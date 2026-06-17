@@ -48,6 +48,7 @@ AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
                                                       const std::string &password,
                                                       const std::string &email,
                                                       const std::string &registrationIp,
+                                                      const std::string &clientVersion,
                                                       int &outUserId,
                                                       std::string &outHash)
 {
@@ -83,7 +84,7 @@ AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
 
         pqxx::work txn(conn);
         pqxx::result insertResult = txn.exec_prepared(
-            "register_user", login, passwordHash, email, ipStr);
+            "register_user", login, passwordHash, email, ipStr, clientVersion);
 
         if (insertResult.empty())
         {
@@ -98,8 +99,9 @@ AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
         boost::uuids::uuid uuid = boost::uuids::random_generator()();
         std::string sessionHash = boost::uuids::to_string(uuid);
 
+        txn.exec_prepared("revoke_user_sessions", userId);
         txn.exec_prepared("cleanup_expired_sessions");
-        txn.exec_prepared("create_user_session", userId, sessionHash);
+        txn.exec_prepared("create_user_session", userId, sessionHash, clientVersion);
         txn.commit();
 
         // --- Populate in-memory client store --------------------------------
@@ -107,6 +109,7 @@ AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
         data.clientId = userId;
         data.login = login;
         data.hash = sessionHash;
+        data.clientVersion = clientVersion;
         clientData.storeClientData(data);
 
         outUserId = userId;

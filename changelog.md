@@ -1,3 +1,45 @@
+v0.1.18
+17.06.2026
+================
+New:
+
+**Валидация версии клиента.**
+- `LoginServerConfig` — новые поля `minClientVersion`, `maxClientVersion` (env vars `MIN_CLIENT_VERSION`, `MAX_CLIENT_VERSION`).
+- `NetworkManager::checkClientVersion()` — новый метод: парсит semver клиента, сравнивает с `[min, max]`, при выходе за диапазон возвращает `ERR_VERSION_OUTDATED` / `ERR_VERSION_TOO_NEW`.
+- Вызывается при `authenticateClient` и `registerAccount` до обработки события.
+- `ClientDataStruct`, `RegistrationDataStruct` — поле `clientVersion`.
+
+**Хранение версии клиента в БД.**
+- `users.client_version` (VARCHAR 32) — последняя версия при логине/регистрации.
+- `user_sessions.client_version` (VARCHAR 32) — версия на сессию.
+- `register_user` — параметр `$5` (client_version).
+- `reset_failed_logins` — параметр `$3` (client_version).
+- `create_user_session` — параметр `$3` (client_version).
+
+**Revoke активных сессий при логине/регистрации.**
+- `revoke_user_sessions` — новый prepared statement: `UPDATE user_sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > NOW()`.
+- Вызывается в `authenticate()` и `registerAccount()` перед созданием новой сессии — только одна активная сессия на пользователя.
+
+**Периодическая очистка истёкших сессий.**
+- `EventQueue::tryPopBatch()` — новый метод с `wait_for` и таймаутом вместо блокирующего `popBatch()`.
+- `LoginServer::mainEventLoop()` — при таймауте (60s без событий) выполняет `cleanup_expired_sessions`.
+
+DB:
+
+**Migration 073 — `client_version` columns.**
+- `users.client_version VARCHAR(32)`, `user_sessions.client_version VARCHAR(32)`.
+
+**Migration 074 — уникальный индекс инвентаря.**
+- `idx_player_inventory_unique` — `CREATE UNIQUE INDEX ON player_inventory (character_id, item_id)`.
+- Pre-cleanup: DO-блок мержит существующие дубликаты строк инвентаря (суммирует quantity в одну строку).
+
+Balance:
+
+**Move speed — базовое значение повышено с 5.0 до 7.0.**
+- `class_stat_formula` для атрибута `move_speed` (id=18): `base_value` изменён с 5.00 на 7.00 для Mage и Warrior.
+- Дамп БД актуализирован.
+
+---
 v0.1.17
 15.06.2026
 ================

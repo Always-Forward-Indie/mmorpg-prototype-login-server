@@ -42,7 +42,7 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
                 if (!ec)
                     clientIp = endpoint.address().to_string();
             }
-            int authClientID = authenticator.authenticate(poolGuard.get(), clientData, passedClientData.login, passedClientData.password, clientIp);
+            int authClientID = authenticator.authenticate(poolGuard.get(), clientData, passedClientData.login, passedClientData.password, clientIp, passedClientData.clientVersion);
 
             // Get the clientData object with the new init data
             const ClientDataStruct *currentClientData = clientData.getClientData(authClientID);
@@ -431,7 +431,7 @@ void EventHandler::handleRegisterAccountEvent(const Event &event, ClientData &cl
         auto poolGuard = pool_.acquire();
         AccountRegisterResult result = accountManager_.registerAccount(
             poolGuard.get(), clientData,
-            reg.login, reg.password, reg.email, reg.registrationIp,
+            reg.login, reg.password, reg.email, reg.registrationIp, reg.clientVersion,
             userId, sessionHash);
 
         if (result != AccountRegisterResult::OK)

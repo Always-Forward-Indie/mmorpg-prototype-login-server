@@ -1,6 +1,38 @@
 #include "network/NetworkManager.hpp"
 #include "utils/TimestampUtils.hpp"
 #include <spdlog/logger.h>
+#include <sstream>
+
+struct Version {
+    int major = 0;
+    int minor = 0;
+    int patch = 0;
+};
+
+static bool parseVersion(const std::string& s, Version& v)
+{
+    if (s.empty())
+        return false;
+    std::stringstream ss(s);
+    std::string segment;
+    if (!std::getline(ss, segment, '.'))
+        return false;
+    try { v.major = std::stoi(segment); } catch (...) { return false; }
+    if (!std::getline(ss, segment, '.'))
+        return false;
+    try { v.minor = std::stoi(segment); } catch (...) { return false; }
+    if (!std::getline(ss, segment, '.'))
+        return false;
+    try { v.patch = std::stoi(segment); } catch (...) { return false; }
+    return true;
+}
+
+static int compareVersions(const Version& a, const Version& b)
+{
+    if (a.major != b.major) return a.major - b.major;
+    if (a.minor != b.minor) return a.minor - b.minor;
+    return a.patch - b.patch;
+}
 
 NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig, LoginServerConfig> &configs, Logger &logger)
     : acceptor_(io_context_),
@@ -193,6 +225,10 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
             // clientData.characterData = characterData;
             clientData.socket = clientSocket;
 
+            // Version check — reject early if client version is outside [min, max]
+            if (!checkClientVersion(clientData.clientVersion, eventType, clientSocket))
+                return;
+
             // Create a new event where authentificate the client and push it to the queue
             Event authentificationClientEvent(Event::AUTH_CLIENT, clientData.clientId, clientData, clientSocket);
             authentificationClientEvent.setTimestamps(timestamps); // Add timestamps
@@ -265,11 +301,17 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
                         reg.password = body["password"].get<std::string>();
                     if (body.contains("email") && body["email"].is_string())
                         reg.email = body["email"].get<std::string>();
+                    if (body.contains("clientVersion") && body["clientVersion"].is_string())
+                        reg.clientVersion = body["clientVersion"].get<std::string>();
                 }
             }
             catch (...)
             {
             }
+
+            // Version check — reject early if client version is outside [min, max]
+            if (!checkClientVersion(reg.clientVersion, eventType, clientSocket))
+                return;
 
             Event registerEvent(Event::REGISTER_ACCOUNT, 0, reg, clientSocket);
             registerEvent.setTimestamps(timestamps);
@@ -299,6 +341,46 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
     {
         logger_.logError("processMessage error: " + std::string(e.what()), RED);
     }
+}
+
+bool NetworkManager::checkClientVersion(const std::string &clientVersion, const std::string &eventType,
+                                         std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
+{
+    const std::string &minVer = std::get<1>(configs_).minClientVersion;
+    const std::string &maxVer = std::get<1>(configs_).maxClientVersion;
+
+    Version client, vmin, vmax;
+    const bool clientOk = parseVersion(clientVersion, client);
+    const bool minOk = parseVersion(minVer, vmin);
+    const bool maxOk = parseVersion(maxVer, vmax);
+
+    if (!clientOk || !minOk || !maxOk || compareVersions(client, vmin) < 0)
+    {
+        const char *errorCode = "ERR_VERSION_OUTDATED";
+        nlohmann::json err;
+        err["header"]["eventType"] = eventType;
+        err["header"]["message"] = errorCode;
+        err["body"] = nlohmann::json::object();
+        sendResponse(clientSocket, generateResponseMessage("error", err));
+        logger_.logError("Version mismatch: client=" + clientVersion +
+                         " server_min=" + minVer + " server_max=" + maxVer);
+        return false;
+    }
+
+    if (compareVersions(client, vmax) > 0)
+    {
+        const char *errorCode = "ERR_VERSION_TOO_NEW";
+        nlohmann::json err;
+        err["header"]["eventType"] = eventType;
+        err["header"]["message"] = errorCode;
+        err["body"] = nlohmann::json::object();
+        sendResponse(clientSocket, generateResponseMessage("error", err));
+        logger_.logError("Version mismatch: client=" + clientVersion +
+                         " server_min=" + minVer + " server_max=" + maxVer);
+        return false;
+    }
+
+    return true;
 }
 
 void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString)

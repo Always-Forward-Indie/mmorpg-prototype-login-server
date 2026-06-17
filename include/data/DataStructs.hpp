@@ -54,6 +54,7 @@ struct ClientDataStruct
     std::string password = "";
     std::string hash = "";
     int role = 0;
+    std::string clientVersion = "";
     std::shared_ptr<boost::asio::ip::tcp::socket> socket;
     CharacterDataStruct characterData;
     bool needDBUpdate = false;
@@ -72,6 +73,7 @@ struct RegistrationDataStruct
     std::string password = "";
     std::string email = ""; // optional
     std::string registrationIp = "";
+    std::string clientVersion = "";
     std::shared_ptr<boost::asio::ip::tcp::socket> socket;
 };
 
