@@ -8111,11 +8111,26 @@ COPY public.skills (id, name, slug, scale_stat_id, school_id, animation_name, is
 
 COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_time) FROM stdin;
 1	1	4	25	00:01:00
-2	2	6	8	00:01:00
-3	3	3	10	00:01:00
 5	5	9	1	00:05:00
 6	6	10	1	00:10:00
-4	4	5	4	00:01:00
+7	7	5	3	00:01:00
+8	9	5	3	00:01:00
+9	8	5	3	00:01:00
+4	4	5	3	00:01:00
+3	3	3	5	00:01:00
+10	11	3	7	00:01:00
+11	10	3	6	00:01:00
+12	13	6	7	00:03:00
+2	2	6	7	00:03:00
+15	15	3	5	00:02:00
+14	14	4	5	00:01:00
+16	16	6	13	00:03:00
+17	17	4	5	00:02:00
+13	12	6	5	00:03:00
+18	18	6	10	00:05:00
+19	18	3	12	00:05:00
+20	19	4	4	00:03:00
+21	20	4	8	00:03:00
 \.
 
 
@@ -8126,10 +8141,24 @@ COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_tim
 COPY public.spawn_zones (zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn_z, max_spawn_x, max_spawn_y, max_spawn_z, game_zone_id, shape_type, center_x, center_y, inner_radius, outer_radius, exclusion_game_zone_id) FROM stdin;
 6	Stone Circle	0	0	830	0	0	960	2	CIRCLE	-12032.552595842932	16916.98064456221	0	835.8154207180941	\N
 3	Boar Grove	0	0	450	0	0	600	2	CIRCLE	-850.226306775221	15642.154846168898	0	1800	\N
-2	Wolf Den	-720.424608875459	-21622.574107102497	500	1347.0295356623174	-20122.574107102497	650	2	RECT	313.3024633934292	-20872.574107102497	0	0	\N
+2	Wolf Den	-1951.544339685708	-23693.42459259131	500	2657.155968128958	-17740.056767833525	650	2	RECT	352.80581422162504	-20716.740680212417	0	0	\N
 1	Fox Glade	5549.27440860249	7606.171800291835	250	8549.27440860249	9106.171800291835	350	2	ANNULUS	-434.657331344104	-973.2708228250776	5608.287819504758	8172.50264880794	\N
-5	Deep Thicket	0	0	450	0	0	600	2	CIRCLE	18268.79008474665	18532.813925674505	0	800	\N
 4	Ruins Outskirts	0	0	1500	0	0	1650	2	CIRCLE	20796.443474754982	-17054.468816737615	0	772.2266057201705	\N
+15	boar_3	3188.8218987050714	-17970.242667433344	620	6771.695202714014	-12786.898039806183	750	\N	RECT	4980.258550709543	-15378.570353619763	0	0	\N
+7	ruins_1	17468.53488428209	-17209.9101204003	1500	18148.598506284492	-15339.882605710198	1650	6	RECT	17808.56669528329	-16274.896363055248	0	0	\N
+8	ruins_2	22027.090603959743	-17404.355670190045	1500	23093.581810484688	-16357.022988333214	1650	6	RECT	22560.336207222215	-16880.68932926163	0	0	\N
+9	ruins_3	20855.787523907682	-14915.832163101113	1500	22218.55162976451	-14205.482209088103	1650	6	RECT	21537.169576836095	-14560.657186094608	0	0	\N
+10	boar_1	2062.919539694878	12912.157347752021	450	6862.157705932572	16613.41482651099	600	\N	RECT	4462.538622813725	14762.786087131506	0	0	\N
+14	fox1	10774.471786109243	-12803.539357122761	620	13926.698788349167	-8826.046130716015	750	\N	RECT	12350.585287229205	-10814.792743919388	0	0	\N
+16	wolf_3	-19526.957843357624	5391.326895782346	650	-12607.81586097108	14124.5786749396	750	\N	RECT	-16067.386852164353	9757.952785360972	0	0	\N
+17	fox_2	-12272.38052149392	-18360.25458771753	600	-8285.236957792622	-13967.147315712115	700	\N	RECT	-10278.808739643271	-16163.700951714822	0	0	\N
+11	boar_2	-8134.241077515209	-18446.399423051505	500	-2513.2446743160326	-12512.090341322168	650	\N	RECT	-5323.742875915621	-15479.244882186837	0	0	\N
+13	wolf_3	-14242.794254285778	-13386.031610287424	500	-9491.888531603938	-8919.913008089548	650	\N	RECT	-11867.341392944858	-11152.972309188486	0	0	\N
+12	wolf_1	6919.023981011735	17395.807505229495	450	10888.078075275156	24380.032126823586	600	\N	RECT	8903.551028143445	20887.91981602654	0	0	\N
+19	fox_3	13400.099229388383	-1604.2616976146674	500	17146.657100585544	1723.9911685459156	600	\N	RECT	15273.378164986963	59.86473546562411	0	0	\N
+20	fox_4	15169.606163730015	-8169.61539156628	600	24052.09210142437	-4808.235886808077	700	\N	RECT	19610.84913257719	-6488.925639187179	0	0	\N
+18	forest_1	12717.175613729672	5406.075893434718	600	25629.894650595794	24820.782431196334	700	7	RECT	19173.53513216273	15113.429162315526	0	0	\N
+5	Deep Thicket	0	0	500	0	0	600	2	CIRCLE	18268.79008474665	18532.813925674505	0	800	\N
 \.
 
 
@@ -8301,8 +8330,9 @@ COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration
 
 COPY public.zones (id, slug, name, min_level, max_level, is_pvp, is_safe_zone, min_x, max_x, min_y, max_y, exploration_xp_reward, champion_threshold_kills, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
 1	village	Village	1	5	f	t	-5440.2178821979505	4568.621024817196	-5471.3412259071965	3002.10848639096	100	100	CIRCLE	-364.183657769343	-962.321990454137	0	4966.320930263775
-2	fields	Fields	1	2	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	100	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	8586.163024291778
-6	ruins	ruins	1	2	f	f	16339.084894023457	25193.736027167175	-21151.22668900151	-12934.748610498787	100	100	CIRCLE	20766.410460595318	-17042.987649750146	0	4427
+2	fields	Fields	1	2	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	100	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	10068.481043434242
+7	forest	Forest	3	10	f	f	10547.6533783079	27781.22904413805	3698.038360451581	28236.99545741896	100	100	RECT	19164.441211222977	15967.516908935271	0	0
+6	ruins	ruins	1	2	f	f	16882.78628907363	24481.746105077662	-20335.67459642625	-13737.355431763328	100	100	RECT	20682.266197075645	-17036.515014094788	0	4427
 \.
 
 
@@ -8331,7 +8361,7 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 53, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 69, true);
 
 
 --
@@ -8345,21 +8375,21 @@ SELECT pg_catalog.setval('public.character_equipment_id_seq', 6, true);
 -- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_position_id_seq', 3, true);
+SELECT pg_catalog.setval('public.character_position_id_seq', 4, true);
 
 
 --
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 3, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 4, true);
 
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.characters_id_seq', 3, true);
+SELECT pg_catalog.setval('public.characters_id_seq', 4, true);
 
 
 --
@@ -8436,7 +8466,7 @@ SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 -- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 113, true);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 145, true);
 
 
 --
@@ -8611,7 +8641,7 @@ SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1, false);
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 6, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 7, true);
 
 
 --
@@ -8723,14 +8753,14 @@ SELECT pg_catalog.setval('public.skills_id_seq', 12, true);
 -- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.spawn_zone_mobs_id_seq', 6, true);
+SELECT pg_catalog.setval('public.spawn_zone_mobs_id_seq', 21, true);
 
 
 --
 -- Name: spawn_zones_zone_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.spawn_zones_zone_id_seq', 6, true);
+SELECT pg_catalog.setval('public.spawn_zones_zone_id_seq', 20, true);
 
 
 --
@@ -8779,7 +8809,7 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 59, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 75, true);
 
 
 --
@@ -8821,7 +8851,7 @@ SELECT pg_catalog.setval('public.zone_event_templates_id_seq', 3, true);
 -- Name: zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.zones_id_seq', 6, true);
+SELECT pg_catalog.setval('public.zones_id_seq', 7, true);
 
 
 --
