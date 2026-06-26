@@ -1,3 +1,97 @@
+v0.1.19
+26.06.2026
+================
+New:
+
+**DatabasePool — пул соединений PostgreSQL.**
+- `DatabasePool` (`include/utils/DatabasePool.hpp`, `src/utils/DatabasePool.cpp`) — пул из 5 подключений (конфигурируется), RAII-гарды, таймаут получения 5000ms, `prepareQueriesOn()` на каждом коннекте.
+- `main.cpp`, `LoginServer`, `EventHandler`, `AccountManager` — все переведены на `DatabasePool` вместо одиночного `Database`. Устраняет O(N) латенси логина от сериализации на одном подключении при 2000+ конкурентных логинах.
+
+**ThreadPool — асинхронная обработка событий.**
+- `ThreadPool` (`include/utils/ThreadPool.hpp`, `src/utils/ThreadPool.cpp`) — пул потоков размером `hardware_concurrency`. Поддерживает `enqueueTask()` и `enqueueTask(F&&, Args...)` с `std::future`.
+- `LoginServer::processBatch()` — события диспетчеризуются асинхронно через `threadPool_.enqueueTask()` с deep-copy данных события.
+
+**Timestamp/Lag-компенсация.**
+- `TimestampStruct` (`DataStructs.hpp`) — поля `serverRecvMs`, `serverSendMs`, `clientSendMsEcho`, `requestId`.
+- `TimestampUtils` — утилиты для работы с таймстемпами.
+- `NetworkManager::processMessage()` — парсинг таймстемпов из каждого сообщения.
+- `NetworkManager::generateResponseMessage()` — вторая перегрузка с таймстемпами в заголовке ответа.
+- `ResponseBuilder::setTimestamps()` — включение таймстемпов в ответ.
+- `EventHandler::handlePingClientEvent()` — возвращает `serverRecvMs`, `serverSendMs`, `clientSendMsEcho` в ping-ответе.
+
+**Ping/Pong система.**
+- `Event::PING_CLIENT` — новый тип события.
+- `EventHandler::handlePingClientEvent()` — обработка пинга с лаг-метриками.
+- `NetworkManager::processMessage()` — роутинг `"pingClient"` → `PING_CLIENT`.
+
+**Disconnect client.**
+- `Event::DISCONNECT_CLIENT` — новый тип события.
+- `EventHandler::handleDisconnectClientEvent()` — удаление данных клиента и broadcast дисконнекта.
+- `NetworkManager::processMessage()` — роутинг `disconnect` → `DISCONNECT_CLIENT`.
+
+**ResponseBuilder — builder-паттерн для JSON-ответов.**
+- `ResponseBuilder` (`include/utils/ResponseBuilder.hpp`) — method chaining: `setHeader()`, `setBody()`, `setTimestamps()`, `build()`. Используется во всех обработчиках событий.
+
+DB:
+
+**init_character_state и init_character_position — начальная инициализация персонажа.**
+- `init_character_state` — `INSERT INTO character_current_state (character_id, current_health, current_mana) VALUES ($1, 1, 1) ON CONFLICT (character_id) DO NOTHING`. Предотвращает старт персонажа с 0 HP/0 MP.
+- `init_character_position` — `INSERT INTO character_position (character_id, zone_id, x, y, z) VALUES ($1, 1, 0, 0, 200) ON CONFLICT (character_id) DO NOTHING`. Выдаёт стартовую позицию в village.
+
+**Account lockout — защита от брутфорса.**
+- `increment_failed_logins` — при 5 неудачных попытках `locked_until = now() + interval '15 minutes'`.
+- `search_user` — проверка `is_active = true` и фильтрация заблокированных аккаунтов (`locked_until IS NULL OR locked_until < now()`).
+
+**Migration 041 — mastery slugs, quest reputation, 3-tier durability.**
+- `items.mastery_slug` заполнен для `iron_sworld` (sword_mastery) и `wooden_staff` (staff_mastery).
+- `quest` — колонки `reputation_faction_slug`, `reputation_on_complete`, `reputation_on_fail`.
+- `game_config` — трёхуровневая система штрафов прочности: tier1 (75%=−5%), tier2 (50%=−15%), tier3 (25%=−30%).
+
+**Migration 064 — новые скилы + skill_active_effects.**
+- Таблица `skill_active_effects` — timed buff/heal/dot/hot определения для активных скилов.
+- 3 новых `skill_damage_types`: buff (5), heal (6), teleport_respawn (7).
+- 4 новых `skill_damage_formulas`: heal_coeff, heal_flat, buff_marker, teleport_marker.
+- 3 новых скила: Battle Cry (Warrior, +25 phys_atk на 30s), Healing Surge (Mage, MagAtk×1.5+80 HP), Blink Home (оба класса, телепорт к респавну).
+- `class_skill_tree` — записи для всех трёх скилов с требованиями по уровню и стоимости.
+- `skill_properties_mapping` — кулдауны, каст-тайм, MP cost, GCD, swing time для новых скилов.
+
+**Migration 064b — фикс конфликта slug формул.**
+- Заменены конфликтующие slug `coeff`/`flat_add` на уникальные `heal_coeff`/`heal_flat`/`buff_marker`/`teleport_marker`.
+- Добавлены отсутствующие строки `skill_effects_mapping`.
+
+**Migration 065 — регистрация status_effects для Battle Cry.**
+- Battle Cry зарегистрирован в `status_effects` (buff, 30s duration).
+- `status_effect_modifiers` — привязка к `physical_attack` с +25 flat модификатором.
+
+**Migration 066 — utility skill school для Blink Home.**
+- `skill_scale_type` — добавлен `none` (id=3).
+- `skill_school` — добавлен `none` (id=9).
+- Blink Home обновлён на none/none.
+
+**Migration 067 — player_skill_cooldown (персистентность кулдаунов).**
+- Таблица `player_skill_cooldown` — хранение активных кулдаунов между сессиями. PK (character_id, skill_slug), индекс.
+
+Fixes:
+
+**NetworkManager — CRITICAL-11: Use-after-free в sendResponse.**
+- `sendResponse()` теперь копирует `responseString` в `std::make_shared<const std::string>()` перед `async_write`. Предотвращает уничтожение данных до завершения асинхронной записи.
+
+**Database — CRITICAL-10: Сериализация pqxx-транзакций.**
+- Добавлен `mutable std::mutex dbMutex_` и RAII-обёртка `ScopedConnection`. Все транзакции сериализуются через `getConnectionLocked()` — предотвращает повреждение данных при конкурентном доступе к одному pqxx-подключению.
+
+**Database — HIGH-10: Авто-переподключение.**
+- `Database::getConnectionLocked()` сохраняет строку подключения в `connectionString_`. При обрыве соединения прозрачно переподключается и перерегистрирует все prepared statements.
+
+**LoginServer — двойной join() в деструкторе.**
+- Убран второй `if (event_thread_.joinable()) event_thread_.join()` после уже вызванного `event_thread_.join()`. Предотвращает `std::system_error` → `std::terminate()` при выключении сервера.
+
+**Dockerfile.dev + watch_and_run.sh — удалён устаревший config.json.**
+- `Dockerfile.dev`: удалён `COPY config.json ./config.json`.
+- `watch_and_run.sh`: удалено копирование `config.json` в build-директорию.
+- Оба файла не были обновлены при переходе на env vars в v0.1.16.
+
+---
+
 v0.1.18
 17.06.2026
 ================
