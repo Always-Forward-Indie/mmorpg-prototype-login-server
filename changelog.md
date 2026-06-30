@@ -1,3 +1,21 @@
+v0.1.20
+30.06.2026
+================
+DB:
+
+**DB dump — актуализация контента: новые мобы, скил, mastery-атрибуты, ребаланс.**
+- `mastery_definitions` — добавлена колонка `target_attribute_slug VARCHAR(60) DEFAULT 'physical_attack'`. Данные обновлены: `staff_mastery` → `magical_attack`, остальные → `physical_attack`.
+- Новый пассивный скил `swift_feet` (id=16): +3 flat `move_speed`. Добавлены `skills`, `class_skill_tree` (для обоих классов, lvl 5), `passive_skill_modifiers`, `skill_effect_instances`, `skill_effects_mapping`.
+- Новые мобы: AncientBear (id=11, lvl 12, HP=3500, faction=hunters, patrolRadius=600) и AwakenedGolem (id=12, lvl 18, HP=8000, faction=city_guard, patrolRadius=400). Со всеми FK-данными (`mob`, `mob_stat`, `mob_skills`).
+- Новые timed champion templates: `ancient_bear` (zone 7, interval 4h), `awakened_golem` (zone 6, interval 6h).
+- Ребаланс мобов: ForestBear — chaseMultiplier 2.5→2.5, patrolRadius 500→500 (без изменений), chaseSpeed 900→600; StoneGolem — HP 5000→3000, chaseSpeed 700→500, patrolRadius 300→400, faction добавлена `city_guard`. Удалены дублирующиеся строки `mob_stat` (сортировка id перенесена в конец таблицы).
+- `class_stat_formula` — `move_speed` (id=18) повышен с 7.0 до 8.0 для обоих классов (Mage и Warrior).
+- NPC — добавлены faction_slug: Edrik→hunters, Sylara→merchants, Theron→city_guard.
+- `game_config` — `mastery.base_delta` 0.5→0.02, `mastery.db_flush_every_hits` 10→25 (ребаланс скорости прокачки мастерства).
+- `Tome of Whirlwind` (id=19) — цена покупки/продажи скорректирована: buy 0→300, sell 80→80.
+- Обновлены sequence setval под текущее состояние данных.
+
+---
 v0.1.19
 26.06.2026
 ================

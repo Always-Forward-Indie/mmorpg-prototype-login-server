@@ -2598,7 +2598,8 @@ CREATE TABLE public.mastery_definitions (
     slug character varying(60) NOT NULL,
     name character varying(120) NOT NULL,
     weapon_type_slug character varying(60) DEFAULT NULL::character varying,
-    max_value double precision DEFAULT 100.0 NOT NULL
+    max_value double precision DEFAULT 100.0 NOT NULL,
+    target_attribute_slug character varying(60) DEFAULT 'physical_attack'::character varying NOT NULL
 );
 
 
@@ -6627,13 +6628,15 @@ COPY public.class_skill_tree (id, class_id, skill_id, required_level, is_default
 14	1	9	8	f	8	1	200	1	f	\N
 16	1	11	5	f	\N	1	150	1	f	\N
 17	1	12	10	f	11	1	300	1	f	\N
-2	1	3	5	t	\N	1	120	1	f	\N
 6	2	5	10	f	4	1	300	1	t	19
 15	1	10	12	f	9	1	400	1	t	24
 23	2	13	5	f	\N	1	100	1	f	\N
 24	1	14	8	f	\N	1	150	1	f	\N
 25	1	15	5	f	\N	1	80	1	f	\N
 26	2	15	5	f	\N	1	80	1	f	\N
+2	1	3	5	t	\N	1	120	1	f	\N
+27	1	16	5	f	\N	1	100	1	f	\N
+28	2	16	5	f	\N	1	100	1	f	\N
 \.
 
 
@@ -6714,8 +6717,8 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 2	33	0.00	0.2000	1.0000
 2	34	0.00	0.2000	1.0000
 2	35	0.00	0.2000	1.0000
-1	18	7.00	0.0000	1.0000
-2	18	7.00	0.0000	1.0000
+1	18	8.00	0.0000	1.0000
+2	18	8.00	0.0000	1.0000
 \.
 
 
@@ -7070,8 +7073,6 @@ bestiary.tier3_kills	15	int	Kills to unlock tier 3: common loot table	2026-03-15
 bestiary.tier4_kills	30	int	Kills to unlock tier 4: uncommon loot table	2026-03-15 07:40:02.83585+00
 bestiary.tier5_kills	75	int	Kills to unlock tier 5: rare loot table	2026-03-15 07:40:02.83585+00
 bestiary.tier6_kills	150	int	Kills to unlock tier 6: very rare loot (approximate rate shown)	2026-03-15 07:40:02.83585+00
-mastery.base_delta	0.5	float	Base mastery gain per successful hit	2026-03-15 10:36:42.853016+00
-mastery.db_flush_every_hits	10	int	Write mastery to DB every N hits (debounce)	2026-03-15 10:36:42.853016+00
 mastery.tier1_value	20	float	Mastery tier 1 threshold	2026-03-15 10:36:42.853016+00
 mastery.tier2_value	50	float	Mastery tier 2 threshold	2026-03-15 10:36:42.853016+00
 mastery.tier3_value	80	float	Mastery tier 3 threshold (crit unlock)	2026-03-15 10:36:42.853016+00
@@ -7095,6 +7096,8 @@ combat.evasion_cap	75	float	Maximum evasion effectiveness (%). Prevents un-hitta
 combat.elemental_resistance_cap	75	float	Maximum elemental resistance per school (%). Same as max_resistance_cap default.	2026-04-18 08:09:30.487328+00
 combat.attack_speed_base_divisor	100	float	attack_speed divisor. effectiveSwingMs = baseSwingMs / (1 + attack_speed/divisor).	2026-04-18 08:09:30.487328+00
 combat.cast_speed_base_divisor	100	float	cast_speed divisor. effectiveCastMs = baseCastMs / (1 + cast_speed/divisor).	2026-04-18 08:09:30.487328+00
+mastery.base_delta	0.02	float	Base mastery gain per successful hit	2026-06-29 19:03:51.762896+00
+mastery.db_flush_every_hits	25	int	Write mastery to DB every N hits (debounce)	2026-06-29 19:03:51.769643+00
 \.
 
 
@@ -7220,7 +7223,6 @@ COPY public.items (id, name, slug, description, is_quest_item, item_type, weight
 2	Старый дубовый щит	old_oak_shield	Старый дубовый щит, повидавший немало битв, но всё ещё крепкий.	f	2	3	2	64	f	t	t	120	120	36	7	3	t	f	f	f	\N
 16	Gold Coin	gold_coin	Universal currency of the realm. Used as payment for goods and services.	f	8	0.01	1	9999999	f	f	t	100	1	1	\N	0	f	f	f	f	\N
 18	Tome of Shield Bash	tome_shield_bash	A worn training manual describing the technique of Shield Bash.	f	10	0.3	2	1	f	f	t	100	500	150	\N	5	f	f	t	f	\N
-19	Tome of Whirlwind	tome_whirlwind	An ancient scroll detailing the devastating Whirlwind technique. Rare.	f	10	0.3	3	1	f	f	t	100	0	80	\N	10	f	f	t	f	\N
 20	Tome of Iron Skin	tome_iron_skin	Teachings of hardening the body through relentless training.	f	10	0.3	2	1	f	f	t	100	400	120	\N	5	f	f	t	f	\N
 21	Tome of Constitution Mastery	tome_constitution_mastery	A guide to unlocking the body's true enduring potential.	f	10	0.3	2	1	f	f	t	100	800	240	\N	8	f	f	t	f	\N
 22	Tome of Frost Bolt	tome_frost_bolt	Basic arcane theory behind channelling cold into a bolt of frost.	f	10	0.3	2	1	f	f	t	100	500	150	\N	5	f	f	t	f	\N
@@ -7275,6 +7277,7 @@ COPY public.items (id, name, slug, description, is_quest_item, item_type, weight
 73	Сломанная печать	broken_seal	Старая сломанная магическая печать. Выпадает с мобов созданных с помощью магии.	f	6	0.2	2	64	f	f	t	100	20	6	\N	0	f	t	f	f	\N
 74	Магический камень	magical_stone	Светящийся камень пропитанный магической энергией. Выпадает с магических мобов.	f	6	0.3	3	64	f	f	t	100	55	16	\N	0	f	t	f	f	\N
 75	Мясо животного	animal_meat	Свежее мясо добытое с животного. Можно приготовить или продать.	f	6	1	1	64	f	f	t	100	8	2	\N	0	f	t	f	f	\N
+19	Tome of Whirlwind	tome_whirlwind	An ancient scroll detailing the devastating Whirlwind technique. Rare.	f	10	0.3	3	1	f	f	t	100	300	80	\N	10	f	f	t	f	\N
 \.
 
 
@@ -7295,12 +7298,12 @@ COPY public.items_rarity (id, name, color_hex, slug) FROM stdin;
 -- Data for Name: mastery_definitions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.mastery_definitions (slug, name, weapon_type_slug, max_value) FROM stdin;
-sword_mastery	Мастерство меча	sword	100
-axe_mastery	Мастерство топора	axe	100
-staff_mastery	Мастерство посоха	staff	100
-bow_mastery	Мастерство лука	bow	100
-unarmed_mastery	Рукопашный бой	\N	100
+COPY public.mastery_definitions (slug, name, weapon_type_slug, max_value, target_attribute_slug) FROM stdin;
+sword_mastery	Мастерство меча	sword	100	physical_attack
+axe_mastery	Мастерство топора	axe	100	physical_attack
+bow_mastery	Мастерство лука	bow	100	physical_attack
+unarmed_mastery	Рукопашный бой	\N	100	physical_attack
+staff_mastery	Мастерство посоха	staff	100	magical_attack
 \.
 
 
@@ -7312,11 +7315,13 @@ COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressi
 3	Простой кабан	2	2	120	10	f	f	ForestBoar	100	30	1	500	120	2	1.5	0.8	t	10	0	melee	f	f	0	\N	\N	0		beast	350
 4	Простая лиса	2	1	50	15	f	f	ForestFox	100	20	1	600	120	2.5	1	1	t	10	0	melee	f	f	0	\N	\N	0		beast	400
 6	Простой волк	2	3	150	20	t	f	ForestWolf	100	45	1	700	130	2	1	1	f	10	0	melee	f	f	0	\N	\N	0		beast	450
-7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1	1	f	10	0	melee	f	t	8	on_kill	\N	0		beast	500
-8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0	melee	f	t	8	on_kill	\N	0		beast	400
-9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	6	900	180	2.5	0.8	0.7	f	10	0	melee	f	f	0	\N	\N	0		beast	500
-10	Каменный голем	2	15	5000	200	t	f	StoneGolem	250	2000	6	700	200	3	1	0.4	f	10	0	melee	f	f	0	\N	\N	0		elemental	300
 5	Скелет	2	1	70	5	f	f	RuinSkeleton	100	25	1	500	110	2.8	1.2	0.7	f	10	0	melee	f	f	0	\N	\N	0		undead	300
+7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1	1	f	10	0	melee	f	t	8	on_kill	hunters	5		beast	500
+8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0	melee	f	t	8	on_kill	nature	5		beast	400
+9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	6	600	140	2.5	0.8	0.7	f	10	0	melee	f	f	0	\N	hunters	10		beast	500
+10	Каменный голем	2	15	3000	200	t	f	StoneGolem	250	2000	6	500	160	3	1	0.4	f	10	0	melee	f	f	0	\N	city_guard	10		elemental	300
+11	Древний медведь	2	12	3500	60	t	f	AncientBear	250	1500	6	700	160	2.5	0.9	0.5	f	15	0	melee	f	f	0	\N	hunters	25		beast	600
+12	Пробуждённый голем	2	18	8000	300	t	f	AwakenedGolem	300	3500	6	600	220	3.5	1	0.3	f	20	0	melee	f	f	0	\N	city_guard	25		elemental	400
 \.
 
 
@@ -7449,6 +7454,8 @@ COPY public.mob_skills (id, mob_id, skill_id, current_level) FROM stdin;
 11	8	1	1
 12	9	1	1
 13	10	1	1
+14	11	1	1
+15	12	1	1
 \.
 
 
@@ -7635,7 +7642,6 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 375	9	9	200.00	\N	\N
 376	9	10	3.00	\N	\N
 377	9	11	0.00	\N	\N
-378	9	12	45.00	\N	\N
 379	9	13	0.00	\N	\N
 380	9	14	10.00	\N	\N
 381	9	15	3.00	\N	\N
@@ -7653,7 +7659,6 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 393	9	33	0.00	\N	\N
 394	9	34	0.00	\N	\N
 395	9	35	0.00	\N	\N
-396	10	1	5000.00	\N	\N
 397	10	2	200.00	\N	\N
 398	10	3	30.00	\N	\N
 399	10	4	5.00	\N	\N
@@ -7663,7 +7668,6 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 403	10	9	200.00	\N	\N
 404	10	10	2.00	\N	\N
 405	10	11	1.00	\N	\N
-406	10	12	55.00	\N	\N
 407	10	13	10.00	\N	\N
 408	10	14	8.00	\N	\N
 409	10	15	1.00	\N	\N
@@ -7681,6 +7685,65 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 421	10	33	0.00	\N	\N
 422	10	34	0.00	\N	\N
 423	10	35	0.00	\N	\N
+378	9	12	35.00	\N	\N
+396	10	1	3000.00	\N	\N
+406	10	12	40.00	\N	\N
+424	11	1	3500.00	\N	\N
+425	11	2	60.00	\N	\N
+426	11	3	30.00	\N	\N
+427	11	4	3.00	\N	\N
+428	11	6	30.00	\N	\N
+429	11	7	12.00	\N	\N
+430	11	8	10.00	\N	\N
+431	11	9	200.00	\N	\N
+432	11	10	4.00	\N	\N
+433	11	11	0.00	\N	\N
+434	11	12	55.00	\N	\N
+435	11	13	0.00	\N	\N
+436	11	14	12.00	\N	\N
+437	11	15	3.00	\N	\N
+438	11	16	0.00	\N	\N
+439	11	17	0.00	\N	\N
+440	11	18	3.50	\N	\N
+441	11	19	4.00	\N	\N
+442	11	20	0.00	\N	\N
+443	11	27	25.00	\N	\N
+444	11	28	2.00	\N	\N
+445	11	29	3.00	\N	\N
+446	11	30	0.00	\N	\N
+447	11	31	0.00	\N	\N
+448	11	32	0.00	\N	\N
+449	11	33	0.00	\N	\N
+450	11	34	0.00	\N	\N
+451	11	35	0.00	\N	\N
+452	12	1	8000.00	\N	\N
+453	12	2	300.00	\N	\N
+454	12	3	40.00	\N	\N
+455	12	4	8.00	\N	\N
+456	12	6	50.00	\N	\N
+457	12	7	40.00	\N	\N
+458	12	8	3.00	\N	\N
+459	12	9	200.00	\N	\N
+460	12	10	3.00	\N	\N
+461	12	11	2.00	\N	\N
+462	12	12	65.00	\N	\N
+463	12	13	15.00	\N	\N
+464	12	14	10.00	\N	\N
+465	12	15	1.00	\N	\N
+466	12	16	0.00	\N	\N
+467	12	17	0.00	\N	\N
+468	12	18	2.50	\N	\N
+469	12	19	3.00	\N	\N
+470	12	20	0.00	\N	\N
+471	12	27	35.00	\N	\N
+472	12	28	5.00	\N	\N
+473	12	29	1.00	\N	\N
+474	12	30	0.00	\N	\N
+475	12	31	0.00	\N	\N
+476	12	32	0.00	\N	\N
+477	12	33	0.00	\N	\N
+478	12	34	0.00	\N	\N
+479	12	35	0.00	\N	\N
 \.
 
 
@@ -7698,11 +7761,11 @@ COPY public.mob_weaknesses (mob_id, element_slug) FROM stdin;
 
 COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead, slug, radius, is_interactable, npc_type, faction_slug) FROM stdin;
 1	Varan	1	1	100	10	f	varan	100	t	1	\N
-3	Edrik	1	1	100	20	f	edrik	100	t	1	\N
 2	Milaya	1	1	100	50	f	milaya	100	t	3	\N
-4	Theron	1	5	500	100	f	theron	100	t	6	\N
-5	Sylara	1	5	400	250	f	sylara	100	t	6	\N
 6	ruins_dying_stranger	1	1	1	0	f	ruins_dying_stranger	300	t	1	\N
+3	Edrik	1	1	100	20	f	edrik	100	t	1	hunters
+5	Sylara	1	5	400	250	f	sylara	100	t	6	merchants
+4	Theron	1	5	500	100	f	theron	100	t	6	city_guard
 \.
 
 
@@ -7820,6 +7883,7 @@ COPY public.passive_skill_modifiers (id, skill_id, attribute_slug, modifier_type
 2	7	max_health	percent	8
 3	11	max_mana	flat	200
 4	12	magical_attack	percent	12
+5	16	move_speed	flat	3
 \.
 
 
@@ -7932,6 +7996,7 @@ COPY public.skill_effect_instances (id, skill_id, order_idx, target_type_id) FRO
 14	14	1	1
 15	14	2	1
 16	15	1	1
+17	16	1	1
 \.
 
 
@@ -7964,6 +8029,7 @@ COPY public.skill_effects_mapping (id, effect_instance_id, effect_id, value, lev
 22	14	4	1.5	1	0	0	\N
 23	15	5	80	1	0	0	\N
 24	16	7	0	1	0	0	\N
+25	17	3	0	1	0	0	\N
 \.
 
 
@@ -8102,6 +8168,7 @@ COPY public.skills (id, name, slug, scale_stat_id, school_id, animation_name, is
 13	Battle Cry	battle_cry	1	1	\N	f
 14	Healing Surge	healing_surge	2	7	\N	f
 15	Blink Home	blink_home	3	9	\N	f
+16	Swift Feet	swift_feet	1	1	\N	t
 \.
 
 
@@ -8199,6 +8266,8 @@ COPY public.target_type (id, slug) FROM stdin;
 --
 
 COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interval_hours, window_minutes, next_spawn_at, last_killed_at, announcement_key) FROM stdin;
+3	ancient_bear	7	11	4	30	\N	\N	champion.ancient_bear
+4	awakened_golem	6	12	6	45	\N	\N	champion.awakened_golem
 \.
 
 
@@ -8361,42 +8430,42 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 69, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 121, true);
 
 
 --
 -- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 6, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 14, true);
 
 
 --
 -- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_position_id_seq', 4, true);
+SELECT pg_catalog.setval('public.character_position_id_seq', 8, true);
 
 
 --
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 4, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 11, true);
 
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.characters_id_seq', 4, true);
+SELECT pg_catalog.setval('public.characters_id_seq', 8, true);
 
 
 --
 -- Name: class_skill_tree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.class_skill_tree_id_seq', 26, true);
+SELECT pg_catalog.setval('public.class_skill_tree_id_seq', 28, true);
 
 
 --
@@ -8466,7 +8535,7 @@ SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 -- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 145, true);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 494, true);
 
 
 --
@@ -8529,7 +8598,7 @@ SELECT pg_catalog.setval('public.mob_active_effect_id_seq', 1, false);
 -- Name: mob_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.mob_id_seq', 10, true);
+SELECT pg_catalog.setval('public.mob_id_seq', 12, true);
 
 
 --
@@ -8557,14 +8626,14 @@ SELECT pg_catalog.setval('public.mob_race_id_seq', 3, true);
 -- Name: mob_skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.mob_skills_id_seq', 13, true);
+SELECT pg_catalog.setval('public.mob_skills_id_seq', 15, true);
 
 
 --
 -- Name: mob_stat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.mob_stat_id_seq', 423, true);
+SELECT pg_catalog.setval('public.mob_stat_id_seq', 479, true);
 
 
 --
@@ -8627,21 +8696,21 @@ SELECT pg_catalog.setval('public.npc_type_id_seq', 6, true);
 -- Name: passive_skill_modifiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 1, false);
+SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 5, true);
 
 
 --
 -- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_active_effect_id_seq', 1, false);
+SELECT pg_catalog.setval('public.player_active_effect_id_seq', 60, true);
 
 
 --
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 7, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 55, true);
 
 
 --
@@ -8690,7 +8759,7 @@ SELECT pg_catalog.setval('public.skill_active_effects_id_seq', 1, true);
 -- Name: skill_effect_instances_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skill_effect_instances_id_seq', 3, true);
+SELECT pg_catalog.setval('public.skill_effect_instances_id_seq', 17, true);
 
 
 --
@@ -8704,7 +8773,7 @@ SELECT pg_catalog.setval('public.skill_effects_id_seq', 7, true);
 -- Name: skill_effects_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skill_effects_mapping_id_seq', 6, true);
+SELECT pg_catalog.setval('public.skill_effects_mapping_id_seq', 25, true);
 
 
 --
@@ -8746,7 +8815,7 @@ SELECT pg_catalog.setval('public.skills_attributes_mapping_id_seq', 50, true);
 -- Name: skills_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skills_id_seq', 12, true);
+SELECT pg_catalog.setval('public.skills_id_seq', 16, true);
 
 
 --
@@ -8788,7 +8857,7 @@ SELECT pg_catalog.setval('public.target_type_id_seq', 6, true);
 -- Name: timed_champion_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.timed_champion_templates_id_seq', 1, false);
+SELECT pg_catalog.setval('public.timed_champion_templates_id_seq', 4, true);
 
 
 --
@@ -8809,7 +8878,7 @@ SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 75, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 128, true);
 
 
 --
