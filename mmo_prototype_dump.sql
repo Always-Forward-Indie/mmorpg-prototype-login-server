@@ -7098,6 +7098,7 @@ combat.attack_speed_base_divisor	100	float	attack_speed divisor. effectiveSwingM
 combat.cast_speed_base_divisor	100	float	cast_speed divisor. effectiveCastMs = baseCastMs / (1 + cast_speed/divisor).	2026-04-18 08:09:30.487328+00
 mastery.base_delta	0.02	float	Base mastery gain per successful hit	2026-06-29 19:03:51.762896+00
 mastery.db_flush_every_hits	25	int	Write mastery to DB every N hits (debounce)	2026-06-29 19:03:51.769643+00
+movement.speed_buffer_multiplier	1.3	float	Multiplier for movement speed validation (maxDist = speed x delta x multiplier). Increase for VPN/high-jitter clients. Default 1.3 = 30 percent buffer.	\N
 \.
 
 

@@ -1,3 +1,12 @@
+v0.1.21
+30.06.2026
+================
+DB:
+
+**DB dump — movement.speed_buffer_multiplier config key.**
+- `game_config` — добавлен ключ `movement.speed_buffer_multiplier` (float, default 1.3): множитель буфера при валидации скорости движения. Увеличение значения повышает толерантность к VPN/high-jitter клиентам (maxDist = speed × delta × multiplier).
+
+---
 v0.1.20
 30.06.2026
 ================
