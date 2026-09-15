@@ -388,33 +388,141 @@ void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> 
     // CRITICAL-11 fix: responseString is a const-ref parameter; it may be destroyed before
     // async_write completes. Copy once into a shared_ptr to keep data alive until completion.
     auto dataPtr = std::make_shared<const std::string>(responseString);
+    enqueueWrite(std::move(clientSocket), std::move(dataPtr));
+}
 
-    boost::asio::async_write(*clientSocket, boost::asio::buffer(*dataPtr),
-                             [this, clientSocket, dataPtr](const boost::system::error_code &error, size_t bytes_transferred)
-                             {
-                                 boost::system::error_code ec;
-                                 boost::asio::ip::tcp::endpoint remoteEndpoint = clientSocket->remote_endpoint(ec);
-                                 if (!ec)
-                                 {
-                                     // Successfully retrieved the remote endpoint
-                                     std::string ipAddress = remoteEndpoint.address().to_string();
-                                     std::string portNumber = std::to_string(remoteEndpoint.port());
+std::shared_ptr<NetworkManager::SocketWriteQueue>
+NetworkManager::getOrCreateWriteQueue(
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &socket)
+{
+    if (!socket)
+        return nullptr;
+    boost::asio::ip::tcp::socket *key = socket.get();
+    std::lock_guard<std::mutex> lock(writeQueuesMutex_);
+    auto it = writeQueues_.find(key);
+    if (it != writeQueues_.end())
+    {
+        // Same live object => same queue (one strand per socket, always:
+        // concurrent async_write on one socket is UB in Asio).
+        auto owner = it->second->owner.lock();
+        if (owner && owner.get() == key)
+            return it->second;
+        // Otherwise REPLACE, never mutate in place: strand callbacks may
+        // still reference the old queue object, and touching writing/queues
+        // off-strand breaks the single-writer invariant (SEGV under churn).
+        auto q = std::make_shared<SocketWriteQueue>(io_context_);
+        q->owner = socket;
+        it->second = q;
+        return q;
+    }
+    auto q = std::make_shared<SocketWriteQueue>(io_context_);
+    q->owner = socket;
+    writeQueues_.emplace(key, q);
+    return q;
+}
 
-                                     log_->debug("Bytes send: " + std::to_string(bytes_transferred));
-                                     log_->debug("Data send successfully to the Client: " + ipAddress + ", Port: " + portNumber);
+void
+NetworkManager::removeWriteQueue(boost::asio::ip::tcp::socket *key,
+    const std::shared_ptr<boost::asio::ip::tcp::socket> &expectedOwner)
+{
+    // Erase-then-recreate for one live socket yields two strands writing it
+    // (UB). So this only drops owner-expired entries now; live mappings are
+    // reclaimed by gcWriteQueues().
+    if (!key)
+        return;
+    std::lock_guard<std::mutex> lock(writeQueuesMutex_);
+    auto it = writeQueues_.find(key);
+    if (it == writeQueues_.end())
+        return;
+    if (expectedOwner)
+    {
+        auto owner = it->second->owner.lock();
+        if (owner)
+            return;
+    }
+    writeQueues_.erase(it);
+}
 
-                                     // Now you can use ipAddress and portNumber as needed
-                                 }
-                                 else
-                                 {
-                                     // Handle error
-                                 }
+void
+NetworkManager::gcWriteQueues()
+{
+    std::lock_guard<std::mutex> lock(writeQueuesMutex_);
+    for (auto it = writeQueues_.begin(); it != writeQueues_.end();)
+    {
+        // Owner expired => no posted strand lambda can reference the socket;
+        // erasing the map entry is safe (no queue fields touched off-strand).
+        if (it->second->owner.expired())
+            it = writeQueues_.erase(it);
+        else
+            ++it;
+    }
+}
 
-                                 if (error)
-                                 {
-                                     log_->error("Error during async_write: " + error.message());
-                                 }
-                             });
+void
+NetworkManager::enqueueWrite(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+    std::shared_ptr<const std::string> data)
+{
+    auto queue = getOrCreateWriteQueue(socket);
+    if (!queue)
+        return;
+    boost::asio::post(queue->strand,
+        [this, socket = std::move(socket), queue, data = std::move(data)]() mutable
+        {
+            queue->pending.push_back(std::move(data));
+            if (!queue->writing)
+                doNextWrite(std::move(socket), std::move(queue));
+        });
+}
+
+void
+NetworkManager::doNextWrite(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+    std::shared_ptr<SocketWriteQueue> queue)
+{
+    // Must be called on queue->strand.
+    if (queue->pending.empty())
+    {
+        queue->writing = false;
+        return;
+    }
+    std::shared_ptr<const std::string> data = std::move(queue->pending.front());
+    queue->pending.pop_front();
+
+    if (!socket || !socket->is_open())
+    {
+        queue->writing = false;
+        queue->pending.clear();
+        return;
+    }
+
+    queue->writing = true;
+    boost::asio::async_write(*socket,
+        boost::asio::buffer(*data),
+        boost::asio::bind_executor(queue->strand,
+            [this, socket, queue, data](const boost::system::error_code &error, size_t bytes_transferred) mutable
+            {
+                if (error)
+                {
+                    log_->error("Error during async_write: " + error.message());
+                    queue->writing = false;
+                    queue->pending.clear();
+                    if (socket->is_open())
+                    {
+                        boost::system::error_code ec;
+                        socket->close(ec);
+                    }
+                    return;
+                }
+                boost::system::error_code ec;
+                boost::asio::ip::tcp::endpoint remoteEndpoint = socket->remote_endpoint(ec);
+                if (!ec)
+                {
+                    log_->debug("Bytes send: " + std::to_string(bytes_transferred));
+                    log_->debug("Data send successfully to the Client: " +
+                                remoteEndpoint.address().to_string() + ", Port: " +
+                                std::to_string(remoteEndpoint.port()));
+                }
+                doNextWrite(std::move(socket), std::move(queue));
+            }));
 }
 
 void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
@@ -465,6 +573,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                               std::lock_guard<std::mutex> lock(activeSocketsMutex_);
                                               activeSockets_.erase(clientSocket.get());
                                           }
+                                          removeWriteQueue(clientSocket.get(), clientSocket);
                                           boost::system::error_code closeEc;
                                           clientSocket->close(closeEc);
                                       }
@@ -481,6 +590,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                               std::lock_guard<std::mutex> lock(activeSocketsMutex_);
                                               activeSockets_.erase(clientSocket.get());
                                           }
+                                          removeWriteQueue(clientSocket.get(), clientSocket);
                                           boost::system::error_code closeEc;
                                           clientSocket->close(closeEc);
                                       }
@@ -497,6 +607,7 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                               std::lock_guard<std::mutex> lock(activeSocketsMutex_);
                                               activeSockets_.erase(clientSocket.get());
                                           }
+                                          removeWriteQueue(clientSocket.get(), clientSocket);
                                           boost::system::error_code closeEc;
                                           clientSocket->close(closeEc);
                                       }

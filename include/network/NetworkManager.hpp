@@ -1,5 +1,7 @@
 #pragma once
 #include <array>
+#include <deque>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -20,6 +22,9 @@ public:
     void startAccept();
     void startIOEventLoop();
     void sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString);
+    /// Reclaim idle per-socket write queues (owner-expired only). Called
+    /// periodically (LoginServer cleanup branch).
+    void gcWriteQueues();
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message);
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message, const TimestampStruct &timestamps);
 
@@ -31,6 +36,36 @@ private:
     void processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message);
     bool checkClientVersion(const std::string &clientVersion, const std::string &eventType,
                             std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
+
+    // Per-socket serialized write queue. The io_context runs on N threads,
+    // so concurrent async_write() calls on the same socket are UB in Asio —
+    // all writes go through the socket's strand (mirrors chunk-server-new).
+    struct SocketWriteQueue
+    {
+        boost::asio::strand<boost::asio::io_context::executor_type> strand;
+        std::deque<std::shared_ptr<const std::string>> pending;
+        bool writing{false};
+        // Owner identity: a raw socket* key alone is unsafe (free+realloc may
+        // reuse the address); a stale queue must never swallow a new socket.
+        std::weak_ptr<boost::asio::ip::tcp::socket> owner;
+
+        explicit SocketWriteQueue(boost::asio::io_context &ioc)
+            : strand(boost::asio::make_strand(ioc))
+        {
+        }
+    };
+
+    std::shared_ptr<SocketWriteQueue> getOrCreateWriteQueue(
+        const std::shared_ptr<boost::asio::ip::tcp::socket> &socket);
+    void removeWriteQueue(boost::asio::ip::tcp::socket *key,
+        const std::shared_ptr<boost::asio::ip::tcp::socket> &expectedOwner);
+    void enqueueWrite(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+        std::shared_ptr<const std::string> data);
+    void doNextWrite(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+        std::shared_ptr<SocketWriteQueue> queue);
+
+    std::unordered_map<boost::asio::ip::tcp::socket *, std::shared_ptr<SocketWriteQueue>> writeQueues_;
+    std::mutex writeQueuesMutex_;
 
     boost::asio::io_context io_context_;
     boost::asio::ip::tcp::acceptor acceptor_;

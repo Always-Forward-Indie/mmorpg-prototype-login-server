@@ -1,3 +1,20 @@
+v0.1.22
+15.09.2026
+================
+
+Fixes:
+
+**Вис на shutdown — stop-предикат очереди.**
+- `EventQueue` — `stopped_` + `notify_all` в `pop/popBatch/tryPopBatch`; деструктор `LoginServer` теперь сначала зовет `stop()`, потом `join` (раньше джойнил вечно живой цикл). Рестарт мгновенный, свежий auth работает.
+
+**Конкурентный `async_write` на один сокет (UB) — per-socket strand-очереди.**
+- `NetworkManager::sendResponse` — сериализация записей через strand-очередь на сокет (паттерн чанка, без critical/bulk — трафик тонкий) + owner-identity от переиспользования адреса; чистка очередей на всех путях дисконнекта + `gcWriteQueues()` на 60с-периодике. Позже усилено race-free lifecycle (замена вместо мутации/стирания, см. чанк v0.2.32).
+
+**Падающий пул ронял цикл — guards.**
+- `LoginServer::processBatch` — `enqueueTask` обернут (full/stopped → дроп с логом, цикл жив).
+
+---
+
 v0.1.21
 30.06.2026
 ================

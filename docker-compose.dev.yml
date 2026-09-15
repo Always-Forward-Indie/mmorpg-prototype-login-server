@@ -18,6 +18,7 @@ services:
       - "5432:5432"
     networks:
       - mmo_network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d mmo_prototype"]
       interval: 5s
@@ -34,8 +35,11 @@ services:
       - ./src:/usr/src/app/src  # ✅ Mount only the `src` folder
       - ./include:/usr/src/app/include  # ✅ Mount only the `include` folder
       - ./CMakeLists.txt:/usr/src/app/CMakeLists.txt  # ✅ Mount CMakeLists.txt so new source files are picked up without image rebuilds
+    env_file:
+      - .env
     environment:
       - ENV=development
+      - DB_HOST=db
       - LOG_LEVEL=info
       - LOG_LEVEL_NETWORK=warn
       - LOG_LEVEL_GAMELOOP=warn
