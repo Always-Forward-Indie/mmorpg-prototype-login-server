@@ -32,22 +32,34 @@ void LoginServer::processBatch(const std::vector<Event> &eventsBatch)
         normalEvents.push_back(event);
     }
 
+    auto safeEnqueue = [this](Event eventCopy)
+    {
+        try
+        {
+            threadPool_.enqueueTask([this, eventCopy]
+                                    {
+                try
+                {
+                    eventHandler_.dispatchEvent(eventCopy, clientData_);
+                }
+                catch (const std::exception &e)
+                {
+                    logger_.logError("Error in dispatchEvent: " + std::string(e.what()));
+                } });
+        }
+        catch (const std::exception &e)
+        {
+            // Pool full/stopped (shutdown storm): drop, never kill the loop.
+            logger_.logError("Dropped event (pool): " + std::string(e.what()));
+        }
+    };
+
     // Process priority ping events first
     for (const auto &event : priorityEvents)
     {
         // Create a deep copy of the event to ensure its data remains valid
         // when processed asynchronously in the thread pool
-        Event eventCopy = event;
-        threadPool_.enqueueTask([this, eventCopy]
-                                {
-            try
-            {
-                eventHandler_.dispatchEvent(eventCopy, clientData_);
-            }
-            catch (const std::exception &e)
-            {
-                logger_.logError("Error processing priority dispatchEvent: " + std::string(e.what()));
-            } });
+        safeEnqueue(event);
     }
 
     // Process normal events
@@ -55,17 +67,7 @@ void LoginServer::processBatch(const std::vector<Event> &eventsBatch)
     {
         // Create a deep copy of the event to ensure its data remains valid
         // when processed asynchronously in the thread pool
-        Event eventCopy = event;
-        threadPool_.enqueueTask([this, eventCopy]
-                                {
-            try
-            {
-                eventHandler_.dispatchEvent(eventCopy, clientData_);
-            }
-            catch (const std::exception &e)
-            {
-                logger_.logError("Error in normal dispatchEvent: " + std::string(e.what()));
-            } });
+        safeEnqueue(event);
     }
 
     eventCondition.notify_all();
@@ -101,6 +103,15 @@ void LoginServer::mainEventLoop()
                 {
                     log_->warn("Periodic session cleanup failed: " + std::string(ex.what()));
                 }
+                // Reclaim idle per-socket write queues on the same cadence.
+                try
+                {
+                    networkManager_.gcWriteQueues();
+                }
+                catch (const std::exception &ex)
+                {
+                    log_->warn("Write-queue GC failed: " + std::string(ex.what()));
+                }
             }
         }
     }
@@ -125,6 +136,9 @@ void LoginServer::startMainEventLoop()
 void LoginServer::stop()
 {
     running_ = false;
+    // Wake the loop blocked in tryPopBatch() (60s timeout otherwise) so it
+    // observes running_ == false promptly instead of hanging shutdown.
+    eventQueueLoginServer_.stop();
     eventCondition.notify_all();
 }
 
@@ -132,9 +146,9 @@ void LoginServer::stop()
 LoginServer::~LoginServer()
 {
     log_->info("Shutting down Login server...");
-    // Stop the main event loop
-    event_thread_.join();
-
+    // Stop the main event loop BEFORE joining (otherwise join blocks forever:
+    // the loop only exits via running_ == false observed after a queue wake).
+    stop();
     if (event_thread_.joinable())
         event_thread_.join();
 }
