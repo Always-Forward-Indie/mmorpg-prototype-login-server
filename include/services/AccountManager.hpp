@@ -46,6 +46,13 @@ public:
                                           int &outUserId,
                                           std::string &outHash);
 
+    /// Pure input validation for registration (no DB access).
+    /// Returns OK when the inputs may proceed to the uniqueness check,
+    /// otherwise the matching ERR_* code. Also used by registerAccount.
+    static AccountRegisterResult validateRegistration(const std::string &login,
+                                                      const std::string &password,
+                                                      const std::string &email);
+
     /// SHA-256 hex digest of plaintext. Used for both registration and login verification.
     /// TODO: migrate to bcrypt/argon2 for production security.
     static std::string hashPassword(const std::string &plaintext);

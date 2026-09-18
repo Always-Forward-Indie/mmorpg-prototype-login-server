@@ -2,6 +2,7 @@
 #include <csignal>
 #include <atomic>
 #include "utils/Config.hpp"
+#include "utils/Database.hpp"
 #include "utils/Logger.hpp"
 #include "login_server/LoginServer.hpp"
 #include "utils/DatabasePool.hpp"
@@ -37,8 +38,15 @@ int main()
         // Initialize CharacterManager
         CharacterManager characterManager(logger);
 
-        // Initialize DatabasePool (5 connections, each with prepared queries)
-        DatabasePool pool(std::get<0>(configs), logger);
+        // Initialize DatabasePool (5 connections, each with prepared queries;
+        // prepare callback re-registers statements on transparent reconnects).
+        // createWithRetry waits for Postgres (host reboot / slow cold start)
+        // up to DB_CONNECT_TIMEOUT_SEC and throws past the deadline — we stay
+        // fail-closed (exit 1, orchestrator restarts us) instead of serving
+        // with a dead pool.
+        auto poolPtr = DatabasePool::createWithRetry(std::get<0>(configs), logger, 5,
+            Database::prepareQueriesOn, DatabasePool::connectTimeoutFromEnv());
+        DatabasePool &pool = *poolPtr;
 
         // Initialize the server
         LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, pool, characterManager, logger);

@@ -112,6 +112,15 @@ void LoginServer::mainEventLoop()
                 {
                     log_->warn("Write-queue GC failed: " + std::string(ex.what()));
                 }
+                // Pool health: silent when clean, warn on anomalies so DB
+                // pressure (timeouts) and drops (reconnects) get noticed.
+                if (pool_.acquireTimeouts() > 0 || pool_.reconnects() > 0)
+                {
+                    log_->warn("[DatabasePool] health: size=" + std::to_string(pool_.size()) +
+                               " inUse=" + std::to_string(pool_.inUse()) +
+                               " acquireTimeouts=" + std::to_string(pool_.acquireTimeouts()) +
+                               " reconnects=" + std::to_string(pool_.reconnects()));
+                }
             }
         }
     }

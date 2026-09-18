@@ -1,61 +1,120 @@
 #pragma once
 
 #include <pqxx/pqxx>
+#include <atomic>
+#include <chrono>
 #include <condition_variable>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <queue>
-#include <vector>
-#include <chrono>
 #include <stdexcept>
+#include <string>
+#include <vector>
 #include "utils/Config.hpp"
 #include "utils/Logger.hpp"
 
-/// CRITICAL-6: Connection pool for login-server.
-/// Prevents O(N) login latency from single-connection serialization at 2000+ concurrent logins.
-/// Each acquire() returns a Guard holding one connection; releasing the Guard returns it to the pool.
+/// Connection pool for login-server (v2, ported from game-server).
+/// Replaces the pointer-based pool: guards hold a slot INDEX, so a dead
+/// connection is transparently replaced (reconnect) on acquire instead of
+/// staying broken until restart.
+///
+/// Design notes (same as game-server):
+/// - Health-checked on acquire: a dropped connection is reopened (with
+///   prepared statements re-registered) instead of handed out broken.
+/// - Prepare logic is injected as a callback: the pool never includes
+///   Database.hpp (no header cycle).
+/// - Contended-acquire and timeout counters for monitoring.
 class DatabasePool
 {
 public:
-    /// RAII guard — holds a pooled connection; returns it on destruction.
-    /// Non-copyable. Moveable so it can be returned from functions.
+    /// RAII guard — holds one pooled connection slot; returns it on destruction.
+    /// Non-copyable, movable (incl. move-assign).
     class Guard
     {
     public:
-        Guard(DatabasePool &pool, pqxx::connection *conn) : pool_(&pool), conn_(conn) {}
+        Guard() : pool_(nullptr), slot_(static_cast<size_t>(-1)) {}
+        Guard(DatabasePool &pool, size_t slot) : pool_(&pool), slot_(slot) {}
         ~Guard()
         {
-            if (pool_ && conn_)
-                pool_->release(conn_);
+            if (pool_)
+                pool_->release(slot_);
         }
-        Guard(Guard &&o) noexcept : pool_(o.pool_), conn_(o.conn_) { o.conn_ = nullptr; }
+        Guard(Guard &&o) noexcept : pool_(o.pool_), slot_(o.slot_)
+        {
+            o.pool_ = nullptr;
+        }
+        Guard &operator=(Guard &&o) noexcept
+        {
+            if (this != &o)
+            {
+                if (pool_)
+                    pool_->release(slot_);
+                pool_ = o.pool_;
+                slot_ = o.slot_;
+                o.pool_ = nullptr;
+            }
+            return *this;
+        }
         Guard(const Guard &) = delete;
         Guard &operator=(const Guard &) = delete;
 
-        pqxx::connection &get() { return *conn_; }
+        pqxx::connection &get() { return pool_->connectionAt(slot_); }
 
     private:
         DatabasePool *pool_;
-        pqxx::connection *conn_;
+        size_t slot_;
     };
 
-    /// @param cfg     database config (host, port, dbname, user, password)
-    /// @param logger  logger reference
-    /// @param poolSize number of connections to open (default 5; tune based on PostgreSQL max_connections)
-    DatabasePool(const DatabaseConfig &cfg, Logger &logger, int poolSize = 5);
+    using PrepareFn = std::function<void(pqxx::connection &)>;
+
+    /// @param cfg      database config (host, port, dbname, user, password)
+    /// @param logger   logger reference
+    /// @param poolSize number of connections (clamped to [1, 20], default 5)
+    /// @param prepare  runs prepared-statement registration on every
+    ///                 (re)opened connection
+    DatabasePool(const DatabaseConfig &cfg, Logger &logger, int poolSize,
+        PrepareFn prepare);
     ~DatabasePool() = default;
 
-    /// Acquire a connection. Blocks until one is available or timeout expires.
-    /// Throws std::runtime_error on timeout.
+    DatabasePool(const DatabasePool &) = delete;
+    DatabasePool &operator=(const DatabasePool &) = delete;
+
+    /// Open a pool, retrying transient DB outages (Postgres still starting
+    /// up, host reboot) until timeoutSec elapses. Logs every attempt.
+    /// Throws std::runtime_error past the deadline — callers must fail FAST
+    /// (exit 1) so the container orchestrator restarts us instead of
+    /// serving with a dead pool. timeoutSec <= 0 = single attempt.
+    static std::unique_ptr<DatabasePool> createWithRetry(const DatabaseConfig &cfg,
+        Logger &logger, int poolSize, PrepareFn prepare, int timeoutSec);
+
+    /// DB_CONNECT_TIMEOUT_SEC, default 90, clamped to [0, 600].
+    static int connectTimeoutFromEnv();
+
+    /// Acquire a slot. Blocks until one is available or timeout expires.
+    /// Throws std::runtime_error on timeout or when no healthy connection
+    /// could be (re)opened.
     Guard acquire(std::chrono::milliseconds timeout = std::chrono::milliseconds(5000));
 
+    size_t size() const { return connections_.size(); }
+    size_t inUse() const;
+    uint64_t acquireTimeouts() const { return timeouts_.load(std::memory_order_relaxed); }
+    uint64_t reconnects() const { return reconnects_.load(std::memory_order_relaxed); }
+
 private:
-    void release(pqxx::connection *conn);
+    void release(size_t slot);
+    pqxx::connection &connectionAt(size_t slot) { return *connections_.at(slot); }
+    /// (Re)open slot: fresh connection + prepared statements. Throws on failure.
+    void openSlot(size_t slot);
 
     Logger &logger_;
     std::shared_ptr<spdlog::logger> log_;
-    std::vector<std::unique_ptr<pqxx::connection>> connections_; ///< owns all connections
-    std::queue<pqxx::connection *> available_;                   ///< pointers into connections_
-    std::mutex mutex_;
+    std::string connStr_;
+    PrepareFn prepare_;
+    std::vector<std::unique_ptr<pqxx::connection>> connections_;
+    std::queue<size_t> available_;
+    mutable std::mutex mutex_;
     std::condition_variable cv_;
+    std::atomic<uint64_t> timeouts_{0};
+    std::atomic<uint64_t> reconnects_{0};
 };

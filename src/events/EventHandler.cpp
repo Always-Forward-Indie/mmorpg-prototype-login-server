@@ -485,7 +485,8 @@ void EventHandler::handleRegisterAccountEvent(const Event &event, ClientData &cl
     {
         logger_.logError("handleRegisterAccountEvent error: " + std::string(ex.what()));
         // Best-effort: try to extract socket and send an error response so the client
-        // doesn't hang waiting indefinitely.
+        // doesn't hang waiting indefinitely. Guard-of-last-resort: the outer
+        // catch already logged the cause with what(), so silence here is fine.
         try
         {
             if (std::holds_alternative<RegistrationDataStruct>(data))

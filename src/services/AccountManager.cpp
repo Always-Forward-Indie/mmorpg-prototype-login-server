@@ -42,17 +42,10 @@ std::string AccountManager::hashPassword(const std::string &plaintext)
 // ---------------------------------------------------------------------------
 // registerAccount
 // ---------------------------------------------------------------------------
-AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
-                                                      ClientData &clientData,
-                                                      const std::string &login,
-                                                      const std::string &password,
-                                                      const std::string &email,
-                                                      const std::string &registrationIp,
-                                                      const std::string &clientVersion,
-                                                      int &outUserId,
-                                                      std::string &outHash)
+AccountRegisterResult AccountManager::validateRegistration(const std::string &login,
+                                                             const std::string &password,
+                                                             const std::string &email)
 {
-    // --- Input validation ---------------------------------------------------
     // Login: 3-20 chars, only A-Za-z0-9_
     static const std::regex loginRegex("^[A-Za-z0-9_]{3,20}$");
     if (!std::regex_match(login, loginRegex))
@@ -66,6 +59,27 @@ AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
 
     if (!email.empty() && email.find('@') == std::string::npos)
         return AccountRegisterResult::ERR_EMAIL_INVALID;
+
+    return AccountRegisterResult::OK;
+}
+
+// ---------------------------------------------------------------------------
+// registerAccount
+// ---------------------------------------------------------------------------
+AccountRegisterResult AccountManager::registerAccount(pqxx::connection &conn,
+                                                      ClientData &clientData,
+                                                      const std::string &login,
+                                                      const std::string &password,
+                                                      const std::string &email,
+                                                      const std::string &registrationIp,
+                                                      const std::string &clientVersion,
+                                                      int &outUserId,
+                                                      std::string &outHash)
+{
+    // --- Input validation (pure, no DB) --------------------------------------
+    AccountRegisterResult valid = validateRegistration(login, password, email);
+    if (valid != AccountRegisterResult::OK)
+        return valid;
 
     try
     {

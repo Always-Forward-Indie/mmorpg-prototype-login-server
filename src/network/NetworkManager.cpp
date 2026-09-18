@@ -287,7 +287,9 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
             reg.socket = clientSocket;
             reg.registrationIp = clientSocket->remote_endpoint().address().to_string();
 
-            // Parse login/password/email from body (re-use already-parsed JSON)
+            // Parse login/password/email from body (re-use already-parsed JSON).
+            // Parse failure => empty fields => downstream validation rejects
+            // with an error response. Debug-level for malformed-body tracing.
             try
             {
                 nlohmann::json parsed = nlohmann::json::parse(
@@ -304,6 +306,10 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
                     if (body.contains("clientVersion") && body["clientVersion"].is_string())
                         reg.clientVersion = body["clientVersion"].get<std::string>();
                 }
+            }
+            catch (const std::exception &e)
+            {
+                log_->debug("registerAccount: malformed body ({}), validation will reject", e.what());
             }
             catch (...)
             {

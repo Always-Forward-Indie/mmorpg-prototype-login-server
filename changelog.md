@@ -1,3 +1,46 @@
+v0.1.25
+18.09.2026
+================
+
+Fixes:
+
+**Wave 1.x verification (gates run this session).**
+- Separate /tmp/lbuild dirs inside the live dev container (never a second
+  make in the watched build): 21/21 unit green; TSan 21/21 pass with zero
+  reports (no suppressions file needed). No product change.
+
+---
+
+v0.1.24
+17.09.2026
+================
+
+Fixes:
+
+**Wave 1.8 — ThreadPool: atomic stop + throwing tasks can't kill workers.**
+- Same change as game-server: `atomic<bool> stop`, try/catch around `task()`
+  with stderr logging, new `ThrowingTaskDoesNotKillWorker` test.
+  Verified: 21/21 green.
+
+**Wave 1.3 — register parse failure debugs instead of vanishing.**
+- Malformed registerAccount body now debug-logs; downstream validation still
+  rejects with an error response. Error-path guard documented as
+  guard-of-last-resort (outer catch already logged the cause).
+
+---
+
+v0.1.23
+17.09.2026
+================
+
+Fixes:
+
+**Wait-for-db: pool opens with retry instead of exit 1 on slow Postgres (Wave 1.5).**
+- Cause: `main` opened the pool with a single attempt — `FATAL: database system is starting up → exit 1` on any host reboot with a slow DB. Same `DatabasePool::createWithRetry` + `DB_CONNECT_TIMEOUT_SEC` (default 90) as game-server: retry every 2s with warn logs, fail-closed (exit 1) only past the deadline.
+- Verified live: stopped `mmorpg_prototype_db`, restarted login — `DB unavailable (attempt N) — retrying`, then `All 5 connections ready` on db start, no manual steps. Login unit suite 20/20 green.
+
+---
+
 v0.1.22
 15.09.2026
 ================
