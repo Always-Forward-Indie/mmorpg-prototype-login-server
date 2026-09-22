@@ -65,6 +65,13 @@ int main()
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 
+        // Ordered shutdown (explicit, not destructor-order only): stop the
+        // event loop first (drains + joins the worker), then wake the queue.
+        // ~LoginServer repeats this defensively; belt and suspenders.
+        logger.info("Shutting down gracefully...");
+        loginServer.stop();
+        eventQueueLoginServer.stop();
+
         return 0;
     }
     catch (const std::exception &e)
