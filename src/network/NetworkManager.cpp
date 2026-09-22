@@ -45,9 +45,9 @@ NetworkManager::NetworkManager(EventQueue &eventQueue, std::tuple<DatabaseConfig
     boost::system::error_code ec;
 
     // Get the custom port and IP address from the configs
-    short customPort = std::get<1>(configs).port;
+    std::uint16_t customPort = std::get<1>(configs).port;
     std::string customIP = std::get<1>(configs).host;
-    short maxClients = std::get<1>(configs).max_clients;
+    int maxClients = std::get<1>(configs).max_clients;
 
     // Create an endpoint with the custom IP and port
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(customIP), customPort);
@@ -84,7 +84,7 @@ void NetworkManager::startAccept()
                     std::string clientIP = remoteEndpoint.address().to_string();
                     std::string portNumber = std::to_string(remoteEndpoint.port());
 
-                    short maxClients = std::get<1>(configs_).max_clients;
+                    int maxClients = std::get<1>(configs_).max_clients;
                     {
                         std::lock_guard<std::mutex> lock(activeSocketsMutex_);
                         if (activeSockets_.size() >= static_cast<size_t>(maxClients))
@@ -179,6 +179,18 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
     // Store any remaining partial message back into the per-socket buffer
     if (!accumulatedData.empty())
     {
+        // DoS guard: a client that never sends '\n' must not grow memory unboundedly.
+        if (accumulatedData.size() > protocol::kMaxAccumulatedBytes)
+        {
+            logger_.logError("Framing overflow (" + std::to_string(accumulatedData.size()) +
+                             " bytes without newline), dropping buffer.");
+            nlohmann::json err;
+            err["header"]["eventType"] = "framing";
+            err["header"]["message"] = protocol::kErrOversize;
+            err["body"] = nlohmann::json::object();
+            sendResponse(clientSocket, generateResponseMessage("error", err));
+            accumulatedData.clear();
+        }
         std::lock_guard<std::mutex> lock(socketBufferMutex_);
         socketBuffers_[clientSocket.get()] = std::move(accumulatedData);
     }
@@ -186,11 +198,25 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
 
 void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message)
 {
-    // Guard: prevent buffer overflow when copying into the fixed-size messageBuffer.
-    if (message.length() >= max_length)
+    // Framing: 8KB matches proto/mmo_proto.py. Oversize gets an explicit
+    // ERR_OVERSIZE (previously silent drop => client hung until timeout).
+    if (message.length() > protocol::kMaxMessageBytes)
     {
         logger_.logError("processMessage: message too large (" + std::to_string(message.length()) +
-                         " bytes), max is " + std::to_string(max_length - 1) + ". Dropping.");
+                         " bytes), max is " + std::to_string(protocol::kMaxMessageBytes) + ". Rejecting.");
+        nlohmann::json err;
+        // Best-effort eventType so the client can correlate the error.
+        std::string eventType = "unknown";
+        try {
+            auto probe = nlohmann::json::parse(message.substr(0, 512), nullptr, false);
+            if (!probe.is_discarded() && probe.contains("header") && probe["header"].is_object() &&
+                probe["header"].contains("eventType") && probe["header"]["eventType"].is_string())
+                eventType = probe["header"]["eventType"].get<std::string>();
+        } catch (...) {}
+        err["header"]["eventType"] = eventType;
+        err["header"]["message"] = protocol::kErrOversize;
+        err["body"] = nlohmann::json::object();
+        sendResponse(clientSocket, generateResponseMessage("error", err));
         return;
     }
 
@@ -345,7 +371,16 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
     }
     catch (const std::exception &e)
     {
+        // Malformed JSON previously vanished silently (client timeout).
+        // Now: explicit ERR_MALFORMED so bots/clients fail fast with context.
         logger_.logError("processMessage error: " + std::string(e.what()), RED);
+        try {
+            nlohmann::json err;
+            err["header"]["eventType"] = "unknown";
+            err["header"]["message"] = protocol::kErrMalformed;
+            err["body"] = nlohmann::json::object();
+            sendResponse(clientSocket, generateResponseMessage("error", err));
+        } catch (...) {}
     }
 }
 
@@ -627,7 +662,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
     response["header"] = message["header"];
     response["header"]["status"] = status;
     response["header"]["timestamp"] = currentTimestamp;
-    response["header"]["version"] = "1.0";
+    response["header"]["version"] = protocol::kProtocolVersion;
     response["body"] = message["body"];
 
     std::string responseString = response.dump();
@@ -644,7 +679,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
     response["header"] = message["header"];
     response["header"]["status"] = status;
     response["header"]["timestamp"] = currentTimestamp;
-    response["header"]["version"] = "1.0";
+    response["header"]["version"] = protocol::kProtocolVersion;
 
     // Add lag compensation timestamps to header
     TimestampStruct finalTimestamps = timestamps;

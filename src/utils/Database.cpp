@@ -20,7 +20,7 @@ void Database::connect(std::tuple<DatabaseConfig, LoginServerConfig> &configs)
     {
         try
         {
-            short port = std::get<0>(configs).port;
+            std::uint16_t port = std::get<0>(configs).port;
             std::string host = std::get<0>(configs).host;
             std::string databaseName = std::get<0>(configs).dbname;
             std::string user = std::get<0>(configs).user;
@@ -82,6 +82,14 @@ void Database::prepareQueriesOn(pqxx::connection &conn)
                  "WHERE login = $1 "
                  "AND is_active = true "
                  "AND (locked_until IS NULL OR locked_until < now()) "
+                 "LIMIT 1;");
+    // Lock/inactive probe: distinguishes LOCKED from INVALID_CREDENTIALS when
+    // search_user returns empty (locked accounts are filtered above).
+    // Read-only, used by Authenticator triage; wire stays generic.
+    conn.prepare("probe_user_status",
+                 "SELECT is_active, locked_until "
+                 "FROM users "
+                 "WHERE login = $1 "
                  "LIMIT 1;");
     conn.prepare("increment_failed_logins",
                  "UPDATE users "

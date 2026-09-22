@@ -6,8 +6,10 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <openssl/evp.h>
 #include <iomanip>
+#include <memory>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <pqxx/pqxx>
 
@@ -27,11 +29,19 @@ std::string AccountManager::hashPassword(const std::string &plaintext)
     unsigned char digest[EVP_MAX_MD_SIZE];
     unsigned int digestLen = 0;
 
-    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr);
-    EVP_DigestUpdate(ctx, plaintext.data(), plaintext.size());
-    EVP_DigestFinal_ex(ctx, digest, &digestLen);
-    EVP_MD_CTX_free(ctx);
+    // RAII: exception between new/free must not leak; nullptr must not be dereferenced.
+    struct CtxDeleter {
+        void operator()(EVP_MD_CTX *p) const noexcept { EVP_MD_CTX_free(p); }
+    };
+    std::unique_ptr<EVP_MD_CTX, CtxDeleter> ctx(EVP_MD_CTX_new());
+    if (!ctx)
+        throw std::runtime_error("hashPassword: EVP_MD_CTX_new failed");
+    if (EVP_DigestInit_ex(ctx.get(), EVP_sha256(), nullptr) != 1)
+        throw std::runtime_error("hashPassword: EVP_DigestInit_ex failed");
+    if (EVP_DigestUpdate(ctx.get(), plaintext.data(), plaintext.size()) != 1)
+        throw std::runtime_error("hashPassword: EVP_DigestUpdate failed");
+    if (EVP_DigestFinal_ex(ctx.get(), digest, &digestLen) != 1)
+        throw std::runtime_error("hashPassword: EVP_DigestFinal_ex failed");
 
     std::ostringstream oss;
     for (unsigned int i = 0; i < digestLen; ++i)

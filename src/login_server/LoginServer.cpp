@@ -82,7 +82,7 @@ void LoginServer::mainEventLoop()
     try
     {
         log_->info("Starting Login Server Event Loop...");
-        while (running_)
+        while (running_.load())
         {
             std::vector<Event> eventsBatch;
             if (eventQueueLoginServer_.tryPopBatch(eventsBatch, BATCH_SIZE, CLEANUP_INTERVAL_MS))
@@ -102,6 +102,20 @@ void LoginServer::mainEventLoop()
                 catch (const std::exception &ex)
                 {
                     log_->warn("Periodic session cleanup failed: " + std::string(ex.what()));
+                }
+                // In-memory sweep: drop sessions idle longer than 2x cleanup interval.
+                // DB is source of truth for expiry; this only reaps leaked map entries
+                // (e.g. client vanished without DISCONNECT_CLIENT event holding a socket).
+                try
+                {
+                    auto removed = clientData_.sweepExpiredSessions(
+                        ClientData::nowMs(), 2 * CLEANUP_INTERVAL_MS);
+                    if (!removed.empty())
+                        log_->info("Swept " + std::to_string(removed.size()) + " idle in-memory sessions");
+                }
+                catch (const std::exception &ex)
+                {
+                    log_->warn("In-memory session sweep failed: " + std::string(ex.what()));
                 }
                 // Reclaim idle per-socket write queues on the same cadence.
                 try
@@ -144,7 +158,7 @@ void LoginServer::startMainEventLoop()
 
 void LoginServer::stop()
 {
-    running_ = false;
+    running_.store(false);
     // Wake the loop blocked in tryPopBatch() (60s timeout otherwise) so it
     // observes running_ == false promptly instead of hanging shutdown.
     eventQueueLoginServer_.stop();

@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <atomic>
 #include <string>
 #include <iostream>
 #include <chrono>
@@ -33,7 +34,7 @@ private:
     void processPingBatch(const std::vector<Event> &pingEvents);
 
     void stop();
-    bool running_ = true; // Flag to control the main event loop
+    std::atomic<bool> running_{true}; // Flag to control the main event loop
     std::condition_variable eventCondition;
     ThreadPool threadPool_{std::thread::hardware_concurrency()};
 

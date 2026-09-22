@@ -1,5 +1,7 @@
 #pragma once
 #include "data/DataStructs.hpp"
+#include "utils/ProtocolLimits.hpp"
+#include <array>
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -60,5 +62,5 @@ public:
      * @param messageLength Length of the message
      * @return Parsed TimestampStruct
      */
-    static TimestampStruct parseTimestampsFromBuffer(const std::array<char, 1024> &messageBuffer, size_t messageLength);
+    static TimestampStruct parseTimestampsFromBuffer(const std::array<char, protocol::kMaxMessageBytes> &messageBuffer, size_t messageLength);
 };

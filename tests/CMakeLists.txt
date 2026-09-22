@@ -7,12 +7,19 @@ if(GTest_FOUND)
         test_event_queue.cpp
         test_db_pool.cpp
         test_threadpool.cpp
+        test_config.cpp
+        test_protocol_limits.cpp
+        test_jsonparser_position.cpp
+        test_client_data.cpp
         ../src/services/AccountManager.cpp
         ../src/data/ClientData.cpp
         ../src/events/Event.cpp
         ../src/events/EventQueue.cpp
         ../src/utils/Logger.cpp
         ../src/utils/ThreadPool.cpp
+        ../src/utils/Config.cpp
+        ../src/utils/JSONParser.cpp
+        ../src/utils/TimestampUtils.cpp
     )
     target_link_libraries(unit_tests PRIVATE
         GTest::gtest_main

@@ -3,12 +3,13 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <spdlog/logger.h>
 #include <string>
 #include <pqxx/pqxx>
-#include <iostream>
 
-int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password, const std::string &clientIp, const std::string &clientVersion)
+AuthOutcome Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, const std::string &login, const std::string &password, const std::string &clientIp, const std::string &clientVersion, Logger &logger)
 {
+    auto log = logger.getSystem("auth");
     try
     {
         // Step 1: fetch user row by login only (is_active check + lock check is in SQL)
@@ -17,8 +18,31 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
 
         if (getUserDBData.empty())
         {
+            // Distinguish LOCKED/inactive from wrong login without leaking
+            // existence to the client (wire stays generic; logs/metrics differ).
+            AuthOutcome::Status status = AuthOutcome::Status::INVALID_CREDENTIALS;
+            try
+            {
+                pqxx::work probe(conn);
+                pqxx::result probeRow = probe.exec_prepared("probe_user_status", login);
+                if (!probeRow.empty())
+                {
+                    bool active = probeRow[0]["is_active"].as<bool>();
+                    bool locked = !probeRow[0]["locked_until"].is_null();
+                    if (!active || locked)
+                    {
+                        status = AuthOutcome::Status::LOCKED;
+                        log->warn("authenticate: locked/inactive login attempt login=" + login);
+                    }
+                }
+                probe.abort(); // read-only
+            }
+            catch (const std::exception &probeEx)
+            {
+                log->warn("authenticate: status probe failed: " + std::string(probeEx.what()));
+            }
             transaction.abort();
-            return 0;
+            return AuthOutcome{status, 0};
         }
 
         const auto &row = getUserDBData[0];
@@ -30,10 +54,14 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         const std::string hashedInput = AccountManager::hashPassword(password);
         if (storedPassword != hashedInput)
         {
-            // Increment failed login counter (may lock the account after 5 attempts)
+            // Increment failed login counter (may lock the account after 5 attempts).
+            // Committed in the same txn as the read; concurrent bursts may both
+            // increment from the same base (write-skew) — tolerable for a counter,
+            // lock still engages (see increment_failed_logins CASE).
             transaction.exec_prepared("increment_failed_logins", login);
             transaction.commit();
-            return 0;
+            log->info("authenticate: wrong password login=" + login);
+            return AuthOutcome{AuthOutcome::Status::INVALID_CREDENTIALS, 0};
         }
 
         // Step 3: reset failed login counter and update last_login
@@ -62,11 +90,13 @@ int Authenticator::authenticate(pqxx::connection &conn, ClientData &clientData, 
         clientDataStruct.clientVersion = clientVersion;
 
         clientData.storeClientData(clientDataStruct);
-        return userID;
+        return AuthOutcome{AuthOutcome::Status::OK, userID};
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Database error: " << e.what() << std::endl;
-        return 0;
+        // DB outage previously looked identical to wrong password (return 0).
+        // Now triaged so operators/metrics can tell them apart.
+        log->error("authenticate: database error: " + std::string(e.what()));
+        return AuthOutcome{AuthOutcome::Status::DB_ERROR, 0};
     }
 }

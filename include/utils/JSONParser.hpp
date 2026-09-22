@@ -2,11 +2,12 @@
 #include <nlohmann/json.hpp>
 #include <array>
 #include "data/DataStructs.hpp"
+#include "utils/ProtocolLimits.hpp"
 
 class JSONParser
 {
 private:
-    static constexpr size_t max_length = 1024;
+    static constexpr size_t max_length = protocol::kMaxMessageBytes;
 
 public:
     JSONParser();

@@ -58,6 +58,9 @@ struct ClientDataStruct
     std::shared_ptr<boost::asio::ip::tcp::socket> socket;
     CharacterDataStruct characterData;
     bool needDBUpdate = false;
+    /// In-memory session activity (steady_clock ms). Updated on store/touch,
+    /// used by sweepExpiredSessions. 0 = never touched (legacy entries).
+    long long lastSeenMs = 0;
 };
 
 struct MessageStruct

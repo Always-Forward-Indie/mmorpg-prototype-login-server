@@ -96,11 +96,14 @@ PositionStruct JSONParser::parsePositionData(const std::array<char, max_length> 
     PositionStruct positionData;
 
     // ... parse jsonData to PositionData ...
+    // NOTE: parentheses are load-bearing — && binds tighter than ||.
+    // Without them the trailing is_number_integer() evaluates even when
+    // "body" is absent and throws (whole packet lost in outer catch).
     if (jsonData.contains("body") &&
             jsonData["body"].is_object() &&
             jsonData["body"].contains("characterPosX") &&
-            jsonData["body"]["characterPosX"].is_number_float() ||
-        jsonData["body"]["characterPosX"].is_number_integer())
+            (jsonData["body"]["characterPosX"].is_number_float() ||
+             jsonData["body"]["characterPosX"].is_number_integer()))
     {
         positionData.positionX = jsonData["body"]["characterPosX"].get<float>();
     }
@@ -108,8 +111,8 @@ PositionStruct JSONParser::parsePositionData(const std::array<char, max_length> 
     if (jsonData.contains("body") &&
             jsonData["body"].is_object() &&
             jsonData["body"].contains("characterPosY") &&
-            jsonData["body"]["characterPosY"].is_number_float() ||
-        jsonData["body"]["characterPosY"].is_number_integer())
+            (jsonData["body"]["characterPosY"].is_number_float() ||
+             jsonData["body"]["characterPosY"].is_number_integer()))
     {
         positionData.positionY = jsonData["body"]["characterPosY"].get<float>();
     }
@@ -117,8 +120,8 @@ PositionStruct JSONParser::parsePositionData(const std::array<char, max_length> 
     if (jsonData.contains("body") &&
             jsonData["body"].is_object() &&
             jsonData["body"].contains("characterPosZ") &&
-            jsonData["body"]["characterPosZ"].is_number_float() ||
-        jsonData["body"]["characterPosZ"].is_number_integer())
+            (jsonData["body"]["characterPosZ"].is_number_float() ||
+             jsonData["body"]["characterPosZ"].is_number_integer()))
     {
         positionData.positionZ = jsonData["body"]["characterPosZ"].get<float>();
     }

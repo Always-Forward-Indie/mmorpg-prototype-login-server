@@ -1,10 +1,15 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 project(MMOLoginServer)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+# C++20 (was 17): invoke_result, concepts-ready, designated initializers.
+# ThreadPool result_of -> invoke_result migrated in Phase 0.
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Warnings as diagnostics (not -Werror: vendored boost headers are noisy).
+add_compile_options(-Wall -Wextra -Wswitch -Wimplicit-fallthrough)
 
 # Build type is set via -DCMAKE_BUILD_TYPE=Debug|Release (defaults to none if omitted)
 
@@ -41,13 +46,16 @@ set(HEADER_FILES
     include/data/DataStructs.hpp
     include/data/SpecialStructs.hpp
     include/utils/Database.hpp
+    include/utils/DatabasePool.hpp
     include/utils/ThreadPool.hpp
     include/utils/Config.hpp
     include/utils/JSONParser.hpp
+    include/utils/ProtocolLimits.hpp
     include/utils/TerminalColors.hpp
     include/utils/Logger.hpp
     include/utils/ResponseBuilder.hpp
     include/utils/TimestampUtils.hpp
+    include/utils/JsonAssertFix.hpp
     include/events/Event.hpp
     include/events/EventHandler.hpp
     include/events/EventQueue.hpp

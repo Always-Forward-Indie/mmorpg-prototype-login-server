@@ -17,7 +17,11 @@ std::string TimestampUtils::getCurrentTimestamp()
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
     auto t = std::chrono::system_clock::to_time_t(now);
     std::ostringstream ss;
-    ss << std::put_time(std::localtime(&t), "%Y-%m-%d %H:%M:%S");
+    // localtime_r: std::localtime shares a static buffer across threads
+    // (data race under io_context + ThreadPool workers) — same output, reentrant.
+    std::tm tmBuf{};
+    localtime_r(&t, &tmBuf);
+    ss << std::put_time(&tmBuf, "%Y-%m-%d %H:%M:%S");
     ss << '.' << std::setfill('0') << std::setw(3) << ms.count();
     return ss.str();
 }
@@ -85,7 +89,7 @@ TimestampStruct TimestampUtils::createTimestamp()
     return timestamps;
 }
 
-TimestampStruct TimestampUtils::parseTimestampsFromBuffer(const std::array<char, 1024> &messageBuffer, size_t messageLength)
+TimestampStruct TimestampUtils::parseTimestampsFromBuffer(const std::array<char, protocol::kMaxMessageBytes> &messageBuffer, size_t messageLength)
 {
     TimestampStruct timestamps;
 

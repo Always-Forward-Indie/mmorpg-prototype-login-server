@@ -42,22 +42,51 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
                 if (!ec)
                     clientIp = endpoint.address().to_string();
             }
-            int authClientID = authenticator.authenticate(poolGuard.get(), clientData, passedClientData.login, passedClientData.password, clientIp, passedClientData.clientVersion);
-
-            // Get the clientData object with the new init data
-            const ClientDataStruct *currentClientData = clientData.getClientData(authClientID);
+            int authClientID = 0;
             std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket = passedClientData.socket;
+            {
+                AuthOutcome outcome = authenticator.authenticate(
+                    poolGuard.get(), clientData, passedClientData.login, passedClientData.password, clientIp,
+                    passedClientData.clientVersion, logger_);
+                authClientID = outcome.userId;
+                if (outcome.status != AuthOutcome::Status::OK)
+                {
+                    const char *code = "Authentication failed for user!";
+                    if (outcome.status == AuthOutcome::Status::LOCKED)
+                        code = "ERR_ACCOUNT_LOCKED";
+                    else if (outcome.status == AuthOutcome::Status::DB_ERROR)
+                        code = "ERR_DB";
+                    nlohmann::json failResp;
+                    ResponseBuilder failBuilder;
+                    failResp = failBuilder
+                                   .setHeader("message", code)
+                                   .setHeader("hash", passedClientData.hash)
+                                   .setHeader("login", passedClientData.login)
+                                   .setHeader("clientId", passedClientData.clientId)
+                                   .setHeader("eventType", "authentificationClient")
+                                   .setBody("", "")
+                                   .build();
+                    networkManager_.sendResponse(
+                        clientSocket, networkManager_.generateResponseMessage("error", failResp));
+                    return;
+                }
+            }
+
+            // Copy under lock — the old raw-pointer API is gone (UAF/data race).
+            std::optional<ClientDataStruct> currentClientData = clientData.getClientData(authClientID);
 
             // Prepare the response message
             nlohmann::json response;
             ResponseBuilder builder;
 
-            // Check if the authentication is not successful
-            if (authClientID == 0)
+            // Defense in depth: status was OK but the session vanished
+            // between store and get (concurrent disconnect/sweep). Internal,
+            // not an auth failure.
+            if (authClientID == 0 || !currentClientData.has_value())
             {
                 // Add response data
                 response = builder
-                               .setHeader("message", "Authentication failed for user!")
+                               .setHeader("message", "ERR_INTERNAL")
                                .setHeader("hash", passedClientData.hash)
                                .setHeader("login", passedClientData.login)
                                .setHeader("clientId", passedClientData.clientId)
@@ -112,17 +141,14 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
         if (std::holds_alternative<ClientDataStruct>(data))
         {
             ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
-            // Save the clientData object with the new init data
-            clientData.storeClientData(passedClientData);
-
-            // Get the clientData object with the new init data
-            const ClientDataStruct *currentClientData = clientData.getClientData(passedClientData.clientId);
 
             // Prepare the response message
             nlohmann::json response;
             ResponseBuilder builder;
 
-            // Check if the authentication is not successful
+            // Auth guard FIRST: never overwrite a live session with attacker data.
+            // Previously storeClientData ran before this check, so anyone who knew
+            // a clientId could clobber the victim's in-memory session.
             if (passedClientData.clientId == 0 || passedClientData.hash == "")
             {
                 // Add response data
@@ -137,6 +163,38 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
                 std::string responseData = networkManager_.generateResponseMessage("error", response);
                 // Send the response to the client
                 networkManager_.sendResponse(passedClientData.socket, responseData);
+                return;
+            }
+            if (!clientData.validateSession(passedClientData.clientId, passedClientData.hash))
+            {
+                response = builder
+                               .setHeader("message", "ERR_SESSION_INVALID")
+                               .setHeader("hash", passedClientData.hash)
+                               .setHeader("clientId", passedClientData.clientId)
+                               .setHeader("eventType", "getCharactersList")
+                               .setBody("", "")
+                               .build();
+                networkManager_.sendResponse(passedClientData.socket,
+                                             networkManager_.generateResponseMessage("error", response));
+                log_->warn("getCharactersList: session mismatch for clientId=" +
+                           std::to_string(passedClientData.clientId));
+                return;
+            }
+            clientData.touchSession(passedClientData.clientId);
+
+            // Copy under lock (no raw pointers).
+            std::optional<ClientDataStruct> currentClientData = clientData.getClientData(passedClientData.clientId);
+            if (!currentClientData.has_value())
+            {
+                response = builder
+                               .setHeader("message", "ERR_SESSION_INVALID")
+                               .setHeader("hash", passedClientData.hash)
+                               .setHeader("clientId", passedClientData.clientId)
+                               .setHeader("eventType", "getCharactersList")
+                               .setBody("", "")
+                               .build();
+                networkManager_.sendResponse(passedClientData.socket,
+                                             networkManager_.generateResponseMessage("error", response));
                 return;
             }
 
@@ -211,7 +269,7 @@ void EventHandler::handleCreateCharacterEvent(const Event &event, ClientData &cl
             nlohmann::json response;
             ResponseBuilder builder;
 
-            // Auth guard
+            // Auth guard (shape + live session match; prevents cross-account use).
             if (passedClientData.clientId == 0 || passedClientData.hash.empty())
             {
                 response = builder
@@ -223,6 +281,21 @@ void EventHandler::handleCreateCharacterEvent(const Event &event, ClientData &cl
                                .build();
                 networkManager_.sendResponse(passedClientData.socket,
                                              networkManager_.generateResponseMessage("error", response));
+                return;
+            }
+            if (!clientData.validateSession(passedClientData.clientId, passedClientData.hash))
+            {
+                response = builder
+                               .setHeader("message", "ERR_SESSION_INVALID")
+                               .setHeader("hash", passedClientData.hash)
+                               .setHeader("clientId", passedClientData.clientId)
+                               .setHeader("eventType", "createCharacter")
+                               .setBody("", "")
+                               .build();
+                networkManager_.sendResponse(passedClientData.socket,
+                                             networkManager_.generateResponseMessage("error", response));
+                log_->warn("createCharacter: session mismatch for clientId=" +
+                           std::to_string(passedClientData.clientId));
                 return;
             }
 
@@ -305,8 +378,18 @@ void EventHandler::handleDisconnectClientEvent(const Event &event, ClientData &c
         {
             ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
 
-            // Remove the client data
-            clientData.removeClientData(passedClientData.clientId);
+            // Validate before removing: a blind disconnect must not evict
+            // someone else's live session (same class as trade-invite fix).
+            if (passedClientData.clientId != 0 && !passedClientData.hash.empty() &&
+                !clientData.validateSession(passedClientData.clientId, passedClientData.hash))
+            {
+                log_->warn("disconnectClient: session mismatch for clientId=" +
+                           std::to_string(passedClientData.clientId) + ", ignoring evict");
+            }
+            else
+            {
+                clientData.removeClientData(passedClientData.clientId);
+            }
 
             // send the response to all clients
             nlohmann::json response;
@@ -532,7 +615,7 @@ void EventHandler::handleGetCharacterCreationOptionsEvent(const Event &event, Cl
         nlohmann::json response;
         ResponseBuilder builder;
 
-        // Auth guard
+        // Auth guard (shape + live session match).
         if (passedClientData.clientId == 0 || passedClientData.hash.empty())
         {
             response = builder
@@ -544,6 +627,21 @@ void EventHandler::handleGetCharacterCreationOptionsEvent(const Event &event, Cl
                            .build();
             networkManager_.sendResponse(passedClientData.socket,
                                          networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+        if (!clientData.validateSession(passedClientData.clientId, passedClientData.hash))
+        {
+            response = builder
+                           .setHeader("message", "ERR_SESSION_INVALID")
+                           .setHeader("hash", passedClientData.hash)
+                           .setHeader("clientId", passedClientData.clientId)
+                           .setHeader("eventType", "getCharacterCreationOptions")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            log_->warn("getCharacterCreationOptions: session mismatch for clientId=" +
+                       std::to_string(passedClientData.clientId));
             return;
         }
 
@@ -623,7 +721,7 @@ void EventHandler::handleDeleteCharacterEvent(const Event &event, ClientData &cl
         nlohmann::json response;
         ResponseBuilder builder;
 
-        // Auth guard
+        // Auth guard (shape + live session match).
         if (passedClientData.clientId == 0 || passedClientData.hash.empty())
         {
             response = builder
@@ -635,6 +733,21 @@ void EventHandler::handleDeleteCharacterEvent(const Event &event, ClientData &cl
                            .build();
             networkManager_.sendResponse(passedClientData.socket,
                                          networkManager_.generateResponseMessage("error", response));
+            return;
+        }
+        if (!clientData.validateSession(passedClientData.clientId, passedClientData.hash))
+        {
+            response = builder
+                           .setHeader("message", "ERR_SESSION_INVALID")
+                           .setHeader("hash", passedClientData.hash)
+                           .setHeader("clientId", passedClientData.clientId)
+                           .setHeader("eventType", "deleteCharacter")
+                           .setBody("", "")
+                           .build();
+            networkManager_.sendResponse(passedClientData.socket,
+                                         networkManager_.generateResponseMessage("error", response));
+            log_->warn("deleteCharacter: session mismatch for clientId=" +
+                       std::to_string(passedClientData.clientId));
             return;
         }
 

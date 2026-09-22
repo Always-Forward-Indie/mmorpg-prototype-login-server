@@ -12,6 +12,7 @@
 #include "utils/Logger.hpp"
 #include "utils/Config.hpp"
 #include "utils/JSONParser.hpp"
+#include "utils/ProtocolLimits.hpp"
 #include "events/EventQueue.hpp"
 
 class NetworkManager
@@ -29,7 +30,7 @@ public:
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message, const TimestampStruct &timestamps);
 
 private:
-    static constexpr size_t max_length = 1024; // Define the appropriate value
+    static constexpr size_t max_length = protocol::kMaxMessageBytes; // 8KB, mirrors proto/mmo_proto.py
     void handleAccept(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const boost::system::error_code &error);
     void startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
     void handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::array<char, max_length> &dataBuffer, size_t bytes_transferred);
