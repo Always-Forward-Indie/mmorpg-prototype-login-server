@@ -566,6 +566,25 @@ NetworkManager::doNextWrite(std::shared_ptr<boost::asio::ip::tcp::socket> socket
             }));
 }
 
+void NetworkManager::reapSocket(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
+{
+    if (!clientSocket)
+        return;
+    {
+        std::lock_guard<std::mutex> lock(socketBufferMutex_);
+        socketBuffers_.erase(clientSocket.get());
+    }
+    {
+        std::lock_guard<std::mutex> lock(activeSocketsMutex_);
+        activeSockets_.erase(clientSocket.get());
+    }
+    // Owner-checked: a live re-registration at a reused address keeps its queue;
+    // only owner-expired mappings are dropped (reclaimed by gcWriteQueues).
+    removeWriteQueue(clientSocket.get(), clientSocket);
+    boost::system::error_code closeEc;
+    clientSocket->close(closeEc);
+}
+
 void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
 {
     auto dataBufferClient = std::make_shared<std::array<char, max_length>>();
@@ -605,52 +624,19 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                       {
                                           // The client has closed the connection
                                           log_->error("Client disconnected gracefully.");
-
-                                          {
-                                              std::lock_guard<std::mutex> lock(socketBufferMutex_);
-                                              socketBuffers_.erase(clientSocket.get());
-                                          }
-                                          {
-                                              std::lock_guard<std::mutex> lock(activeSocketsMutex_);
-                                              activeSockets_.erase(clientSocket.get());
-                                          }
-                                          removeWriteQueue(clientSocket.get(), clientSocket);
-                                          boost::system::error_code closeEc;
-                                          clientSocket->close(closeEc);
+                                          reapSocket(clientSocket);
                                       }
                                       else if (error == boost::asio::error::operation_aborted)
                                       {
                                           // The read operation was canceled, likely due to the client disconnecting
                                           log_->error("Read operation canceled (client disconnected).");
-
-                                          {
-                                              std::lock_guard<std::mutex> lock(socketBufferMutex_);
-                                              socketBuffers_.erase(clientSocket.get());
-                                          }
-                                          {
-                                              std::lock_guard<std::mutex> lock(activeSocketsMutex_);
-                                              activeSockets_.erase(clientSocket.get());
-                                          }
-                                          removeWriteQueue(clientSocket.get(), clientSocket);
-                                          boost::system::error_code closeEc;
-                                          clientSocket->close(closeEc);
+                                          reapSocket(clientSocket);
                                       }
                                       else
                                       {
                                           // Handle other errors
                                           log_->error("Error during async_read_some: " + error.message());
-
-                                          {
-                                              std::lock_guard<std::mutex> lock(socketBufferMutex_);
-                                              socketBuffers_.erase(clientSocket.get());
-                                          }
-                                          {
-                                              std::lock_guard<std::mutex> lock(activeSocketsMutex_);
-                                              activeSockets_.erase(clientSocket.get());
-                                          }
-                                          removeWriteQueue(clientSocket.get(), clientSocket);
-                                          boost::system::error_code closeEc;
-                                          clientSocket->close(closeEc);
+                                          reapSocket(clientSocket);
                                       }
                                   });
 }

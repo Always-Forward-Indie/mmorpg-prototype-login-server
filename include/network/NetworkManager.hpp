@@ -35,6 +35,11 @@ private:
     void startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
     void handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::array<char, max_length> &dataBuffer, size_t bytes_transferred);
     void processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message);
+    /// SocketReaper: single cleanup path for dead sockets (eof / aborted /
+    /// other). Previously three copy-pasted erase+close blocks that could drift;
+    /// all read-teardown now funnels here: drop partial buffer, release the
+    /// active slot, drop the owner-expired write queue hook, close the socket.
+    void reapSocket(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
     bool checkClientVersion(const std::string &clientVersion, const std::string &eventType,
                             std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
 
