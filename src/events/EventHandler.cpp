@@ -200,7 +200,7 @@ void EventHandler::handleGetCharactersListEvent(const Event &event, ClientData &
 
             // Get the character list from the database
             auto poolGuard = pool_.acquire();
-            std::vector<CharacterDataStruct> charactersList = characterManager_.getCharactersList(poolGuard.get(), clientData, clientID);
+            std::vector<CharacterDataStruct> charactersList = characterManager_.getCharactersList(poolGuard.get(), clientID);
 
             // convert the charactersList to a json object
             nlohmann::json charactersListJson = nlohmann::json::array();

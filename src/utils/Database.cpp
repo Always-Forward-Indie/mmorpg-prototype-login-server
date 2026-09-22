@@ -320,6 +320,10 @@ pqxx::result Database::executeQueryWithTransaction(
     {
         transaction.abort(); // Rollback transaction
         handleDatabaseError(e);
-        return pqxx::result();
+        // Fail loud with query context: an empty pqxx::result is a valid
+        // "no rows" answer and must never double as an error signal.
+        // (No live callers today — all new code uses DatabasePool + exec_prepared
+        // with explicit empty() checks — but the trap stays closed.)
+        throw DatabaseError("executeQueryWithTransaction[" + preparedQueryName + "]: " + e.what());
     }
 }

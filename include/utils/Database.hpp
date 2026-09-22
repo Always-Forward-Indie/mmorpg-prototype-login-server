@@ -1,12 +1,20 @@
-#ifndef DATABASE_HPP
-#define DATABASE_HPP
+#pragma once
 
 #include <pqxx/pqxx>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <variant>
 #include "utils/Config.hpp"
 #include "utils/Logger.hpp"
+
+/// Thrown by Database helpers on query failure (query-name context included).
+/// Replaces the old silent `return pqxx::result()` trap in
+/// executeQueryWithTransaction, which turned DB errors into empty results
+/// that callers could mistake for "no rows".
+struct DatabaseError : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 
 class Database
 {
@@ -61,5 +69,3 @@ private:
     Logger &logger_;
     std::shared_ptr<spdlog::logger> log_;
 };
-
-#endif // DATABASE_HPP

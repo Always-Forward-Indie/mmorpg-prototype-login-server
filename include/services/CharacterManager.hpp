@@ -25,8 +25,8 @@ public:
     // Constructor
     CharacterManager(Logger &logger);
 
-    // Method to get characters list
-    std::vector<CharacterDataStruct> getCharactersList(pqxx::connection &conn, ClientData &clientData, int accountId);
+    // Method to get characters list (read-only: never mutates the session).
+    std::vector<CharacterDataStruct> getCharactersList(pqxx::connection &conn, int accountId);
 
     /// Fetch equipped items for a single character for the character-selection preview.
     std::vector<EquipmentPreviewItemStruct> getCharacterEquipmentPreview(pqxx::connection &conn, int characterId);

@@ -1,6 +1,5 @@
 #include "services/CharacterManager.hpp"
 #include <pqxx/pqxx>
-#include <iostream>
 #include <regex>
 #include <vector>
 #include <spdlog/logger.h>
@@ -13,8 +12,8 @@ CharacterManager::CharacterManager(Logger &logger)
     // Initialize properties or perform any setup here
 }
 
-// Method to get characters list
-std::vector<CharacterDataStruct> CharacterManager::getCharactersList(pqxx::connection &conn, ClientData &clientData, int accountId)
+// Method to get characters list (read-only: never mutates the session)
+std::vector<CharacterDataStruct> CharacterManager::getCharactersList(pqxx::connection &conn, int accountId)
 {
     // initialize a vector of strings for characters
     std::vector<CharacterDataStruct> charactersList;
@@ -53,12 +52,14 @@ std::vector<CharacterDataStruct> CharacterManager::getCharactersList(pqxx::conne
 
         transaction.commit(); // Commit the transaction
 
-        clientData.updateClientData(accountId, characterDataStruct); // Update clientData in the ClientData class
+        // NOTE: no updateClientData here by design. Listing characters must not
+        // mutate the session's selected character (the old code passed a stale
+        // outer characterDataStruct, wiping it with empty values).
     }
     catch (const std::exception &e)
     {
         // Handle database connection or query errors
-        std::cerr << "Database error: " << e.what() << std::endl;
+        logger_.logError("getCharactersList error: " + std::string(e.what()));
         // You might want to send an error response back to the client or log the error
         return charactersList;
     }
@@ -99,7 +100,7 @@ CharacterDataStruct CharacterManager::selectCharacter(pqxx::connection &conn, Cl
     catch (const std::exception &e)
     {
         // Handle database connection or query errors
-        std::cerr << "Database error: " << e.what() << std::endl;
+        logger_.logError("selectCharacter error: " + std::string(e.what()));
         // You might want to send an error response back to the client or log the error
         return characterDataStruct;
     }
