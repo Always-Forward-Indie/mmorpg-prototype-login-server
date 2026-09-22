@@ -7099,6 +7099,12 @@ combat.cast_speed_base_divisor	100	float	cast_speed divisor. effectiveCastMs = b
 mastery.base_delta	0.02	float	Base mastery gain per successful hit	2026-06-29 19:03:51.762896+00
 mastery.db_flush_every_hits	25	int	Write mastery to DB every N hits (debounce)	2026-06-29 19:03:51.769643+00
 movement.speed_buffer_multiplier	1.3	float	Multiplier for movement speed validation (maxDist = speed x delta x multiplier). Increase for VPN/high-jitter clients. Default 1.3 = 30 percent buffer.	\N
+interest.cell_size	1500.0	float	Interest v2 grid cell size in world units (3x3 neighbourhood at view_radius=1)	2026-09-22 17:25:45.293839+00
+interest.view_radius	1	int	Interest v2 view radius in cells (1 = 3x3 neighbourhood around anchor cell)	2026-09-22 17:25:45.297035+00
+interest.rehome_margin_frac	0.15	float	Interest v2 anchor rehome margin as fraction of cell size (anti-jitter on cell borders)	2026-09-22 17:25:45.299099+00
+interest.enabled	true	bool	Interest v2 master switch (false = legacy broadcast-all fail-open)	2026-09-15 13:31:47.19718+00
+interest.snapshots	true	bool	Interest v2 enter-snapshots for newly subscribed cells	2026-09-22 17:25:45.301598+00
+interest.snapshot_cooldown_ms	2000	int	Interest v2 enter-snapshot gate: at most one snapshot per client per N ms	2026-09-22 17:25:45.303741+00
 \.
 
 
