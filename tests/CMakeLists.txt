@@ -11,6 +11,7 @@ if(GTest_FOUND)
         test_protocol_limits.cpp
         test_jsonparser_position.cpp
         test_client_data.cpp
+        test_query_registry.cpp
         ../src/services/AccountManager.cpp
         ../src/data/ClientData.cpp
         ../src/events/Event.cpp
@@ -18,6 +19,7 @@ if(GTest_FOUND)
         ../src/utils/Logger.cpp
         ../src/utils/ThreadPool.cpp
         ../src/utils/Config.cpp
+        ../src/utils/QueryRegistry.cpp
         ../src/utils/JSONParser.cpp
         ../src/utils/TimestampUtils.cpp
     )

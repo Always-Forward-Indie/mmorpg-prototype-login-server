@@ -25,6 +25,7 @@ set(SOURCE_FILES
     src/utils/ThreadPool.cpp
     src/utils/Database.cpp
     src/utils/DatabasePool.cpp
+    src/utils/QueryRegistry.cpp
     src/utils/Config.cpp
     src/utils/JSONParser.cpp
     src/utils/Logger.cpp
@@ -47,6 +48,7 @@ set(HEADER_FILES
     include/data/SpecialStructs.hpp
     include/utils/Database.hpp
     include/utils/DatabasePool.hpp
+    include/utils/QueryRegistry.hpp
     include/utils/ThreadPool.hpp
     include/utils/Config.hpp
     include/utils/JSONParser.hpp
