@@ -166,8 +166,8 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
         // Extract one message up to the delimiter
         std::string message = accumulatedData.substr(0, delimiterPos);
 
-        // Log the received message
-        log_->info("Received data from Client: " + message);
+        // debug-level: per-packet payload (very noisy with bots/swarm).
+        log_->debug("Received data from Client: " + message);
 
         // Process the message
         processMessage(clientSocket, message);
@@ -238,10 +238,10 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
         // Parse timestamps for lag compensation
         TimestampStruct timestamps = TimestampUtils::parseTimestampsFromBuffer(messageBuffer, messageLength);
 
-        log_->info("Event type: " + eventType);
-        log_->info("Client ID: " + std::to_string(clientData.clientId));
-        log_->info("Client hash: " + clientData.hash);
-        log_->info("Character ID: " + std::to_string(characterData.characterId));
+        log_->debug("Event type: " + eventType);
+        log_->debug("Client ID: " + std::to_string(clientData.clientId));
+        log_->debug("Client hash: " + clientData.hash);
+        log_->debug("Character ID: " + std::to_string(characterData.characterId));
 
         // Check if the type of request is authentificationClient
         if (eventType == "authentificationClient" && clientData.login != "" && clientData.password != "")
@@ -601,8 +601,8 @@ void NetworkManager::startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp
                                           std::string ipAddress = remoteEndpoint.address().to_string();
                                           std::string portNumber = std::to_string(remoteEndpoint.port());
 
-                                          log_->info("Bytes received: " + std::to_string(bytes_transferred));
-                                          log_->info("Data received from Client IP address: " + ipAddress + ", Port: " + portNumber);
+                                          log_->debug("Bytes received: " + std::to_string(bytes_transferred));
+                                          log_->debug("Data received from Client IP address: " + ipAddress + ", Port: " + portNumber);
                                       }
                                       else
                                       {
@@ -653,7 +653,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
 
     std::string responseString = response.dump();
 
-    log_->info("Response generated: " + responseString);
+    log_->debug("Response generated: " + responseString);
 
     return responseString + "\n";
 }
@@ -676,7 +676,7 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
 
     std::string responseString = response.dump();
 
-    log_->info("Response with timestamps generated: " + responseString);
+    log_->debug("Response with timestamps generated: " + responseString);
 
     return responseString + "\n";
 }
