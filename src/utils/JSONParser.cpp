@@ -12,6 +12,11 @@ JSONParser::~JSONParser()
 CharacterDataStruct JSONParser::parseCharacterData(const std::array<char, max_length> &dataBuffer, size_t bytes_transferred)
 {
     nlohmann::json jsonData = nlohmann::json::parse(dataBuffer.data(), dataBuffer.data() + bytes_transferred);
+    return parseCharacterData(jsonData);
+}
+
+CharacterDataStruct JSONParser::parseCharacterData(const nlohmann::json &jsonData)
+{
     CharacterDataStruct characterData;
 
     // ... parse jsonData to CharacterData ...
@@ -93,6 +98,11 @@ CharacterDataStruct JSONParser::parseCharacterData(const std::array<char, max_le
 PositionStruct JSONParser::parsePositionData(const std::array<char, max_length> &dataBuffer, size_t bytes_transferred)
 {
     nlohmann::json jsonData = nlohmann::json::parse(dataBuffer.data(), dataBuffer.data() + bytes_transferred);
+    return parsePositionData(jsonData);
+}
+
+PositionStruct JSONParser::parsePositionData(const nlohmann::json &jsonData)
+{
     PositionStruct positionData;
 
     // ... parse jsonData to PositionData ...
@@ -132,6 +142,11 @@ PositionStruct JSONParser::parsePositionData(const std::array<char, max_length> 
 ClientDataStruct JSONParser::parseClientData(const std::array<char, max_length> &dataBuffer, size_t bytes_transferred)
 {
     nlohmann::json jsonData = nlohmann::json::parse(dataBuffer.data(), dataBuffer.data() + bytes_transferred);
+    return parseClientData(jsonData);
+}
+
+ClientDataStruct JSONParser::parseClientData(const nlohmann::json &jsonData)
+{
     ClientDataStruct clientData;
 
     // ... parse jsonData to ClientData ...
@@ -202,6 +217,11 @@ nlohmann::json JSONParser::parseCharactersList(const std::array<char, max_length
 MessageStruct JSONParser::parseMessage(const std::array<char, max_length> &dataBuffer, size_t bytes_transferred)
 {
     nlohmann::json jsonData = nlohmann::json::parse(dataBuffer.data(), dataBuffer.data() + bytes_transferred);
+    return parseMessage(jsonData);
+}
+
+MessageStruct JSONParser::parseMessage(const nlohmann::json &jsonData)
+{
     MessageStruct message;
 
     // ... parse jsonData to Message ...
@@ -227,6 +247,11 @@ MessageStruct JSONParser::parseMessage(const std::array<char, max_length> &dataB
 std::string JSONParser::parseEventType(const std::array<char, max_length> &dataBuffer, size_t bytes_transferred)
 {
     nlohmann::json jsonData = nlohmann::json::parse(dataBuffer.data(), dataBuffer.data() + bytes_transferred);
+    return parseEventType(jsonData);
+}
+
+std::string JSONParser::parseEventType(const nlohmann::json &jsonData)
+{
     std::string eventType;
 
     // ... parse jsonData to EventType ...

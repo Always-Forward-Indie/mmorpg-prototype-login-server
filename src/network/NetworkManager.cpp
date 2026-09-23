@@ -220,23 +220,21 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
         return;
     }
 
-    // Convert the message string to a buffer array for parsing
-    std::array<char, max_length> messageBuffer;
-    std::copy(message.begin(), message.end(), messageBuffer.begin());
-    size_t messageLength = message.length();
-
-    // Now we can use JSON parsing logic on the `messageBuffer` with `messageLength` bytes of data
+    // Single parse: the wire bytes are parsed once here and the json is
+    // threaded through the extractors below (was 6-7 parses/message).
+    // Malformed input throws -> outer catch replies ERR_MALFORMED (unchanged).
     try
     {
+        const nlohmann::json jsonData = nlohmann::json::parse(message);
         // Parse the data received from the client using JSONParser
-        std::string eventType = jsonParser_.parseEventType(messageBuffer, messageLength);
-        ClientDataStruct clientData = jsonParser_.parseClientData(messageBuffer, messageLength);
-        CharacterDataStruct characterData = jsonParser_.parseCharacterData(messageBuffer, messageLength);
-        PositionStruct positionData = jsonParser_.parsePositionData(messageBuffer, messageLength);
-        MessageStruct messageStruct = jsonParser_.parseMessage(messageBuffer, messageLength);
+        std::string eventType = jsonParser_.parseEventType(jsonData);
+        ClientDataStruct clientData = jsonParser_.parseClientData(jsonData);
+        CharacterDataStruct characterData = jsonParser_.parseCharacterData(jsonData);
+        PositionStruct positionData = jsonParser_.parsePositionData(jsonData);
+        MessageStruct messageStruct = jsonParser_.parseMessage(jsonData);
 
         // Parse timestamps for lag compensation
-        TimestampStruct timestamps = TimestampUtils::parseTimestampsFromBuffer(messageBuffer, messageLength);
+        TimestampStruct timestamps = TimestampUtils::parseTimestampsFromHeader(jsonData);
 
         log_->debug("Event type: " + eventType);
         log_->debug("Client ID: " + std::to_string(clientData.clientId));
@@ -313,32 +311,20 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
             reg.socket = clientSocket;
             reg.registrationIp = clientSocket->remote_endpoint().address().to_string();
 
-            // Parse login/password/email from body (re-use already-parsed JSON).
-            // Parse failure => empty fields => downstream validation rejects
-            // with an error response. Debug-level for malformed-body tracing.
-            try
+            // Parse login/password/email from the already-parsed body.
+            // Missing fields => downstream validation rejects with an error
+            // response (no extra parse).
+            if (jsonData.contains("body") && jsonData["body"].is_object())
             {
-                nlohmann::json parsed = nlohmann::json::parse(
-                    std::string(messageBuffer.data(), messageBuffer.data() + messageLength));
-                if (parsed.contains("body") && parsed["body"].is_object())
-                {
-                    const auto &body = parsed["body"];
-                    if (body.contains("login") && body["login"].is_string())
-                        reg.login = body["login"].get<std::string>();
-                    if (body.contains("password") && body["password"].is_string())
-                        reg.password = body["password"].get<std::string>();
-                    if (body.contains("email") && body["email"].is_string())
-                        reg.email = body["email"].get<std::string>();
-                    if (body.contains("clientVersion") && body["clientVersion"].is_string())
-                        reg.clientVersion = body["clientVersion"].get<std::string>();
-                }
-            }
-            catch (const std::exception &e)
-            {
-                log_->debug("registerAccount: malformed body ({}), validation will reject", e.what());
-            }
-            catch (...)
-            {
+                const auto &body = jsonData["body"];
+                if (body.contains("login") && body["login"].is_string())
+                    reg.login = body["login"].get<std::string>();
+                if (body.contains("password") && body["password"].is_string())
+                    reg.password = body["password"].get<std::string>();
+                if (body.contains("email") && body["email"].is_string())
+                    reg.email = body["email"].get<std::string>();
+                if (body.contains("clientVersion") && body["clientVersion"].is_string())
+                    reg.clientVersion = body["clientVersion"].get<std::string>();
             }
 
             // Version check — reject early if client version is outside [min, max]
