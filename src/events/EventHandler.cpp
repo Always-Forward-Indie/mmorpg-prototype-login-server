@@ -32,8 +32,33 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
         {
             ClientDataStruct passedClientData = std::get<ClientDataStruct>(data);
 
-            // Authenticate the client
-            auto poolGuard = pool_.acquire();
+            // Authenticate the client. Pool acquisition throws when Postgres
+            // is down — answer ERR_DB fast instead of hanging the client
+            // (the exception would otherwise escape to the dispatch loop,
+            // which only logs).
+            DatabasePool::Guard poolGuard;
+            try
+            {
+                poolGuard = pool_.acquire();
+            }
+            catch (const std::exception &ex)
+            {
+                logger_.logError("handleAuthentificationClientEvent: pool acquire failed: " +
+                                 std::string(ex.what()));
+                nlohmann::json dbFailResp;
+                ResponseBuilder dbFailBuilder;
+                dbFailResp = dbFailBuilder
+                                 .setHeader("message", "ERR_DB")
+                                 .setHeader("hash", passedClientData.hash)
+                                 .setHeader("login", passedClientData.login)
+                                 .setHeader("clientId", passedClientData.clientId)
+                                 .setHeader("eventType", "authentificationClient")
+                                 .setBody("", "")
+                                 .build();
+                networkManager_.sendResponse(
+                    passedClientData.socket, networkManager_.generateResponseMessage("error", dbFailResp));
+                return;
+            }
             std::string clientIp = "127.0.0.1";
             if (passedClientData.socket && passedClientData.socket->is_open())
             {
