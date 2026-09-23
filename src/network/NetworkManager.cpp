@@ -402,6 +402,9 @@ bool NetworkManager::checkClientVersion(const std::string &clientVersion, const 
         err["header"]["eventType"] = eventType;
         err["header"]["message"] = errorCode;
         err["body"] = nlohmann::json::object();
+        err["body"]["serverVersion"] = protocol::kProtocolVersion;
+        err["body"]["minClientVersion"] = minVer;
+        err["body"]["maxClientVersion"] = maxVer;
         sendResponse(clientSocket, generateResponseMessage("error", err));
         logger_.logError("Version mismatch: client=" + clientVersion +
                          " server_min=" + minVer + " server_max=" + maxVer);
@@ -415,6 +418,9 @@ bool NetworkManager::checkClientVersion(const std::string &clientVersion, const 
         err["header"]["eventType"] = eventType;
         err["header"]["message"] = errorCode;
         err["body"] = nlohmann::json::object();
+        err["body"]["serverVersion"] = protocol::kProtocolVersion;
+        err["body"]["minClientVersion"] = minVer;
+        err["body"]["maxClientVersion"] = maxVer;
         sendResponse(clientSocket, generateResponseMessage("error", err));
         logger_.logError("Version mismatch: client=" + clientVersion +
                          " server_min=" + minVer + " server_max=" + maxVer);
@@ -650,6 +656,17 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
     response["header"]["timestamp"] = currentTimestamp;
     response["header"]["version"] = protocol::kProtocolVersion;
     response["body"] = message["body"];
+    // Protocol: every error response carries a machine-readable
+    // `body.errorCode` mirroring `header.message` (additive: old clients
+    // ignore unknown body keys). Explicit errorCode set by a handler wins.
+    if (status == "error" && response["header"].contains("message") &&
+        response["header"]["message"].is_string() &&
+        (!response["body"].is_object() || !response["body"].contains("errorCode")))
+    {
+        if (!response["body"].is_object())
+            response["body"] = nlohmann::json::object();
+        response["body"]["errorCode"] = response["header"]["message"];
+    }
 
     std::string responseString = response.dump();
 
@@ -673,6 +690,15 @@ std::string NetworkManager::generateResponseMessage(const std::string &status, c
     TimestampUtils::addTimestampsToHeader(response, finalTimestamps);
 
     response["body"] = message["body"];
+    // Protocol: mirror header.message into body.errorCode on errors (see above).
+    if (status == "error" && response["header"].contains("message") &&
+        response["header"]["message"].is_string() &&
+        (!response["body"].is_object() || !response["body"].contains("errorCode")))
+    {
+        if (!response["body"].is_object())
+            response["body"] = nlohmann::json::object();
+        response["body"]["errorCode"] = response["header"]["message"];
+    }
 
     std::string responseString = response.dump();
 
