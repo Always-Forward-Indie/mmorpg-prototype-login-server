@@ -1,3 +1,38 @@
+v0.1.26
+22.09.2026
+================
+
+Fixes:
+
+**Single JSON parse per message (was 6-7x).**
+- `const json&` overloads on `JSONParser`; `processMessage` parses once
+  (registerAccount body read from the same object, extra parse deleted).
+
+**ERR_DB fast-fail on pool outage (was silent hang).**
+- `pool_.acquire()` throwing inside auth escaped to the dispatch loop,
+  which only logs — the client hung. Now answers `ERR_DB` immediately.
+  Pinned by standalone `test_dbdown.py` (pools reconnect transparently).
+
+New:
+
+**body.errorCode on every error response + version hints.**
+- Central injection in `generateResponseMessage` (mirrors
+  `header.message`); version rejects additionally carry
+  `body.serverVersion/minClientVersion/maxClientVersion`.
+
+**session_cleanup_ms via Config.**
+- `LoginServerConfig.sessionCleanupMs` (default 60s): `config.json`
+  `session_cleanup_ms` + `SESSION_CLEANUP_MS` env; wired into
+  `LoginServer` ctor (was a constexpr).
+
+**Migration 086: scheduler.* keys in game_config (+ dump).**
+
+Build:
+
+**ASan in Debug builds (chunk parity).**
+
+---
+
 v0.1.25
 18.09.2026
 ================
