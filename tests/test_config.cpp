@@ -52,6 +52,7 @@ TEST(Config, DefaultsWhenNoFileNoEnv) {
     EXPECT_EQ(ls.host, "0.0.0.0");
     EXPECT_EQ(ls.port, 27014);
     EXPECT_EQ(ls.max_clients, 3000);
+    EXPECT_EQ(ls.sessionCleanupMs, 60000);
 }
 
 TEST(Config, EnvOverridesDefaults) {

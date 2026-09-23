@@ -91,6 +91,9 @@ std::tuple<DatabaseConfig, LoginServerConfig> Config::parseConfig(const std::str
     LSConfig.max_clients = 3000;
     LSConfig.minClientVersion = jsonStr(j, "min_client_version", "0.1.0");
     LSConfig.maxClientVersion = jsonStr(j, "max_client_version", "0.1.0");
+    if (j.contains("session_cleanup_ms") && j["session_cleanup_ms"].is_number_integer())
+        LSConfig.sessionCleanupMs = parsePositiveInt("session_cleanup_ms(config.json)",
+            std::to_string(j["session_cleanup_ms"].get<int>()), 1000, 3600000);
     if (j.contains("server_port") && j["server_port"].is_number_integer())
         LSConfig.port = parsePort("server_port(config.json)", std::to_string(j["server_port"].get<int>()));
     if (j.contains("server_max_clients") && j["server_max_clients"].is_number_integer())
@@ -119,6 +122,9 @@ std::tuple<DatabaseConfig, LoginServerConfig> Config::parseConfig(const std::str
         LSConfig.minClientVersion = getEnvOrDefault("MIN_CLIENT_VERSION", "0.1.0");
     if (envPresent("MAX_CLIENT_VERSION"))
         LSConfig.maxClientVersion = getEnvOrDefault("MAX_CLIENT_VERSION", "0.1.0");
+    if (envPresent("SESSION_CLEANUP_MS"))
+        LSConfig.sessionCleanupMs = parsePositiveInt("SESSION_CLEANUP_MS",
+            getEnvOrDefault("SESSION_CLEANUP_MS", "60000"), 1000, 3600000);
 
     return std::make_tuple(DBConfig, LSConfig);
 }

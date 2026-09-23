@@ -19,6 +19,7 @@ struct LoginServerConfig {
     int max_clients = 3000;
     std::string minClientVersion = "0.1.0";
     std::string maxClientVersion = "0.1.0";
+    int sessionCleanupMs = 60000;
 };
 
 class Config {

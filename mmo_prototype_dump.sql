@@ -7105,6 +7105,31 @@ interest.rehome_margin_frac	0.15	float	Interest v2 anchor rehome margin as fract
 interest.enabled	true	bool	Interest v2 master switch (false = legacy broadcast-all fail-open)	2026-09-15 13:31:47.19718+00
 interest.snapshots	true	bool	Interest v2 enter-snapshots for newly subscribed cells	2026-09-22 17:25:45.301598+00
 interest.snapshot_cooldown_ms	2000	int	Interest v2 enter-snapshot gate: at most one snapshot per client per N ms	2026-09-22 17:25:45.303741+00
+scheduler.spawn_safety_ms	300000	int	Chunk spawn safety sweep: spawn where alive<totalSpawnCount (5 min)	2026-09-23 11:39:57.856487+00
+scheduler.respawn_ms	30000	int	Chunk respawn-timed fill of non-full zones	2026-09-23 11:39:57.859109+00
+scheduler.mob_tick_ms	50	int	Chunk unified mob movement + broadcast tick resolution (per-mob gating inside)	2026-09-23 11:39:57.86119+00
+scheduler.combat_ms	100	int	Chunk ongoing-actions (instant-skill/cast resolution) tick	2026-09-23 11:39:57.863293+00
+scheduler.cleanup_ms	10000	int	Chunk periodic cleanup of inactive sessions and client data	2026-09-23 11:39:57.865343+00
+scheduler.harvest_ms	1000	int	Chunk harvest progress + corpse cleanup tick	2026-09-23 11:39:57.867386+00
+scheduler.drop_cleanup_ms	60000	int	Chunk expired ground-item cleanup tick (TTL itself: drop.ttl_sec)	2026-09-23 11:39:57.8695+00
+scheduler.dead_mob_ms	5000	int	Chunk dead-mob corpse-expiry check (TTL itself: corpse.ttl_ms)	2026-09-23 11:39:57.871683+00
+scheduler.mem_monitor_ms	5000	int	Chunk VmRSS memory-monitor log tick	2026-09-23 11:39:57.873692+00
+scheduler.aggressive_cleanup_ms	30000	int	Chunk aggressive memory cleanup (forceCleanup + malloc_trim) tick	2026-09-23 11:39:57.875744+00
+scheduler.save_positions_ms	30000	int	Chunk savePositions push to game-server for online chars	2026-09-23 11:39:57.877771+00
+scheduler.dialogue_cleanup_ms	60000	int	Chunk expired dialogue-session cleanup tick	2026-09-23 11:39:57.879734+00
+scheduler.trade_cleanup_ms	30000	int	Chunk expired trade-session cleanup tick	2026-09-23 11:39:57.881743+00
+scheduler.rep_snapshot_ms	60000	int	Chunk absolute reputation snapshot push (delta-loss bound)	2026-09-23 11:39:57.883759+00
+scheduler.quest_flush_ms	5000	int	Chunk dirty quest-progress + pending-flags flush tick	2026-09-23 11:39:57.885838+00
+scheduler.dead_sockets_ms	30000	int	Chunk dead-socket cleanup (off hot broadcast path) tick	2026-09-23 11:39:57.887833+00
+scheduler.save_hp_mana_ms	10000	int	Chunk saveHpMana push to game-server for online chars	2026-09-23 11:39:57.889826+00
+scheduler.save_playtime_ms	60000	int	Chunk savePlayTime delta push tick	2026-09-23 11:39:57.891916+00
+scheduler.timed_champion_ms	30000	int	Chunk timed-champion window + pre-announce tick	2026-09-23 11:39:57.893959+00
+scheduler.survival_evo_ms	300000	int	Chunk survival-champion evolution tick (5 min)	2026-09-23 11:39:57.896018+00
+scheduler.zone_event_ms	30000	int	Chunk zone-event scheduler tick	2026-09-23 11:39:57.898034+00
+scheduler.ping_sweep_ms	15000	int	Chunk ping-timeout client reap tick (threshold: 30s in code)	2026-09-23 11:39:57.900048+00
+scheduler.ghost_cleanup_ms	30000	int	Chunk ghost-character (orphaned join) cleanup tick	2026-09-23 11:39:57.902144+00
+scheduler.chunk_sweep_sec	60	int	Game chunk-liveness sweep period in seconds (threshold: silent 180s)	2026-09-23 11:39:57.904141+00
+scheduler.client_sweep_sec	60	int	Game client-liveness sweep period in seconds (threshold: silent 600s)	2026-09-23 11:39:57.906197+00
 \.
 
 

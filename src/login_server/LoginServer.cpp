@@ -6,14 +6,16 @@ LoginServer::LoginServer(ClientData &clientData,
                          NetworkManager &networkManager,
                          DatabasePool &pool,
                          CharacterManager &characterManager,
-                         Logger &logger)
+                         Logger &logger,
+                         LoginServerConfig serverConfig)
     : networkManager_(networkManager),
       clientData_(clientData),
       logger_(logger),
       eventQueueLoginServer_(eventQueueLoginServer),
       characterManager_(characterManager),
       eventHandler_(networkManager, pool, characterManager, logger),
-      pool_(pool)
+      pool_(pool),
+      serverConfig_(serverConfig)
 {
     log_ = logger.getSystem("gameloop");
 }
@@ -77,7 +79,9 @@ void LoginServer::mainEventLoop()
 {
     log_->info("Add Tasks To Login Server Scheduler...");
     constexpr int BATCH_SIZE = 10;
-    constexpr int CLEANUP_INTERVAL_MS = 60000; // 60 seconds
+    // Session-cleanup cadence from config (session_cleanup_ms); the in-memory
+    // sweep below uses 2x this interval. 60s fallback = previous behavior.
+    const int CLEANUP_INTERVAL_MS = serverConfig_.sessionCleanupMs;
 
     try
     {

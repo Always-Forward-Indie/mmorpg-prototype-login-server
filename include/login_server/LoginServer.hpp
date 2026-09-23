@@ -9,6 +9,7 @@
 #include "events/Event.hpp"
 #include "events/EventQueue.hpp"
 #include "events/EventHandler.hpp"
+#include "utils/Config.hpp"
 #include "utils/Logger.hpp"
 #include "utils/ThreadPool.hpp"
 #include "utils/DatabasePool.hpp"
@@ -22,7 +23,8 @@ public:
                 NetworkManager &networkManager,
                 DatabasePool &pool,
                 CharacterManager &characterManager,
-                Logger &logger);
+                Logger &logger,
+                LoginServerConfig serverConfig = LoginServerConfig{});
     ~LoginServer();
     void startMainEventLoop();
     /// Explicit shutdown: stops the event loop and joins the worker.
@@ -50,4 +52,5 @@ private:
     NetworkManager &networkManager_;
     CharacterManager &characterManager_;
     DatabasePool &pool_;
+    LoginServerConfig serverConfig_;
 };

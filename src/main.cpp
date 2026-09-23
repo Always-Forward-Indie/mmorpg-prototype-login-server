@@ -48,8 +48,9 @@ int main()
             Database::prepareQueriesOn, DatabasePool::connectTimeoutFromEnv());
         DatabasePool &pool = *poolPtr;
 
-        // Initialize the server
-        LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, pool, characterManager, logger);
+        // Initialize the server (login cadence knobs come from LoginServerConfig).
+        LoginServer loginServer(clientData, eventQueueLoginServer, networkManager, pool, characterManager, logger,
+            std::get<1>(configs));
 
         // Start accepting connections
         // networkManager.startAccept();
