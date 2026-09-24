@@ -1686,6 +1686,16 @@ ALTER TABLE public.exp_for_level ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 
 
 --
+-- Name: fact_keys_applied; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.fact_keys_applied (
+    key text NOT NULL,
+    applied_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: factions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3694,6 +3704,19 @@ ALTER TABLE public.npc_type ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     NO MINVALUE
     MAXVALUE 99999999
     CACHE 1
+);
+
+
+--
+-- Name: outbox_seq_watermark; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.outbox_seq_watermark (
+    chunk_id smallint DEFAULT 1 NOT NULL,
+    character_id integer NOT NULL,
+    last_seq bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT ck_outbox_seq_watermark_seq CHECK ((last_seq >= 0))
 );
 
 
@@ -7003,6 +7026,14 @@ COPY public.exp_for_level (id, level, experience_points) FROM stdin;
 
 
 --
+-- Data for Name: fact_keys_applied; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.fact_keys_applied (key, applied_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: factions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -7132,6 +7163,8 @@ scheduler.chunk_sweep_sec	60	int	Game chunk-liveness sweep period in seconds (th
 scheduler.client_sweep_sec	60	int	Game client-liveness sweep period in seconds (threshold: silent 600s)	2026-09-23 11:39:57.906197+00
 scheduler.chunk_silent_threshold_ms	180000	int	Game chunk-liveness sweep: drop chunks silent longer than this (3x 60s heartbeats)	2026-09-24 08:47:05.307594+00
 scheduler.client_silent_threshold_ms	600000	int	Game client-liveness sweep: evict clients silent longer than this (10 min)	2026-09-24 08:47:05.310358+00
+drop.ttl_sec	300	int	Chunk expired ground-item cleanup: drop age threshold in seconds	2026-09-24 13:31:51.529378+00
+corpse.ttl_ms	60000	int	Chunk dead-mob cleanup: corpse visibility window in milliseconds	2026-09-24 13:31:51.531888+00
 \.
 
 
@@ -7905,6 +7938,14 @@ COPY public.npc_type (id, name, slug) FROM stdin;
 4	Blacksmith	blacksmith
 5	Guard	guard
 6	Trainer	trainer
+\.
+
+
+--
+-- Data for Name: outbox_seq_watermark; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.outbox_seq_watermark (chunk_id, character_id, last_seq, updated_at) FROM stdin;
 \.
 
 
@@ -9222,6 +9263,14 @@ ALTER TABLE ONLY public.factions
 
 
 --
+-- Name: fact_keys_applied fact_keys_applied_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.fact_keys_applied
+    ADD CONSTRAINT fact_keys_applied_pkey PRIMARY KEY (key);
+
+
+--
 -- Name: game_analytics game_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9515,6 +9564,14 @@ ALTER TABLE ONLY public.npc_trainer_class
 
 ALTER TABLE ONLY public.npc_type
     ADD CONSTRAINT npc_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: outbox_seq_watermark pk_outbox_seq_watermark; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outbox_seq_watermark
+    ADD CONSTRAINT pk_outbox_seq_watermark PRIMARY KEY (chunk_id, character_id);
 
 
 --
