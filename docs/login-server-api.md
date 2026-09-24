@@ -36,6 +36,29 @@
 
 `clientId` and `hash` are **0 / empty** on the very first request. After successful login or registration the client must store and send them with every subsequent request.
 
+Every `status:error` response additionally carries `body.errorCode`
+mirroring `header.message` (machine-readable; see protocol `00`, error
+handling). Match on `body.errorCode`, never on human text.
+
+---
+
+## 0. Client version gate (login only!)
+
+`registerAccount` and `authentificationClient` must send
+`body.clientVersion` (`"major.minor.patch"`). Outside
+`[min_client_version, max_client_version]` (dev: `0.1.2–0.1.4`; config.json
++ `MIN/MAX_CLIENT_VERSION` env) the server rejects **before** auth:
+
+| Condition | `message` / `errorCode` |
+|-----------|--------------------------|
+| Below min, missing or garbled | `ERR_VERSION_OUTDATED` |
+| Above max | `ERR_VERSION_TOO_NEW` |
+
+Reject body additionally carries `serverVersion` (`"1.0"`),
+`minClientVersion`, `maxClientVersion` — show them in the
+"update required" UI. **Game/chunk never check versions** (old and future
+clients keep working there).
+
 ---
 
 ## 1. Register Account
@@ -50,7 +73,8 @@
   "body": {
     "login":    "MyLogin",
     "password": "MyPassword123",
-    "email":    "optional@example.com"
+    "email":    "optional@example.com",
+    "clientVersion": "0.1.2"
   }
 }
 ```
@@ -86,6 +110,7 @@
 | `ERR_PASSWORD_TOO_LONG` | Password longer than 100 characters       |
 | `ERR_EMAIL_INVALID`     | Email provided but has no `@`             |
 | `ERR_REGISTER_FAILED`   | Internal/DB error                          |
+| `ERR_DB`                | Postgres unreachable (fast-fail, retry later) |
 
 ---
 
@@ -100,7 +125,8 @@
   "header": { "eventType": "authentificationClient" },
   "body": {
     "login":    "MyLogin",
-    "password": "MyPassword123"
+    "password": "MyPassword123",
+    "clientVersion": "0.1.2"
   }
 }
 ```
@@ -130,9 +156,20 @@
     "clientId":  0,
     "hash":      ""
   },
-  "body": {}
+  "body": {
+    "errorCode": "Authentication failed for user!"
+  }
 }
 ```
+
+Machine-readable auth failures (`body.errorCode` mirrors `message`):
+
+| `message` / `errorCode`       | Meaning                                              |
+|-------------------------------|------------------------------------------------------|
+| `ERR_ACCOUNT_LOCKED`          | Too many failed logins, account temporarily locked   |
+| `ERR_DB`                      | Postgres unreachable — fail fast, retry (never hang) |
+| `ERR_INTERNAL`                | Session vanished between store and read (rare race)  |
+| `Authentication failed for user!` | Wrong login/password (deliberately vague)        |
 
 ---
 
@@ -401,5 +438,15 @@ The server automatically:
 
 - All error responses have `"status": "error"` in the header.
 - The `message` field contains a machine-readable error code (`ERR_*`) or a human-readable string.
+- **Match on `body.errorCode`** (always present on errors), not on `message` text.
 - Map `ERR_*` codes to localized UI strings on the client side; never display raw codes to the player.
 - On `Unauthorized` response: clear stored `clientId`/`hash` and redirect to the login screen.
+- On `ERR_DB`: back off and retry — the server answers fast (5s pool timeout) and recovers transparently when Postgres returns.
+
+---
+
+## Ops: sessions, cleanup, DB outages
+
+- Session expiry is DB truth (`cleanup_expired_sessions`); cadence via `session_cleanup_ms` (config.json + `SESSION_CLEANUP_MS` env, default 60s). In-memory sweep drops entries idle > 2× cadence.
+- Pool (`DatabasePool`, 5 conns): health-checked `SELECT 1` on acquire, transparent reopen on drops, reconnect/timeout counters in logs.
+- DB-down contract: auth during a Postgres outage returns `ERR_DB` (never hangs); after `docker start` the pools reconnect with no server restart. Pinned by standalone `test_dbdown.py` (nightly only — it stops the shared dev DB, never add to batches).
