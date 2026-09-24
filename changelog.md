@@ -1,3 +1,18 @@
+v0.1.27
+24.09.2026
+================
+
+DB (no code change):
+
+**Migrations 088/089 + dump carries outbox schema.**
+- `088_outbox_seq_watermark`: watermark table + `ix_fact_keys_applied` index.
+- `089_drop_corpse_ttl`: seeds `drop.ttl_sec`/`corpse.ttl_ms` (were fallback-only).
+- Canonical dump now includes `fact_keys_applied` + `outbox_seq_watermark`
+  schema (empty): previously a `load` wiped claims with no recovery path.
+  Strict `ON_ERROR_STOP=1` load verified in scratch DB.
+
+---
+
 v0.1.26
 22.09.2026
 ================
