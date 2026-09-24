@@ -7130,6 +7130,8 @@ scheduler.ping_sweep_ms	15000	int	Chunk ping-timeout client reap tick (threshold
 scheduler.ghost_cleanup_ms	30000	int	Chunk ghost-character (orphaned join) cleanup tick	2026-09-23 11:39:57.902144+00
 scheduler.chunk_sweep_sec	60	int	Game chunk-liveness sweep period in seconds (threshold: silent 180s)	2026-09-23 11:39:57.904141+00
 scheduler.client_sweep_sec	60	int	Game client-liveness sweep period in seconds (threshold: silent 600s)	2026-09-23 11:39:57.906197+00
+scheduler.chunk_silent_threshold_ms	180000	int	Game chunk-liveness sweep: drop chunks silent longer than this (3x 60s heartbeats)	2026-09-24 08:47:05.307594+00
+scheduler.client_silent_threshold_ms	600000	int	Game client-liveness sweep: evict clients silent longer than this (10 min)	2026-09-24 08:47:05.310358+00
 \.
 
 
