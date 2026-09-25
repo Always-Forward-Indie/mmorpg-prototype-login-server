@@ -7165,6 +7165,8 @@ scheduler.chunk_silent_threshold_ms	180000	int	Game chunk-liveness sweep: drop c
 scheduler.client_silent_threshold_ms	600000	int	Game client-liveness sweep: evict clients silent longer than this (10 min)	2026-09-24 08:47:05.310358+00
 drop.ttl_sec	300	int	Chunk expired ground-item cleanup: drop age threshold in seconds	2026-09-24 13:31:51.529378+00
 corpse.ttl_ms	60000	int	Chunk dead-mob cleanup: corpse visibility window in milliseconds	2026-09-24 13:31:51.531888+00
+scheduler.wio_tick_ms	1000	int	Chunk WIO tick: complete finished channels + respawn depleted globals	2026-09-25 14:42:16.403282+00
+scheduler.vendor_restock_ms	60000	int	Chunk vendor restock tick: refill depleted shop slots	2026-09-25 14:44:29.309503+00
 \.
 
 
