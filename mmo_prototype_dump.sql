@@ -7226,6 +7226,8 @@ COPY public.item_class_restrictions (item_id, class_id) FROM stdin;
 --
 
 COPY public.item_set_bonuses (id, set_id, pieces_required, attribute_id, bonus_value) FROM stdin;
+1	1	2	12	3
+2	1	3	8	2
 \.
 
 
@@ -7234,6 +7236,9 @@ COPY public.item_set_bonuses (id, set_id, pieces_required, attribute_id, bonus_v
 --
 
 COPY public.item_set_members (set_id, item_id) FROM stdin;
+1	29
+1	38
+1	40
 \.
 
 
@@ -7242,6 +7247,7 @@ COPY public.item_set_members (set_id, item_id) FROM stdin;
 --
 
 COPY public.item_sets (id, name, slug) FROM stdin;
+1	Wayfarer garb	wayfarer_garb
 \.
 
 
@@ -7829,7 +7835,7 @@ COPY public.mob_weaknesses (mob_id, element_slug) FROM stdin;
 --
 
 COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead, slug, radius, is_interactable, npc_type, faction_slug) FROM stdin;
-1	Varan	1	1	100	10	f	varan	100	t	1	\N
+1	Varan	1	1	100	10	f	varan	100	t	4	\N
 2	Milaya	1	1	100	50	f	milaya	100	t	3	\N
 6	ruins_dying_stranger	1	1	1	0	f	ruins_dying_stranger	300	t	1	\N
 3	Edrik	1	1	100	20	f	edrik	100	t	1	hunters
@@ -8633,14 +8639,14 @@ SELECT pg_catalog.setval('public.item_attributes_mapping_id_seq', 37, true);
 -- Name: item_set_bonuses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.item_set_bonuses_id_seq', 1, false);
+SELECT pg_catalog.setval('public.item_set_bonuses_id_seq', 2, true);
 
 
 --
 -- Name: item_sets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.item_sets_id_seq', 1, false);
+SELECT pg_catalog.setval('public.item_sets_id_seq', 1, true);
 
 
 --
