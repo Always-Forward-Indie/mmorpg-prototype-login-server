@@ -7381,12 +7381,12 @@ staff_mastery	Мастерство посоха	staff	100	magical_attack
 --
 
 COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressive, is_dead, slug, radius, base_xp, rank_id, aggro_range, attack_range, attack_cooldown, chase_multiplier, patrol_speed, is_social, chase_duration, flee_hp_threshold, ai_archetype, can_evolve, is_rare, rare_spawn_chance, rare_spawn_condition, faction_slug, rep_delta_per_kill, biome_slug, mob_type_slug, patrol_radius) FROM stdin;
-3	Простой кабан	2	2	120	10	f	f	ForestBoar	100	30	1	500	120	2	1.5	0.8	t	10	0	melee	f	f	0	\N	\N	0		beast	350
-4	Простая лиса	2	1	50	15	f	f	ForestFox	100	20	1	600	120	2.5	1	1	t	10	0	melee	f	f	0	\N	\N	0		beast	400
-6	Простой волк	2	3	150	20	t	f	ForestWolf	100	45	1	700	130	2	1	1	f	10	0	melee	f	f	0	\N	\N	0		beast	450
+3	Простой кабан	2	2	120	10	f	f	ForestBoar	100	30	1	500	120	2	1.5	0.8	t	10	0.3	melee	f	f	0	\N	\N	0		beast	350
+4	Простая лиса	2	1	50	15	f	f	ForestFox	100	20	1	600	120	2.5	1	1	t	10	0.3	melee	f	f	0	\N	\N	0		beast	400
+6	Простой волк	2	3	150	20	t	f	ForestWolf	100	45	1	700	130	2	1	1	f	10	0.3	melee	f	f	0	\N	\N	0		beast	450
 5	Скелет	2	1	70	5	f	f	RuinSkeleton	100	25	1	500	110	2.8	1.2	0.7	f	10	0	melee	f	f	0	\N	\N	0		undead	300
 7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1	1	f	10	0	melee	f	t	8	on_kill	hunters	5		beast	500
-8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0	melee	f	t	8	on_kill	nature	5		beast	400
+8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0.3	melee	f	t	8	on_kill	nature	5		beast	400
 9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	6	600	140	2.5	0.8	0.7	f	10	0	melee	f	f	0	\N	hunters	10		beast	500
 10	Каменный голем	2	15	3000	200	t	f	StoneGolem	250	2000	6	500	160	3	1	0.4	f	10	0	melee	f	f	0	\N	city_guard	10		elemental	300
 11	Древний медведь	2	12	3500	60	t	f	AncientBear	250	1500	6	700	160	2.5	0.9	0.5	f	15	0	melee	f	f	0	\N	hunters	25		beast	600
