@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Find the correct container ID using the image name
-CONTAINER_ID=$(docker ps --format "{{.ID}}" --filter "ancestor=mmorpg-prototype-chunk-server")
+# Find the correct container ID using the image name (login-server here —
+# each subproject's copy must reference its own image, not chunk-server's).
+CONTAINER_ID=$(docker ps --format "{{.ID}}" --filter "ancestor=mmorpg-prototype-login-server")
 
 # Check if the container was found
 if [ -z "$CONTAINER_ID" ]; then

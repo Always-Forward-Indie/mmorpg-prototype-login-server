@@ -3929,7 +3929,8 @@ CREATE TABLE public.player_inventory (
     quantity integer DEFAULT 1 NOT NULL,
     slot_index smallint,
     durability_current integer,
-    kill_count integer DEFAULT 0 NOT NULL
+    kill_count integer DEFAULT 0 NOT NULL,
+    sync_token bigint
 );
 
 
@@ -10320,7 +10321,7 @@ CREATE INDEX idx_player_inventory_ground ON public.player_inventory USING btree 
 -- Name: idx_player_inventory_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_player_inventory_unique ON public.player_inventory USING btree (character_id, item_id);
+CREATE UNIQUE INDEX idx_player_inventory_sync_token ON public.player_inventory USING btree (sync_token);
 
 
 --
