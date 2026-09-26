@@ -1,3 +1,15 @@
+v0.1.29
+26.09.2026
+================
+
+DB (no code change):
+
+**Migration 096 + dump update.**
+- `player_inventory.sync_token UNIQUE NULL` (per-instance idempotency key);
+  template-pair unique index dropped (forbade real duplicates).
+
+---
+
 v0.1.28
 26.09.2026
 ================
