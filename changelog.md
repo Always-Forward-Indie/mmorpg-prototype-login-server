@@ -1,3 +1,15 @@
+v0.1.28
+26.09.2026
+================
+
+DB (no code change):
+
+**Migration 095 + dump row.**
+- `095_inv_sync_retry_cadence`: seeds `scheduler.inv_sync_retry_ms=5000`
+  (chunk id-sync retry sweep).
+
+---
+
 v0.1.27
 24.09.2026
 ================
