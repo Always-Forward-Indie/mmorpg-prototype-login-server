@@ -7167,6 +7167,7 @@ drop.ttl_sec	300	int	Chunk expired ground-item cleanup: drop age threshold in se
 corpse.ttl_ms	60000	int	Chunk dead-mob cleanup: corpse visibility window in milliseconds	2026-09-24 13:31:51.531888+00
 scheduler.wio_tick_ms	1000	int	Chunk WIO tick: complete finished channels + respawn depleted globals	2026-09-25 14:42:16.403282+00
 scheduler.vendor_restock_ms	60000	int	Chunk vendor restock tick: refill depleted shop slots	2026-09-25 14:44:29.309503+00
+scheduler.inv_sync_retry_ms	5000	int	Chunk inventory id-sync retry sweep: resend saves missing their id echo	2026-09-26 08:50:00+00
 \.
 
 
