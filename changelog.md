@@ -1,3 +1,46 @@
+v0.1.30
+12.10.2026
+================
+
+DB:
+
+**Migrations 097-100 + dump update.**
+- `097`: mob ranks retune, 5% vendor sell tax + buy markup, XP curve soften.
+- `098`: frostbolt requirement 5->3, wolf tuning.
+- `099`: resistance attributes.
+- `100`: Shield Slam + 2s stun skill.
+
+**Migrations 101-108 (gamedesign audit) + dump update.**
+- `101`: 5/12 unreachable titles fixed (ForestWolf retarget, goblin/bandit
+  removed, veteran 25->9).
+- `102`: dead `bandits` faction removed.
+- `103`: guaranteed champion trophies (alpha_fang 200, golem_heart 500).
+- `104`: reputation vendor discount keys added, orphans removed.
+- `105`: orphan config keys removed, missing champion/scheduler keys added.
+- `106`: `can_evolve` for AlphaWolf/ForestBear.
+- `107`: dead tables `mob_position`, `mob_active_effect` dropped.
+- `108`: rare spawns binding (`rare_of_mob_id`, percent chances).
+
+New:
+
+**Manual GM bans with reason.**
+- `user_bans` wired in: `check_active_ban` on login (after password, no
+  existence leak), `ERR_ACCOUNT_BANNED` wire code with `banReason` /
+  `banExpiresAt` in body. Pinned by `test_ban.py`.
+
+Fixes:
+
+**Single-connection Database API removed (pool-only).**
+- Dead `Database::connect/getConnection/executeQueryWithTransaction` gone;
+  all queries go through `DatabasePool` + prepared statements.
+
+Docs:
+
+- `config.example.json` (layered config example).
+- `login-server-api.md`: `ERR_ACCOUNT_BANNED` row.
+
+---
+
 v0.1.29
 26.09.2026
 ================
