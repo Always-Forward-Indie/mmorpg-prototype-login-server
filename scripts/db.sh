@@ -43,8 +43,15 @@ PLAYER_TABLES=(
     character_permanent_modifiers
     player_inventory player_quest player_active_effect
     player_flag player_skill_cooldown
-    currency_transactions mob_active_effect
+    currency_transactions
     game_analytics gm_action_log
+)
+
+# Ephemeral runtime state: outbox idempotency keys + link watermarks.
+# Bound to process boot (random bootId) / live link epochs — a fresh
+# deploy or load-safe restore must start empty.
+EPHEMERAL_TABLES=(
+    fact_keys_applied outbox_seq_watermark
 )
 
 # Sequences owned by player tables (reset after player data restore)
@@ -113,8 +120,13 @@ cmd_dump() {
     for table in "${PLAYER_TABLES[@]}"; do
         exclude_args+=" --exclude-table-data=$table"
     done
+    # Ephemeral runtime state (boot-scoped keys/epochs; a fresh deploy must
+    # start empty — stale rows only bloat the dump, never help).
+    for table in "${EPHEMERAL_TABLES[@]}"; do
+        exclude_args+=" --exclude-table-data=$table"
+    done
 
-    info "Dumping schema + content (excluding ${#PLAYER_TABLES[@]} player tables) ..."
+    info "Dumping schema + content (excluding ${#PLAYER_TABLES[@]} player + ${#EPHEMERAL_TABLES[@]} ephemeral tables) ..."
 
     docker exec "$CONTAINER" \
         pg_dump -U "$DB_USER" -d "$DB_NAME" \

@@ -2683,6 +2683,7 @@ CREATE TABLE public.mob (
     biome_slug character varying(64) DEFAULT ''::character varying NOT NULL,
     mob_type_slug character varying(64) DEFAULT 'beast'::character varying NOT NULL,
     patrol_radius double precision DEFAULT 350.0 NOT NULL,
+    rare_of_mob_id integer,
     CONSTRAINT mob_ai_archetype_check CHECK (((ai_archetype)::text = ANY (ARRAY[('melee'::character varying)::text, ('caster'::character varying)::text, ('ranged'::character varying)::text, ('support'::character varying)::text, ('summoner'::character varying)::text, ('lurker'::character varying)::text]))),
     CONSTRAINT mob_flee_hp_threshold_check CHECK (((flee_hp_threshold >= (0.0)::double precision) AND (flee_hp_threshold < (1.0)::double precision)))
 );
@@ -2815,92 +2816,10 @@ COMMENT ON COLUMN public.mob.patrol_radius IS 'Max distance mob can wander from 
 
 
 --
--- Name: mob_active_effect; Type: TABLE; Schema: public; Owner: -
+-- Name: COLUMN mob.rare_of_mob_id; Type: COMMENT; Schema: public; Owner: -
 --
 
-CREATE TABLE public.mob_active_effect (
-    id bigint NOT NULL,
-    mob_uid integer NOT NULL,
-    effect_id integer NOT NULL,
-    attribute_id integer,
-    value numeric(10,4) DEFAULT 0 NOT NULL,
-    source_type text DEFAULT 'skill'::text NOT NULL,
-    source_player_id bigint,
-    applied_at timestamp with time zone DEFAULT now() NOT NULL,
-    expires_at timestamp with time zone,
-    tick_ms integer DEFAULT 0 NOT NULL,
-    CONSTRAINT mob_active_effect_source_type_ck CHECK ((source_type = ANY (ARRAY['skill'::text, 'zone'::text, 'quest'::text, 'admin'::text])))
-);
-
-
---
--- Name: TABLE mob_active_effect; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON TABLE public.mob_active_effect IS 'Активные баффы/дебаффы runtime-экземпляров мобов. mob_uid = MobDataStruct::uid из памяти chunk-server (не mob.id). Записи создаются при применении скила игрока на моба и удаляются при смерти моба или истечении таймера.';
-
-
---
--- Name: COLUMN mob_active_effect.mob_uid; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.mob_uid IS 'Runtime UID экземпляра моба (MobDataStruct::uid)';
-
-
---
--- Name: COLUMN mob_active_effect.effect_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.effect_id IS 'Ссылка на skill_effects';
-
-
---
--- Name: COLUMN mob_active_effect.attribute_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.attribute_id IS 'Модифицируемый атрибут (NULL для non-stat эффектов)';
-
-
---
--- Name: COLUMN mob_active_effect.value; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.value IS 'Величина изменения атрибута';
-
-
---
--- Name: COLUMN mob_active_effect.source_type; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.source_type IS 'Источник активного эффекта: skill | zone | quest | admin';
-
-
---
--- Name: COLUMN mob_active_effect.source_player_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.source_player_id IS 'FK → characters.id. Персонаж, наложивший эффект на моба. NULL = эффект от зоны, квеста или системы.';
-
-
---
--- Name: COLUMN mob_active_effect.expires_at; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_active_effect.expires_at IS 'NULL = постоянный (до смерти моба)';
-
-
---
--- Name: mob_active_effect_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.mob_active_effect ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.mob_active_effect_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
+COMMENT ON COLUMN public.mob.rare_of_mob_id IS 'Rare variant of another template: on respawn of the common family mob, roll rare_spawn_chance (percent) to spawn this template instead.';
 
 
 --
@@ -2976,56 +2895,6 @@ COMMENT ON COLUMN public.mob_loot_info.max_quantity IS 'Максимальное
 
 ALTER TABLE public.mob_loot_info ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.mob_loot_info_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    MAXVALUE 99999999
-    CACHE 1
-);
-
-
---
--- Name: mob_position; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.mob_position (
-    id bigint NOT NULL,
-    mob_id integer NOT NULL,
-    x numeric(11,2) NOT NULL,
-    y numeric(11,2) NOT NULL,
-    z numeric(11,2) NOT NULL,
-    rot_z double precision DEFAULT 0 NOT NULL,
-    zone_id integer
-);
-
-
---
--- Name: TABLE mob_position; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON TABLE public.mob_position IS 'Статические позиции спавна шаблонов мобов в зонах. FK: mob_id → mob';
-
-
---
--- Name: COLUMN mob_position.rot_z; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_position.rot_z IS 'Начальный угол поворота моба в точке спавна (в радианах)';
-
-
---
--- Name: COLUMN mob_position.zone_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.mob_position.zone_id IS 'Зона, в которой размещён моб. NULL = не привязан к зоне';
-
-
---
--- Name: mob_position_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.mob_position ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME public.mob_position_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -3721,6 +3590,13 @@ CREATE TABLE public.outbox_seq_watermark (
 
 
 --
+-- Name: TABLE outbox_seq_watermark; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.outbox_seq_watermark IS 'Max applied chunk fact seq per character. GREATEST-wins; never moves backward.';
+
+
+--
 -- Name: passive_skill_modifiers; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3981,6 +3857,13 @@ COMMENT ON COLUMN public.player_inventory.slot_index IS 'Позиция пред
 --
 
 COMMENT ON COLUMN public.player_inventory.durability_current IS 'Текущая прочность (NULL если item.is_durable = false)';
+
+
+--
+-- Name: COLUMN player_inventory.sync_token; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_inventory.sync_token IS 'Chunk id-sync token: per-instance idempotency key (NULL = legacy row).';
 
 
 --
@@ -5478,7 +5361,7 @@ COMMENT ON COLUMN public.title_definitions.bonuses IS 'JSON-массив бон�
 --
 
 COMMENT ON COLUMN public.title_definitions.condition_params IS 'Data-driven unlock params (JSONB). Fields depend on earn_condition:
-     bestiary:   {"mobSlug":"GreyWolf","minTier":6}   — unlocked when bestiary tier >= minTier
+     bestiary:   {"mobSlug":"ForestWolf","minTier":6}   — unlocked when bestiary tier >= minTier
      mastery:    {"masterySlug":"sword_mastery","minTier":3} — unlocked when mastery tier >= minTier (1-4)
      reputation: {"factionSlug":"hunters","minTierName":"ally"} — unlocked when faction tier == minTierName
      level:      {"level":10}                          — unlocked on exact level-up
@@ -6648,7 +6531,6 @@ COPY public.class_skill_tree (id, class_id, skill_id, required_level, is_default
 7	2	6	5	f	\N	1	120	1	f	\N
 8	2	7	8	f	6	1	200	1	f	\N
 4	2	2	5	f	\N	1	100	1	f	\N
-13	1	8	5	f	\N	1	100	1	f	\N
 14	1	9	8	f	8	1	200	1	f	\N
 16	1	11	5	f	\N	1	150	1	f	\N
 17	1	12	10	f	11	1	300	1	f	\N
@@ -6661,6 +6543,8 @@ COPY public.class_skill_tree (id, class_id, skill_id, required_level, is_default
 2	1	3	5	t	\N	1	120	1	f	\N
 27	1	16	5	f	\N	1	100	1	f	\N
 28	2	16	5	f	\N	1	100	1	f	\N
+13	1	8	3	f	\N	1	100	1	f	\N
+29	2	17	5	f	\N	1	100	1	f	\N
 \.
 
 
@@ -6743,6 +6627,10 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 2	35	0.00	0.2000	1.0000
 1	18	8.00	0.0000	1.0000
 2	18	8.00	0.0000	1.0000
+1	36	0.00	0.0000	1.0000
+1	37	0.00	0.0000	1.0000
+2	36	0.00	0.0000	1.0000
+2	37	0.00	0.0000	1.0000
 \.
 
 
@@ -6775,6 +6663,8 @@ COPY public.dialogue (id, slug, version, start_node_id) FROM stdin;
 6	ruins_dying_stranger_main	1	600
 7	ruins_dying_stranger_replay	1	650
 8	ruins_dying_stranger_items_shortcut	1	660
+9000	dev_short_main	1	9000
+9001	dev_repeatable_main	1	9005
 \.
 
 
@@ -6846,6 +6736,7 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 159	607	608	0	ruins_dying_stranger.choice.useful_items	\N	\N	f
 160	607	610	1	ruins_dying_stranger.choice.leave	\N	\N	f
 161	608	609	0	ruins_dying_stranger.choice.continue	\N	\N	f
+9000	9000	9001	0	dev_short.continue	\N	\N	f
 162	609	610	0	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 2}]	[{"type": "give_item", "item_id": 29, "quantity": 1}, {"type": "give_item", "item_id": 36, "quantity": 1}, {"type": "give_item", "item_id": 35, "quantity": 1}, {"type": "give_item", "item_id": 46, "quantity": 2}, {"type": "give_item", "item_id": 47, "quantity": 1}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
 163	609	610	1	ruins_dying_stranger.choice.accept	[{"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}, {"type": "class", "class_id": 1}]	[{"type": "give_item", "item_id": 30, "quantity": 1}, {"type": "give_item", "item_id": 37, "quantity": 1}, {"type": "give_item", "item_id": 35, "quantity": 1}, {"type": "give_item", "item_id": 46, "quantity": 2}, {"type": "give_item", "item_id": 47, "quantity": 1}, {"key": "ruins_dying_stranger.received_gift", "type": "set_flag", "bool_value": true}]	t
 164	609	610	2	ruins_dying_stranger.choice.leave	\N	\N	f
@@ -6859,6 +6750,17 @@ COPY public.dialogue_edge (id, from_node_id, to_node_id, order_index, client_cho
 172	661	662	2	ruins_dying_stranger.choice.leave	\N	\N	f
 173	662	663	0	ruins_dying_stranger.choice.continue	\N	\N	f
 174	663	669	0	ruins_dying_stranger.choice.continue	\N	\N	f
+9001	9001	9002	0	dev_short.accept	[{"any": [{"slug": "dev_short_chain", "type": "quest", "state": "not_started"}]}]	[{"slug": "dev_short_chain", "type": "offer_quest"}]	f
+9002	9002	9001	0	dev_short.back	\N	\N	f
+9003	9001	9003	0	dev_short.turnin	[{"slug": "dev_short_chain", "type": "quest", "state": "completed"}]	[{"slug": "dev_short_chain", "type": "turn_in_quest"}]	f
+9004	9003	9004	0	dev_short.farewell	\N	\N	f
+9005	9001	9004	99	dev_short.farewell	\N	\N	f
+9006	9005	9006	0	dev_repeat.continue	\N	\N	f
+9007	9006	9007	0	dev_repeat.accept	[{"any": [{"slug": "dev_repeatable_errand", "type": "quest", "state": "not_started"}, {"slug": "dev_repeatable_errand", "type": "quest", "state": "turned_in"}]}]	[{"slug": "dev_repeatable_errand", "type": "offer_quest"}]	f
+9008	9007	9006	0	dev_repeat.back	\N	\N	f
+9009	9006	9008	0	dev_repeat.turnin	[{"slug": "dev_repeatable_errand", "type": "quest", "state": "completed"}]	[{"slug": "dev_repeatable_errand", "type": "turn_in_quest"}]	f
+9010	9008	9009	0	dev_repeat.farewell	\N	\N	f
+9011	9006	9009	99	dev_repeat.farewell	\N	\N	f
 \.
 
 
@@ -6919,6 +6821,16 @@ COPY public.dialogue_node (id, dialogue_id, type, speaker_npc_id, client_node_ke
 501	5	line	5	sylara.dialogue.greeting	\N	\N	\N
 502	5	choice_hub	5	sylara.dialogue.main_hub	\N	\N	\N
 599	5	end	5	\N	\N	\N	\N
+9000	9000	line	9000	dev_short.greeting	\N	\N	\N
+9001	9000	choice_hub	9000	dev_short.hub	\N	\N	\N
+9002	9000	line	9000	dev_short.accepted	\N	\N	\N
+9003	9000	line	9000	dev_short.thanks	\N	\N	\N
+9004	9000	end	9000	\N	\N	\N	\N
+9005	9001	line	9001	dev_repeat.greeting	\N	\N	\N
+9006	9001	choice_hub	9001	dev_repeat.hub	\N	\N	\N
+9007	9001	line	9001	dev_repeat.accepted	\N	\N	\N
+9008	9001	line	9001	dev_repeat.thanks	\N	\N	\N
+9009	9001	end	9001	\N	\N	\N	\N
 \.
 
 
@@ -6976,6 +6888,8 @@ COPY public.entity_attributes (id, name, slug, is_percentage) FROM stdin;
 33	Arcane Resistance	arcane_resistance	t
 34	Holy Resistance	holy_resistance	t
 35	Shadow Resistance	shadow_resistance	t
+36	Physical Resistance	physical_resistance	t
+37	Magical Resistance	magical_resistance	t
 \.
 
 
@@ -7006,31 +6920,13 @@ COPY public.exp_for_level (id, level, experience_points) FROM stdin;
 1	1	100
 2	2	500
 3	3	1000
-4	4	2000
-5	5	4000
-6	6	8000
-7	7	15000
-8	8	25000
-9	9	40000
-10	10	60000
-1	1	100
-2	2	500
-3	3	1000
-4	4	2000
-5	5	4000
-6	6	8000
-7	7	15000
-8	8	25000
-9	9	40000
-10	10	60000
-\.
-
-
---
--- Data for Name: fact_keys_applied; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.fact_keys_applied (key, applied_at) FROM stdin;
+4	4	1500
+5	5	2500
+6	6	4500
+7	7	9000
+8	8	16000
+9	9	28000
+10	10	52000
 \.
 
 
@@ -7041,7 +6937,6 @@ COPY public.fact_keys_applied (key, applied_at) FROM stdin;
 COPY public.factions (id, slug, name) FROM stdin;
 1	hunters	Гильдия Охотников
 2	city_guard	Городская Стража
-3	bandits	Bandit Brotherhood
 4	merchants	Торговый Союз
 5	nature	Духи Природы
 \.
@@ -7061,14 +6956,10 @@ combat.level_diff_cap	10	int	Максимальная учитываемая р�
 combat.base_hit_chance	0.95	float	Базовый шанс попадания до учёта accuracy/evasion (0–1). Финальный hitChance = base_hit_chance + (accuracy - evasion) * 0.01.	2026-03-05 14:27:26.320486+00
 combat.hit_chance_min	0.05	float	Минимальный возможный шанс попадания (0–1). Даже при огромном уклонении противника не менее N% ударов попадут.	2026-03-05 14:27:26.320486+00
 combat.hit_chance_max	0.95	float	Максимальный возможный шанс попадания (0–1). Даже при огромной точности не более N% ударов попадут.	2026-03-05 14:27:26.320486+00
-aggro.base_radius	500	int	Базовый радиус обнаружения игрока мобом (игровые единицы). Конкретный моб может иметь свой radius из таблицы mobs.	2026-03-05 14:27:26.320486+00
-aggro.leash_distance	2000	int	Дистанция от точки спавна, при превышении которой моб сбрасывает агро и возвращается назад (игровые единицы).	2026-03-05 14:27:26.320486+00
 combat.max_resistance_cap	75	float	Maximum resistance % a target can have for any school (0-100)	2026-03-05 18:09:52.304703+00
 combat.dot_min_tick_ms	500	float	Minimum allowed tick interval for DoT/HoT effects (ms)	2026-03-05 18:29:09.000283+00
 combat.dot_max_ticks	20	float	Maximum number of ticks a single DoT/HoT effect can have	2026-03-05 18:29:09.000283+00
 combat.aoe_target_cap	10	float	Maximum number of targets hit by a single AoE skill cast	2026-03-05 18:49:40.6975+00
-economy.vendor_sell_tax_pct	0.0	float	Global tax on items sold TO vendor (0–1). 0 = vendor pays full vendorPriceSell.	2026-03-11 12:07:55.916948+00
-economy.vendor_buy_markup_pct	0.0	float	Global markup on items bought FROM vendor (0–1). 0 = base vendorPriceBuy.	2026-03-11 12:07:55.916948+00
 economy.trade_range	5.0	float	Max distance (units) between two players for P2P trade to start.	2026-03-11 12:07:55.916948+00
 durability.death_penalty_pct	0.05	float	Fraction of durabilityMax lost on death for each equipped durable item (0–1).	2026-03-11 12:07:55.916948+00
 durability.weapon_loss_per_hit	1	int	Durability points weapon loses per successful attack.	2026-03-11 12:07:55.916948+00
@@ -7093,7 +6984,6 @@ item_soul.tier3_bonus_flat	3	int	Flat attribute bonus at tier 3	2026-03-14 20:09
 item_soul.tier2_crit_pct	0.05	float	Crit chance bonus at tier 2	2026-03-14 20:09:43.80189+00
 item_soul.tier3_crit_pct	0.08	float	Crit chance bonus at tier 3	2026-03-14 20:09:43.80189+00
 item_soul.db_flush_every_kills	5	float	\N	2026-03-14 20:09:48.042848+00
-exploration.default_xp_reward	100	float	\N	2026-03-14 20:09:48.045159+00
 pity.soft_pity_kills	300	int	Kill count from which soft pity starts boosting drop chance	2026-03-15 07:40:02.83585+00
 pity.hard_pity_kills	800	int	Kill count at which a guaranteed drop triggers (hard cap, resets counter)	2026-03-15 07:40:02.83585+00
 pity.soft_bonus_per_kill	0.00005	float	Additional flat drop chance per kill after soft_pity_kills threshold	2026-03-15 07:40:02.83585+00
@@ -7102,6 +6992,7 @@ pity.hint_threshold_kills	500	int	Kill count at which to send a pity_hint world 
 bestiary.tier1_kills	1	int	Kills to unlock tier 1: name, type, HP range, biome	2026-03-15 07:40:02.83585+00
 bestiary.tier2_kills	5	int	Kills to unlock tier 2: weaknesses and resistances	2026-03-15 07:40:02.83585+00
 bestiary.tier3_kills	15	int	Kills to unlock tier 3: common loot table	2026-03-15 07:40:02.83585+00
+economy.vendor_buy_markup_pct	0.05	float	Global markup on items bought FROM vendor (0–1). 0 = base vendorPriceBuy.	2026-10-02 14:44:23.845719+00
 bestiary.tier4_kills	30	int	Kills to unlock tier 4: uncommon loot table	2026-03-15 07:40:02.83585+00
 bestiary.tier5_kills	75	int	Kills to unlock tier 5: rare loot table	2026-03-15 07:40:02.83585+00
 bestiary.tier6_kills	150	int	Kills to unlock tier 6: very rare loot (approximate rate shown)	2026-03-15 07:40:02.83585+00
@@ -7113,9 +7004,6 @@ reputation.enemy_threshold	-500	int	Below this: enemy tier	2026-03-15 10:36:42.8
 reputation.neutral_threshold	0	int	Below this: stranger tier	2026-03-15 10:36:42.853016+00
 reputation.friendly_threshold	200	int	Below this: neutral tier	2026-03-15 10:36:42.853016+00
 reputation.ally_threshold	500	int	Below this: friendly tier	2026-03-15 10:36:42.853016+00
-zone_event.pre_announce_sec	300	int	Seconds before event to send pre-announcement	2026-03-15 10:36:42.853016+00
-reputation.vendor_buy_discount	0.05	float	Buy price reduction for friendly/ally	2026-03-15 10:36:42.853016+00
-reputation.vendor_sell_bonus	0.05	float	Sell price bonus for friendly/ally	2026-03-15 10:36:42.853016+00
 durability.tier1_threshold_pct	0.75	float	\N	2026-04-16 08:33:27.432886+00
 durability.tier1_penalty_pct	0.05	float	\N	2026-04-16 08:33:27.432886+00
 durability.tier2_threshold_pct	0.50	float	\N	2026-04-16 08:33:27.432886+00
@@ -7125,18 +7013,19 @@ durability.tier3_penalty_pct	0.30	float	\N	2026-04-16 08:33:27.432886+00
 combat.crit_chance_cap	75	float	Maximum crit_chance (%). Prevents 100% crit builds.	2026-04-18 08:09:30.487328+00
 combat.block_chance_cap	75	float	Maximum block_chance (%). Prevents unkillable tank builds.	2026-04-18 08:09:30.487328+00
 combat.evasion_cap	75	float	Maximum evasion effectiveness (%). Prevents un-hittable builds.	2026-04-18 08:09:30.487328+00
-combat.elemental_resistance_cap	75	float	Maximum elemental resistance per school (%). Same as max_resistance_cap default.	2026-04-18 08:09:30.487328+00
 combat.attack_speed_base_divisor	100	float	attack_speed divisor. effectiveSwingMs = baseSwingMs / (1 + attack_speed/divisor).	2026-04-18 08:09:30.487328+00
 combat.cast_speed_base_divisor	100	float	cast_speed divisor. effectiveCastMs = baseCastMs / (1 + cast_speed/divisor).	2026-04-18 08:09:30.487328+00
 mastery.base_delta	0.02	float	Base mastery gain per successful hit	2026-06-29 19:03:51.762896+00
 mastery.db_flush_every_hits	25	int	Write mastery to DB every N hits (debounce)	2026-06-29 19:03:51.769643+00
-movement.speed_buffer_multiplier	1.3	float	Multiplier for movement speed validation (maxDist = speed x delta x multiplier). Increase for VPN/high-jitter clients. Default 1.3 = 30 percent buffer.	2026-09-22 17:29:13.476854+00
+interest.enabled	true	bool	kill-switch for interest v2 fan-out	2026-09-15 13:31:47.19718+00
+admin.enabled	true	bool	DEV-only admin-RPC test hook master switch	2026-09-20 18:05:43.533284+00
+admin.gm_client_ids	3809	string	DEV-only admin-RPC GM allowlist (CSV clientIds, gm_bot only)	2026-09-20 18:05:43.543077+00
 interest.cell_size	1500.0	float	Interest v2 grid cell size in world units (3x3 neighbourhood at view_radius=1)	2026-09-22 17:25:45.293839+00
 interest.view_radius	1	int	Interest v2 view radius in cells (1 = 3x3 neighbourhood around anchor cell)	2026-09-22 17:25:45.297035+00
 interest.rehome_margin_frac	0.15	float	Interest v2 anchor rehome margin as fraction of cell size (anti-jitter on cell borders)	2026-09-22 17:25:45.299099+00
-interest.enabled	true	bool	Interest v2 master switch (false = legacy broadcast-all fail-open)	2026-09-15 13:31:47.19718+00
 interest.snapshots	true	bool	Interest v2 enter-snapshots for newly subscribed cells	2026-09-22 17:25:45.301598+00
 interest.snapshot_cooldown_ms	2000	int	Interest v2 enter-snapshot gate: at most one snapshot per client per N ms	2026-09-22 17:25:45.303741+00
+movement.speed_buffer_multiplier	1.3	float	Multiplier for movement speed validation (maxDist = speed x delta x multiplier). Increase for VPN/high-jitter clients. Default 1.3 = 30 percent buffer.	2026-09-22 17:29:13.476854+00
 scheduler.spawn_safety_ms	300000	int	Chunk spawn safety sweep: spawn where alive<totalSpawnCount (5 min)	2026-09-23 11:39:57.856487+00
 scheduler.respawn_ms	30000	int	Chunk respawn-timed fill of non-full zones	2026-09-23 11:39:57.859109+00
 scheduler.mob_tick_ms	50	int	Chunk unified mob movement + broadcast tick resolution (per-mob gating inside)	2026-09-23 11:39:57.86119+00
@@ -7168,7 +7057,19 @@ drop.ttl_sec	300	int	Chunk expired ground-item cleanup: drop age threshold in se
 corpse.ttl_ms	60000	int	Chunk dead-mob cleanup: corpse visibility window in milliseconds	2026-09-24 13:31:51.531888+00
 scheduler.wio_tick_ms	1000	int	Chunk WIO tick: complete finished channels + respawn depleted globals	2026-09-25 14:42:16.403282+00
 scheduler.vendor_restock_ms	60000	int	Chunk vendor restock tick: refill depleted shop slots	2026-09-25 14:44:29.309503+00
-scheduler.inv_sync_retry_ms	5000	int	Chunk inventory id-sync retry sweep: resend saves missing their id echo	2026-09-26 08:50:00+00
+scheduler.inv_sync_retry_ms	5000	int	Chunk inventory id-sync retry sweep: resend saves missing their id echo	2026-09-26 08:47:43.660041+00
+economy.vendor_sell_tax_pct	0.05	float	Global tax on items sold TO vendor (0–1). 0 = vendor pays full vendorPriceSell.	2026-10-02 14:44:23.837883+00
+reputation.vendor_discount_threshold	200	int	Rep needed for vendor discount (VendorEventHandler)	2026-10-06 13:55:36.232299+00
+reputation.vendor_discount_pct	0.05	float	Vendor buy/sell discount at threshold (VendorDiscountPolicy)	2026-10-06 13:55:36.232299+00
+champion.pre_announce_sec	300	int	Timed champion pre-announce window	2026-10-06 13:58:04.909205+00
+champion.hp_multiplier	3.0	float	Champion HP multiplier	2026-10-06 13:58:04.909205+00
+champion.damage_multiplier	1.5	float	Champion damage multiplier	2026-10-06 13:58:04.909205+00
+champion.despawn_minutes	30	int	Champion despawn window default	2026-10-06 13:58:04.909205+00
+champion.spawn_chance_pct	100	float	Champion spawn chance default	2026-10-06 13:58:04.909205+00
+champion.max_active_per_zone	3	int	Max active champions per zone	2026-10-06 13:58:04.909205+00
+survival_champion.evolve_hours	12	int	Survival evolution period	2026-10-06 13:58:04.909205+00
+survival_champion.hp_bonus_pct	0.5	float	Survival evolve HP bonus	2026-10-06 13:58:04.909205+00
+scheduler.character_stale_threshold_ms	180000	int	Stale character sweep threshold	2026-10-06 13:58:04.909205+00
 \.
 
 
@@ -7355,6 +7256,8 @@ COPY public.items (id, name, slug, description, is_quest_item, item_type, weight
 74	Магический камень	magical_stone	Светящийся камень пропитанный магической энергией. Выпадает с магических мобов.	f	6	0.3	3	64	f	f	t	100	55	16	\N	0	f	t	f	f	\N
 75	Мясо животного	animal_meat	Свежее мясо добытое с животного. Можно приготовить или продать.	f	6	1	1	64	f	f	t	100	8	2	\N	0	f	t	f	f	\N
 19	Tome of Whirlwind	tome_whirlwind	An ancient scroll detailing the devastating Whirlwind technique. Rare.	f	10	0.3	3	1	f	f	t	100	300	80	\N	10	f	f	t	f	\N
+76	Клык вожака	alpha_fang	Трофей с древнего медведя. Скупщики платят хорошо.	f	6	0.3	3	64	f	f	t	100	400	200	\N	0	f	f	f	f	\N
+77	Сердце голема	golem_heart	Пульсирующее ядро пробуждённого голема. Тяжёлое и дорогое.	f	6	2	4	64	f	f	t	100	1000	500	\N	0	f	f	f	f	\N
 \.
 
 
@@ -7388,17 +7291,17 @@ staff_mastery	Мастерство посоха	staff	100	magical_attack
 -- Data for Name: mob; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressive, is_dead, slug, radius, base_xp, rank_id, aggro_range, attack_range, attack_cooldown, chase_multiplier, patrol_speed, is_social, chase_duration, flee_hp_threshold, ai_archetype, can_evolve, is_rare, rare_spawn_chance, rare_spawn_condition, faction_slug, rep_delta_per_kill, biome_slug, mob_type_slug, patrol_radius) FROM stdin;
-3	Простой кабан	2	2	120	10	f	f	ForestBoar	100	30	1	500	120	2	1.5	0.8	t	10	0.15	melee	f	f	0	\N	\N	0		beast	350
-4	Простая лиса	2	1	50	15	f	f	ForestFox	100	20	1	600	120	2.5	1	1	t	10	0.15	melee	f	f	0	\N	\N	0		beast	400
-6	Простой волк	2	3	150	20	t	f	ForestWolf	100	45	1	700	130	2	1	1	f	10	0.15	melee	f	f	0	\N	\N	0		beast	450
-5	Скелет	2	1	70	5	f	f	RuinSkeleton	100	25	1	500	110	2.8	1.2	0.7	f	10	0	melee	f	f	0	\N	\N	0		undead	300
-7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1	1	f	10	0	melee	f	t	8	on_kill	hunters	5		beast	500
-8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0.15	melee	f	t	8	on_kill	nature	5		beast	400
-9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	6	600	140	2.5	0.8	0.7	f	10	0	melee	f	f	0	\N	hunters	10		beast	500
-10	Каменный голем	2	15	3000	200	t	f	StoneGolem	250	2000	6	500	160	3	1	0.4	f	10	0	melee	f	f	0	\N	city_guard	10		elemental	300
-11	Древний медведь	2	12	3500	60	t	f	AncientBear	250	1500	6	700	160	2.5	0.9	0.5	f	15	0	melee	f	f	0	\N	hunters	25		beast	600
-12	Пробуждённый голем	2	18	8000	300	t	f	AwakenedGolem	300	3500	6	600	220	3.5	1	0.3	f	20	0	melee	f	f	0	\N	city_guard	25		elemental	400
+COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressive, is_dead, slug, radius, base_xp, rank_id, aggro_range, attack_range, attack_cooldown, chase_multiplier, patrol_speed, is_social, chase_duration, flee_hp_threshold, ai_archetype, can_evolve, is_rare, rare_spawn_chance, rare_spawn_condition, faction_slug, rep_delta_per_kill, biome_slug, mob_type_slug, patrol_radius, rare_of_mob_id) FROM stdin;
+5	Скелет	2	1	70	5	f	f	RuinSkeleton	100	25	1	500	110	2.8	1.2	0.7	f	10	0	melee	f	f	0	\N	\N	0		undead	300	\N
+3	Простой кабан	2	2	120	10	f	f	ForestBoar	100	30	1	500	120	2	1.5	0.8	t	10	0.15	melee	f	f	0	\N	\N	0		beast	350	\N
+4	Простая лиса	2	1	50	15	f	f	ForestFox	100	20	1	600	120	2.5	1	1	t	10	0.15	melee	f	f	0	\N	\N	0		beast	400	\N
+6	Простой волк	2	3	150	20	t	f	ForestWolf	100	45	1	700	130	2	1	1	f	10	0.15	melee	f	f	0	\N	\N	0		beast	450	\N
+12	Пробуждённый голем	2	18	8000	300	t	f	AwakenedGolem	300	3500	6	600	220	3.5	1	0.3	f	20	0	melee	f	f	0	\N	city_guard	25		elemental	400	\N
+11	Древний медведь	2	12	3500	60	t	f	AncientBear	250	1500	4	700	160	2.5	0.9	0.5	f	15	0	melee	f	f	0	\N	hunters	25		beast	600	\N
+10	Каменный голем	2	15	3000	200	t	f	StoneGolem	250	2000	5	500	160	3	1	0.4	f	10	0	melee	f	f	0	\N	city_guard	10		elemental	300	\N
+9	Лесной медведь	2	10	2000	50	t	f	ForestBear	200	800	4	600	140	2.5	0.8	0.7	f	10	0	melee	t	f	0	\N	hunters	10		beast	500	\N
+8	Духовный лис	2	5	300	150	f	f	SpiritFox	120	180	3	600	140	2.2	1	1.2	t	10	0.15	melee	f	t	8	on_respawn	nature	5		beast	400	4
+7	Матёрый волк	2	5	400	40	t	f	AlphaWolf	120	200	3	800	150	1.8	1	1	f	10	0	melee	t	t	8	on_respawn	hunters	5		beast	500	6
 \.
 
 
@@ -7474,14 +7377,8 @@ COPY public.mob_loot_info (id, mob_id, item_id, drop_chance, is_harvest_only, mi
 104	10	74	0.14	f	1	1	rare
 105	10	65	0.40	t	1	1	uncommon
 106	10	62	0.60	t	1	2	common
-\.
-
-
---
--- Data for Name: mob_position; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.mob_position (id, mob_id, x, y, z, rot_z, zone_id) FROM stdin;
+107	11	76	1.00	f	1	1	rare
+108	12	77	1.00	f	1	1	very_rare
 \.
 
 
@@ -7635,7 +7532,6 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 291	6	9	200.00	\N	\N
 292	6	10	0.80	\N	\N
 293	6	11	0.00	\N	\N
-294	6	12	15.00	\N	\N
 295	6	13	0.00	\N	\N
 296	6	14	6.00	\N	\N
 297	6	15	5.00	\N	\N
@@ -7821,6 +7717,7 @@ COPY public.mob_stat (id, mob_id, attribute_id, flat_value, multiplier, exponent
 477	12	33	0.00	\N	\N
 478	12	34	0.00	\N	\N
 479	12	35	0.00	\N	\N
+294	6	12	17.00	\N	\N
 \.
 
 
@@ -7837,12 +7734,14 @@ COPY public.mob_weaknesses (mob_id, element_slug) FROM stdin;
 --
 
 COPY public.npc (id, name, race_id, level, current_health, current_mana, is_dead, slug, radius, is_interactable, npc_type, faction_slug) FROM stdin;
-1	Varan	1	1	100	10	f	varan	100	t	4	\N
 2	Milaya	1	1	100	50	f	milaya	100	t	3	\N
 6	ruins_dying_stranger	1	1	1	0	f	ruins_dying_stranger	300	t	1	\N
 3	Edrik	1	1	100	20	f	edrik	100	t	1	hunters
 5	Sylara	1	5	400	250	f	sylara	100	t	6	merchants
 4	Theron	1	5	500	100	f	theron	100	t	6	city_guard
+9000	DevFoxHelper	1	1	100	10	f	dev_fox_helper	100	t	1	\N
+1	Varan	1	1	100	10	f	varan	100	t	4	\N
+9001	DevErrandBoard	1	1	100	10	f	dev_errand_board	100	t	1	\N
 \.
 
 
@@ -7899,6 +7798,8 @@ COPY public.npc_dialogue (npc_id, dialogue_id, priority, condition_group) FROM s
 6	7	2	[{"eq": true, "key": "ruins_dying_stranger.dialogue_started", "type": "flag"}, {"eq": true, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]
 6	8	1	[{"eq": true, "key": "ruins_dying_stranger.dialogue_started", "type": "flag"}, {"eq": false, "key": "ruins_dying_stranger.received_gift", "type": "flag"}]
 6	6	0	\N
+9000	9000	0	\N
+9001	9001	0	\N
 \.
 
 
@@ -7913,6 +7814,8 @@ COPY public.npc_placements (id, npc_id, zone_id, x, y, z, rot_z) FROM stdin;
 4	4	1	2839.3231182176823	-796.9468721200974	200	-145.0710341056735
 2	2	1	-3535.895437615007	-2136.5818797081447	200	44.58672960296602
 5	5	1	-2416.035161390464	-2718.4701626988026	200	8.13010235415546
+9000	9000	1	700	-3200	200	0
+9001	9001	1	800	-3200	200	0
 \.
 
 
@@ -7952,14 +7855,6 @@ COPY public.npc_type (id, name, slug) FROM stdin;
 
 
 --
--- Data for Name: outbox_seq_watermark; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.outbox_seq_watermark (chunk_id, character_id, last_seq, updated_at) FROM stdin;
-\.
-
-
---
 -- Data for Name: passive_skill_modifiers; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -7978,6 +7873,8 @@ COPY public.passive_skill_modifiers (id, skill_id, attribute_slug, modifier_type
 
 COPY public.quest (id, slug, min_level, repeatable, cooldown_sec, giver_npc_id, turnin_npc_id, client_quest_key, reputation_faction_slug, reputation_on_complete, reputation_on_fail) FROM stdin;
 2	varan_fox_menace	1	f	0	1	1	quest.varan_fox_menace	merchants	50	0
+9000	dev_short_chain	1	f	0	9000	9000	quest.dev_short_chain	\N	0	0
+9001	dev_repeatable_errand	1	t	60	9001	9001	quest.dev_repeatable_errand	\N	0	0
 \.
 
 
@@ -7989,6 +7886,9 @@ COPY public.quest_reward (id, quest_id, reward_type, item_id, quantity, amount, 
 4	2	item	46	3	0	f
 5	2	gold	\N	1	20	f
 6	2	exp	\N	1	50	f
+9000	9000	item	46	1	0	f
+9001	9000	gold	\N	1	5	f
+9002	9001	gold	\N	1	1	f
 \.
 
 
@@ -8000,6 +7900,9 @@ COPY public.quest_step (id, quest_id, step_index, step_type, params, client_step
 8	2	0	kill	{"count": 6, "mob_id": 4}	quest.varan_fox_menace.kill_foxes	auto
 9	2	1	custom	{}	quest.varan_fox_menace.report_to_varan	manual
 10	2	2	collect	{"count": 6, "item_id": 57}	quest.varan_fox_menace.collect_hides	auto
+9000	9000	0	kill	{"count": 2, "mob_id": 4}	\N	auto
+9001	9000	1	collect	{"count": 1, "item_id": 57}	\N	auto
+9002	9001	0	reach	{"x": 850.0, "y": -3200.0, "radius": 300.0}	\N	auto
 \.
 
 
@@ -8027,6 +7930,7 @@ COPY public.respawn_zones (id, name, x, y, z, zone_id, is_default, min_x, max_x,
 
 COPY public.skill_active_effects (id, skill_id, effect_slug, effect_type_slug, attribute_slug, value, duration_seconds, tick_ms) FROM stdin;
 1	13	battle_cry_phys_atk	buff	physical_attack	25	30	0
+2	17	shield_slam_stun	stun		0	2	0
 \.
 
 
@@ -8082,6 +7986,7 @@ COPY public.skill_effect_instances (id, skill_id, order_idx, target_type_id) FRO
 15	14	2	1
 16	15	1	1
 17	16	1	1
+18	17	1	1
 \.
 
 
@@ -8115,6 +8020,8 @@ COPY public.skill_effects_mapping (id, effect_instance_id, effect_id, value, lev
 23	15	5	80	1	0	0	\N
 24	16	7	0	1	0	0	\N
 25	17	3	0	1	0	0	\N
+26	18	1	1.2	1	0	0	\N
+27	18	2	10	1	0	0	\N
 \.
 
 
@@ -8202,6 +8109,12 @@ COPY public.skill_properties_mapping (id, skill_id, skill_level, property_id, pr
 63	15	1	4	3000
 64	15	1	5	20
 65	15	1	8	500
+66	17	1	2	12000
+67	17	1	3	1000
+68	17	1	4	0
+69	17	1	5	0
+70	17	1	6	2.5
+71	17	1	8	300
 \.
 
 
@@ -8254,6 +8167,7 @@ COPY public.skills (id, name, slug, scale_stat_id, school_id, animation_name, is
 14	Healing Surge	healing_surge	2	7	\N	f
 15	Blink Home	blink_home	3	9	\N	f
 16	Swift Feet	swift_feet	1	1	\N	t
+17	Shield Slam	shield_slam	1	1	\N	f
 \.
 
 
@@ -8283,6 +8197,7 @@ COPY public.spawn_zone_mobs (id, spawn_zone_id, mob_id, spawn_count, respawn_tim
 19	18	3	12	00:05:00
 20	19	4	4	00:03:00
 21	20	4	8	00:03:00
+23	9001	4	3	00:01:00
 \.
 
 
@@ -8311,6 +8226,7 @@ COPY public.spawn_zones (zone_id, zone_name, min_spawn_x, min_spawn_y, min_spawn
 20	fox_4	15169.606163730015	-8169.61539156628	600	24052.09210142437	-4808.235886808077	700	\N	RECT	19610.84913257719	-6488.925639187179	0	0	\N
 18	forest_1	12717.175613729672	5406.075893434718	600	25629.894650595794	24820.782431196334	700	7	RECT	19173.53513216273	15113.429162315526	0	0	\N
 5	Deep Thicket	0	0	500	0	0	600	2	CIRCLE	18268.79008474665	18532.813925674505	0	800	\N
+9001	Test Arena Foxes	4638	-1025	250	4838	-825	350	9001	RECT	4738	-925	0	0	\N
 \.
 
 
@@ -8351,8 +8267,9 @@ COPY public.target_type (id, slug) FROM stdin;
 --
 
 COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interval_hours, window_minutes, next_spawn_at, last_killed_at, announcement_key) FROM stdin;
-3	ancient_bear	7	11	4	30	\N	\N	champion.ancient_bear
-4	awakened_golem	6	12	6	45	\N	\N	champion.awakened_golem
+4	awakened_golem	6	12	6	45	1790955867	\N	champion.awakened_golem
+3	ancient_bear	7	11	4	30	1790955867	\N	champion.ancient_bear
+9001	dev_timed_fox	9001	4	1	5	1791759498	2026-10-11 19:47:18.584396+00	champion.dev_timed_fox
 \.
 
 
@@ -8361,18 +8278,16 @@ COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interv
 --
 
 COPY public.title_definitions (id, slug, display_name, description, earn_condition, bonuses, condition_params) FROM stdin;
-1	wolf_slayer	Волкобой	Достиг максимального тира бестиария серого волка. Волки тебя не пугают.	bestiary	[{"value": 2.0, "attributeSlug": "physical_attack"}, {"value": 1.0, "attributeSlug": "move_speed"}]	{"minTier": 6, "mobSlug": "GreyWolf"}
-2	wolf_hunter	Охотник на волков	Достиг 3-го тира бестиария серого волка. Ты знаешь их повадки.	bestiary	[{"value": 1.0, "attributeSlug": "physical_attack"}]	{"minTier": 3, "mobSlug": "GreyWolf"}
-3	goblin_exterminator	Истребитель гоблинов	Достиг 4-го тира бестиария лесного гоблина. Гоблины боятся тебя.	bestiary	[{"value": 1.5, "attributeSlug": "physical_attack"}, {"value": 1.0, "attributeSlug": "physical_defense"}]	{"minTier": 4, "mobSlug": "ForestGoblin"}
 4	swordsman	Мечник	Достиг 3-го тира мастерства меча. Клинок — твоё продолжение.	mastery	[{"value": 3.0, "attributeSlug": "physical_attack"}, {"value": 0.5, "attributeSlug": "crit_chance"}]	{"minTier": 3, "masterySlug": "sword_mastery"}
 6	bowmaster	Мастер лука	Достиг 3-го тира мастерства лука. Стрелы не знают промаха.	mastery	[{"value": 1.0, "attributeSlug": "crit_chance"}, {"value": 2.0, "attributeSlug": "physical_attack"}]	{"minTier": 3, "masterySlug": "bow_mastery"}
 7	friend_of_hunters	Союзник Гильдии Охотников	Достиг статуса союзника в Гильдии Охотников.	reputation	[{"value": 2.0, "attributeSlug": "move_speed"}, {"value": 1.0, "attributeSlug": "physical_attack"}]	{"factionSlug": "hunters", "minTierName": "ally"}
 8	city_guardian	Страж Города	Достиг статуса союзника в Городской Страже.	reputation	[{"value": 3.0, "attributeSlug": "physical_defense"}, {"value": 15.0, "attributeSlug": "max_health"}]	{"factionSlug": "city_guard", "minTierName": "ally"}
-9	bandit_friend	Свой среди чужих	Достиг статуса союзника в Братстве Бандитов.	reputation	[{"value": 3.0, "attributeSlug": "move_speed"}]	{"factionSlug": "bandits", "minTierName": "ally"}
 10	seasoned_adventurer	Бывалый искатель приключений	Достиг 10-го уровня. Путь только начинается.	level	[{"value": 10.0, "attributeSlug": "max_health"}]	{"level": 10}
-11	veteran	Ветеран	Достиг 25-го уровня. Опыт не купить за золото.	level	[{"value": 5.0, "attributeSlug": "physical_defense"}, {"value": 20.0, "attributeSlug": "max_health"}]	{"level": 25}
 5	archmage	Архимаг	Достиг 4-го тира мастерства посоха. Магия послушна тебе.	mastery	[{"value": 5.0, "attributeSlug": "magical_attack"}]	{"minTier": 4, "masterySlug": "staff_mastery"}
 12	first_hunter	Первая охота	Завершил вводное задание по охоте на волков.	quest	[{"value": 1.0, "attributeSlug": "physical_attack"}]	{"questSlug": "varan_fox_menace"}
+11	veteran	Ветеран	Достиг 25-го уровня. Опыт не купить за золото.	level	[{"value": 5.0, "attributeSlug": "physical_defense"}, {"value": 20.0, "attributeSlug": "max_health"}]	{"level": 9}
+1	wolf_slayer	Волкобой	Достиг максимального тира бестиария серого волка. Волки тебя не пугают.	bestiary	[{"value": 2.0, "attributeSlug": "physical_attack"}, {"value": 1.0, "attributeSlug": "move_speed"}]	{"minTier": 6, "mobSlug": "ForestWolf"}
+2	wolf_hunter	Охотник на волков	Достиг 3-го тира бестиария серого волка. Ты знаешь их повадки.	bestiary	[{"value": 1.0, "attributeSlug": "physical_attack"}]	{"minTier": 3, "mobSlug": "ForestWolf"}
 \.
 
 
@@ -8435,6 +8350,7 @@ COPY public.vendor_inventory (id, vendor_npc_id, item_id, stock_count, price_ove
 90	5	20	-1	\N	0	-1	3600	\N
 91	5	21	-1	\N	0	-1	3600	\N
 92	5	19	1	\N	1	1	86400	\N
+93	2	46	2	\N	2	2	60	\N
 \.
 
 
@@ -8464,6 +8380,9 @@ COPY public.world_object_states (object_id, state, depleted_at) FROM stdin;
 --
 
 COPY public.world_objects (id, slug, name_key, object_type, scope, pos_x, pos_y, pos_z, rot_z, zone_id, dialogue_id, loot_table_id, required_item_id, interaction_radius, channel_time_sec, respawn_sec, is_active_by_default, min_level, condition_group) FROM stdin;
+9001	dev_examine_stone	dev.examine	examine	global	0	0	200	0	1	\N	\N	\N	50000	0	0	t	1	null
+9002	dev_far_stone	dev.far	examine	global	28000	28000	200	0	1	\N	\N	\N	100	0	0	t	1	null
+9003	dev_channel_stone	dev.channel	channeled	global	100	100	200	0	1	\N	\N	\N	50000	5	30	t	1	null
 \.
 
 
@@ -8484,9 +8403,10 @@ COPY public.zone_event_templates (id, slug, game_zone_id, trigger_type, duration
 
 COPY public.zones (id, slug, name, min_level, max_level, is_pvp, is_safe_zone, min_x, max_x, min_y, max_y, exploration_xp_reward, champion_threshold_kills, shape_type, center_x, center_y, inner_radius, outer_radius) FROM stdin;
 1	village	Village	1	5	f	t	-5440.2178821979505	4568.621024817196	-5471.3412259071965	3002.10848639096	100	100	CIRCLE	-364.183657769343	-962.321990454137	0	4966.320930263775
-2	fields	Fields	1	2	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	100	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	10068.481043434242
-7	forest	Forest	3	10	f	f	10547.6533783079	27781.22904413805	3698.038360451581	28236.99545741896	100	100	RECT	19164.441211222977	15967.516908935271	0	0
-6	ruins	ruins	1	2	f	f	16882.78628907363	24481.746105077662	-20335.67459642625	-13737.355431763328	100	100	RECT	20682.266197075645	-17036.515014094788	0	4427
+9001	test_arena	Test Arena (DEV ONLY)	1	999	f	f	4638	4838	-1025	-825	0	5	RECT	4738	-925	0	0
+2	fields	Fields	1	2	f	f	-5438.206711468296	4555.443380622781	3054.1359757361442	7954.135975736144	100	25	ANNULUS	-440.5078918600502	-890.5384478275864	5314.343027676288	10068.481043434242
+7	forest	Forest	3	10	f	f	10547.6533783079	27781.22904413805	3698.038360451581	28236.99545741896	100	25	RECT	19164.441211222977	15967.516908935271	0	0
+6	ruins	ruins	1	2	f	f	16882.78628907363	24481.746105077662	-20335.67459642625	-13737.355431763328	100	25	RECT	20682.266197075645	-17036.515014094788	0	4427
 \.
 
 
@@ -8515,42 +8435,42 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 121, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 5089, true);
 
 
 --
 -- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 14, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 99, true);
 
 
 --
 -- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_position_id_seq', 8, true);
+SELECT pg_catalog.setval('public.character_position_id_seq', 603, true);
 
 
 --
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 11, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 655, true);
 
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.characters_id_seq', 8, true);
+SELECT pg_catalog.setval('public.characters_id_seq', 603, true);
 
 
 --
 -- Name: class_skill_tree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.class_skill_tree_id_seq', 28, true);
+SELECT pg_catalog.setval('public.class_skill_tree_id_seq', 29, true);
 
 
 --
@@ -8571,28 +8491,28 @@ SELECT pg_catalog.setval('public.class_starter_items_id_seq', 2, true);
 -- Name: currency_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.currency_transactions_id_seq', 1, false);
+SELECT pg_catalog.setval('public.currency_transactions_id_seq', 170, true);
 
 
 --
 -- Name: dialogue_edge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 224, true);
+SELECT pg_catalog.setval('public.dialogue_edge_id_seq', 9100, true);
 
 
 --
 -- Name: dialogue_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.dialogue_id_seq', 8, true);
+SELECT pg_catalog.setval('public.dialogue_id_seq', 9100, true);
 
 
 --
 -- Name: dialogue_node_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.dialogue_node_id_seq', 699, true);
+SELECT pg_catalog.setval('public.dialogue_node_id_seq', 9100, true);
 
 
 --
@@ -8620,14 +8540,14 @@ SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 -- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 494, true);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 9143, true);
 
 
 --
 -- Name: gm_action_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.gm_action_log_id_seq', 1, false);
+SELECT pg_catalog.setval('public.gm_action_log_id_seq', 4052, true);
 
 
 --
@@ -8669,14 +8589,7 @@ SELECT pg_catalog.setval('public.item_use_effects_id_seq', 17, true);
 -- Name: items_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.items_id_seq', 75, true);
-
-
---
--- Name: mob_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.mob_active_effect_id_seq', 1, false);
+SELECT pg_catalog.setval('public.items_id_seq', 77, true);
 
 
 --
@@ -8690,14 +8603,7 @@ SELECT pg_catalog.setval('public.mob_id_seq', 12, true);
 -- Name: mob_loot_info_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.mob_loot_info_id_seq', 106, true);
-
-
---
--- Name: mob_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.mob_position_id_seq', 1, false);
+SELECT pg_catalog.setval('public.mob_loot_info_id_seq', 108, true);
 
 
 --
@@ -8746,14 +8652,14 @@ SELECT pg_catalog.setval('public.npc_attributes_id_seq', 13, true);
 -- Name: npc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.npc_id_seq', 6, true);
+SELECT pg_catalog.setval('public.npc_id_seq', 9100, true);
 
 
 --
 -- Name: npc_placements_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.npc_placements_id_seq', 12, true);
+SELECT pg_catalog.setval('public.npc_placements_id_seq', 9100, true);
 
 
 --
@@ -8788,21 +8694,21 @@ SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 5, true);
 -- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_active_effect_id_seq', 60, true);
+SELECT pg_catalog.setval('public.player_active_effect_id_seq', 9050, true);
 
 
 --
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 55, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 351, true);
 
 
 --
 -- Name: quest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.quest_id_seq', 2, true);
+SELECT pg_catalog.setval('public.quest_id_seq', 9100, true);
 
 
 --
@@ -8816,7 +8722,7 @@ SELECT pg_catalog.setval('public.quest_reward_id_seq', 6, true);
 -- Name: quest_step_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.quest_step_id_seq', 10, true);
+SELECT pg_catalog.setval('public.quest_step_id_seq', 9100, true);
 
 
 --
@@ -8837,7 +8743,7 @@ SELECT pg_catalog.setval('public.respawn_zones_id_seq', 1, true);
 -- Name: skill_active_effects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skill_active_effects_id_seq', 1, true);
+SELECT pg_catalog.setval('public.skill_active_effects_id_seq', 2, true);
 
 
 --
@@ -8858,7 +8764,7 @@ SELECT pg_catalog.setval('public.skill_effects_id_seq', 7, true);
 -- Name: skill_effects_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skill_effects_mapping_id_seq', 25, true);
+SELECT pg_catalog.setval('public.skill_effects_mapping_id_seq', 27, true);
 
 
 --
@@ -8893,7 +8799,7 @@ SELECT pg_catalog.setval('public.skill_school_id_seq', 4, true);
 -- Name: skills_attributes_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.skills_attributes_mapping_id_seq', 50, true);
+SELECT pg_catalog.setval('public.skills_attributes_mapping_id_seq', 71, true);
 
 
 --
@@ -8907,14 +8813,14 @@ SELECT pg_catalog.setval('public.skills_id_seq', 16, true);
 -- Name: spawn_zone_mobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.spawn_zone_mobs_id_seq', 21, true);
+SELECT pg_catalog.setval('public.spawn_zone_mobs_id_seq', 23, true);
 
 
 --
 -- Name: spawn_zones_zone_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.spawn_zones_zone_id_seq', 20, true);
+SELECT pg_catalog.setval('public.spawn_zones_zone_id_seq', 9100, true);
 
 
 --
@@ -8942,7 +8848,7 @@ SELECT pg_catalog.setval('public.target_type_id_seq', 6, true);
 -- Name: timed_champion_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.timed_champion_templates_id_seq', 4, true);
+SELECT pg_catalog.setval('public.timed_champion_templates_id_seq', 9100, true);
 
 
 --
@@ -8956,28 +8862,28 @@ SELECT pg_catalog.setval('public.title_definitions_id_seq', 12, true);
 -- Name: user_bans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_bans_id_seq', 1, false);
+SELECT pg_catalog.setval('public.user_bans_id_seq', 9, true);
 
 
 --
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 128, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 8890, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 3, true);
+SELECT pg_catalog.setval('public.users_id_seq', 4199, true);
 
 
 --
 -- Name: vendor_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.vendor_inventory_id_seq', 92, true);
+SELECT pg_catalog.setval('public.vendor_inventory_id_seq', 93, true);
 
 
 --
@@ -9005,7 +8911,7 @@ SELECT pg_catalog.setval('public.zone_event_templates_id_seq', 3, true);
 -- Name: zones_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.zones_id_seq', 7, true);
+SELECT pg_catalog.setval('public.zones_id_seq', 9100, true);
 
 
 --
@@ -9257,6 +9163,14 @@ ALTER TABLE ONLY public.equip_slot
 
 
 --
+-- Name: fact_keys_applied fact_keys_applied_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.fact_keys_applied
+    ADD CONSTRAINT fact_keys_applied_pkey PRIMARY KEY (key);
+
+
+--
 -- Name: factions factions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9270,14 +9184,6 @@ ALTER TABLE ONLY public.factions
 
 ALTER TABLE ONLY public.factions
     ADD CONSTRAINT factions_slug_key UNIQUE (slug);
-
-
---
--- Name: fact_keys_applied fact_keys_applied_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.fact_keys_applied
-    ADD CONSTRAINT fact_keys_applied_pkey PRIMARY KEY (key);
 
 
 --
@@ -9385,14 +9291,6 @@ ALTER TABLE ONLY public.mastery_definitions
 
 
 --
--- Name: mob_active_effect mob_active_effect_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_active_effect
-    ADD CONSTRAINT mob_active_effect_pkey PRIMARY KEY (id);
-
-
---
 -- Name: mob_loot_info mob_loot_info_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9406,14 +9304,6 @@ ALTER TABLE ONLY public.mob_loot_info
 
 ALTER TABLE ONLY public.mob
     ADD CONSTRAINT mob_pkey PRIMARY KEY (id);
-
-
---
--- Name: mob_position mob_position_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_position
-    ADD CONSTRAINT mob_position_pkey PRIMARY KEY (id);
 
 
 --
@@ -9577,19 +9467,19 @@ ALTER TABLE ONLY public.npc_type
 
 
 --
--- Name: outbox_seq_watermark pk_outbox_seq_watermark; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.outbox_seq_watermark
-    ADD CONSTRAINT pk_outbox_seq_watermark PRIMARY KEY (chunk_id, character_id);
-
-
---
 -- Name: passive_skill_modifiers passive_skill_modifiers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.passive_skill_modifiers
     ADD CONSTRAINT passive_skill_modifiers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: outbox_seq_watermark pk_outbox_seq_watermark; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outbox_seq_watermark
+    ADD CONSTRAINT pk_outbox_seq_watermark PRIMARY KEY (chunk_id, character_id);
 
 
 --
@@ -9614,6 +9504,14 @@ ALTER TABLE ONLY public.player_flag
 
 ALTER TABLE ONLY public.player_inventory
     ADD CONSTRAINT player_inventory_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: player_inventory player_inventory_sync_token_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_inventory
+    ADD CONSTRAINT player_inventory_sync_token_key UNIQUE (sync_token);
 
 
 --
@@ -10199,20 +10097,6 @@ CREATE INDEX idx_item_use_effects_item_id ON public.item_use_effects USING btree
 
 
 --
--- Name: idx_mob_active_effect_expires_at; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_mob_active_effect_expires_at ON public.mob_active_effect USING btree (expires_at) WHERE (expires_at IS NOT NULL);
-
-
---
--- Name: idx_mob_active_effect_mob_uid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_mob_active_effect_mob_uid ON public.mob_active_effect USING btree (mob_uid);
-
-
---
 -- Name: idx_mob_loot_info_mob; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -10231,13 +10115,6 @@ CREATE INDEX idx_mob_loot_tier ON public.mob_loot_info USING btree (mob_id, loot
 --
 
 CREATE INDEX idx_mob_mob_type_slug ON public.mob USING btree (mob_type_slug);
-
-
---
--- Name: idx_mob_position_mob; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_mob_position_mob ON public.mob_position USING btree (mob_id);
 
 
 --
@@ -10315,13 +10192,6 @@ CREATE INDEX idx_player_inventory_character ON public.player_inventory USING btr
 --
 
 CREATE INDEX idx_player_inventory_ground ON public.player_inventory USING btree (id) WHERE (character_id IS NULL);
-
-
---
--- Name: idx_player_inventory_unique; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_player_inventory_sync_token ON public.player_inventory USING btree (sync_token);
 
 
 --
@@ -10535,6 +10405,13 @@ CREATE INDEX ix_edge_to ON public.dialogue_edge USING btree (to_node_id);
 
 
 --
+-- Name: ix_fact_keys_applied_applied_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_fact_keys_applied_applied_at ON public.fact_keys_applied USING btree (applied_at);
+
+
+--
 -- Name: ix_gm_action_log_created; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -10584,24 +10461,10 @@ CREATE INDEX ix_items_mastery_slug ON public.items USING btree (mastery_slug) WH
 
 
 --
--- Name: ix_mob_active_effect_src_player; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX ix_mob_active_effect_src_player ON public.mob_active_effect USING btree (source_player_id) WHERE (source_player_id IS NOT NULL);
-
-
---
 -- Name: ix_mob_faction_slug; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX ix_mob_faction_slug ON public.mob USING btree (faction_slug) WHERE (faction_slug IS NOT NULL);
-
-
---
--- Name: ix_mob_position_zone; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX ix_mob_position_zone ON public.mob_position USING btree (zone_id);
 
 
 --
@@ -11272,22 +11135,6 @@ ALTER TABLE ONLY public.characters
 
 
 --
--- Name: mob_position fk_mob_position_mob; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_position
-    ADD CONSTRAINT fk_mob_position_mob FOREIGN KEY (mob_id) REFERENCES public.mob(id) ON DELETE CASCADE;
-
-
---
--- Name: mob_position fk_mob_position_zone; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_position
-    ADD CONSTRAINT fk_mob_position_zone FOREIGN KEY (zone_id) REFERENCES public.zones(id) ON DELETE SET NULL;
-
-
---
 -- Name: users fk_users_role; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11416,30 +11263,6 @@ ALTER TABLE ONLY public.items
 
 
 --
--- Name: mob_active_effect mob_active_effect_attribute_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_active_effect
-    ADD CONSTRAINT mob_active_effect_attribute_id_fkey FOREIGN KEY (attribute_id) REFERENCES public.entity_attributes(id) ON DELETE SET NULL;
-
-
---
--- Name: mob_active_effect mob_active_effect_effect_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_active_effect
-    ADD CONSTRAINT mob_active_effect_effect_id_fkey FOREIGN KEY (effect_id) REFERENCES public.skill_damage_formulas(id) ON DELETE CASCADE;
-
-
---
--- Name: mob_active_effect mob_active_effect_source_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.mob_active_effect
-    ADD CONSTRAINT mob_active_effect_source_player_id_fkey FOREIGN KEY (source_player_id) REFERENCES public.characters(id) ON DELETE SET NULL;
-
-
---
 -- Name: mob mob_faction_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11477,6 +11300,14 @@ ALTER TABLE ONLY public.mob
 
 ALTER TABLE ONLY public.mob
     ADD CONSTRAINT mob_rank_id_fkey FOREIGN KEY (rank_id) REFERENCES public.mob_ranks(rank_id);
+
+
+--
+-- Name: mob mob_rare_of_mob_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob
+    ADD CONSTRAINT mob_rare_of_mob_id_fkey FOREIGN KEY (rare_of_mob_id) REFERENCES public.mob(id) ON DELETE SET NULL;
 
 
 --
