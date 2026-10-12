@@ -2,7 +2,7 @@
 
 namespace {
 
-// 24 prepared statements.
+// 25 prepared statements.
 const QueryDef kQueries[] = {
         // Search user by login — returns user row including hashed password for verification in app code.
         // Also checks is_active and lock status (locked_until).
@@ -13,6 +13,9 @@ const QueryDef kQueries[] = {
         // Read-only, used by Authenticator triage; wire stays generic.
     {"probe_user_status",
      R"QDEF(SELECT is_active, locked_until FROM users WHERE login = $1 LIMIT 1;)QDEF"},
+        // Manual GM bans with reason (user_bans; auto-lock stays in users.locked_until).
+    {"check_active_ban",
+     R"QDEF(SELECT reason, COALESCE(expires_at::text, '') AS expires_at FROM user_bans WHERE user_id = $1 AND is_active = true AND (expires_at IS NULL OR expires_at > now()) ORDER BY id DESC LIMIT 1;)QDEF"},
     {"increment_failed_logins",
      R"QDEF(UPDATE users SET failed_login_attempts = failed_login_attempts + 1, locked_until = CASE WHEN failed_login_attempts + 1 >= 5   THEN now() + interval '15 minutes' ELSE locked_until END WHERE login = $1;)QDEF"},
     {"reset_failed_logins",

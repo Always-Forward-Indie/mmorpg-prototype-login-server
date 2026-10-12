@@ -69,6 +69,22 @@ AuthOutcome Authenticator::authenticate(pqxx::connection &conn, ClientData &clie
         transaction.exec_prepared("reset_failed_logins", userID, ipStr, clientVersion);
         transaction.commit();
 
+        // Step 3b: manual GM ban (user_bans, with reason). Checked only after
+        // a correct password so bans don't leak account existence.
+        {
+            pqxx::work banTxn(conn);
+            pqxx::result banRow = banTxn.exec_prepared("check_active_ban", userID);
+            banTxn.abort(); // read-only
+            if (!banRow.empty())
+            {
+                AuthOutcome banned{AuthOutcome::Status::BANNED, 0};
+                banned.banReason = banRow[0]["reason"].as<std::string>();
+                banned.banExpiresAt = banRow[0]["expires_at"].as<std::string>();
+                log->warn("authenticate: banned login attempt login=" + login);
+                return banned;
+            }
+        }
+
         // Step 4: generate session token
         boost::uuids::uuid uuid = boost::uuids::random_generator()();
         std::string uniqueHash = boost::uuids::to_string(uuid);

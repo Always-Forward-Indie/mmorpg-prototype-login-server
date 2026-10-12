@@ -15,9 +15,12 @@ struct AuthOutcome {
         INVALID_CREDENTIALS = 1, ///< unknown login, inactive, or wrong password
         LOCKED = 2,             ///< account temporarily locked (5 fails / 15 min)
         DB_ERROR = 3,           ///< database / internal error
+        BANNED = 4,             ///< manual GM ban (user_bans, with reason+expiry)
     };
     Status status = Status::INVALID_CREDENTIALS;
     int userId = 0;
+    std::string banReason;
+    std::string banExpiresAt;
 };
 
 class Authenticator

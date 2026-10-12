@@ -27,7 +27,7 @@ const QueryDef *findByName(const std::string &name) {
 } // namespace
 
 TEST(QueryRegistry, ExactCountAndNamesUnique) {
-    EXPECT_EQ(queryRegistrySize(), 24u); // login catalog pin; bump on purpose
+    EXPECT_EQ(queryRegistrySize(), 25u); // login catalog pin; bump on purpose
     std::set<std::string> names;
     for (const QueryDef *q = queryRegistryBegin(); q != queryRegistryEnd(); ++q) {
         EXPECT_FALSE(q->name.empty());

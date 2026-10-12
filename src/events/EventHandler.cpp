@@ -79,6 +79,8 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
                     const char *code = "Authentication failed for user!";
                     if (outcome.status == AuthOutcome::Status::LOCKED)
                         code = "ERR_ACCOUNT_LOCKED";
+                    else if (outcome.status == AuthOutcome::Status::BANNED)
+                        code = "ERR_ACCOUNT_BANNED";
                     else if (outcome.status == AuthOutcome::Status::DB_ERROR)
                         code = "ERR_DB";
                     nlohmann::json failResp;
@@ -89,7 +91,8 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
                                    .setHeader("login", passedClientData.login)
                                    .setHeader("clientId", passedClientData.clientId)
                                    .setHeader("eventType", "authentificationClient")
-                                   .setBody("", "")
+                                   .setBody("banReason", outcome.banReason)
+                                   .setBody("banExpiresAt", outcome.banExpiresAt)
                                    .build();
                     networkManager_.sendResponse(
                         clientSocket, networkManager_.generateResponseMessage("error", failResp));

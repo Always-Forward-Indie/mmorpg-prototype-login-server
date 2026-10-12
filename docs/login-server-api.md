@@ -167,6 +167,7 @@ Machine-readable auth failures (`body.errorCode` mirrors `message`):
 | `message` / `errorCode`       | Meaning                                              |
 |-------------------------------|------------------------------------------------------|
 | `ERR_ACCOUNT_LOCKED`          | Too many failed logins, account temporarily locked   |
+| `ERR_ACCOUNT_BANNED`          | Manual GM ban (`user_bans`); body adds `banReason` + `banExpiresAt` ("" = permanent). Пин: `test_ban.py` |
 | `ERR_DB`                      | Postgres unreachable — fail fast, retry (never hang) |
 | `ERR_INTERNAL`                | Session vanished between store and read (rare race)  |
 | `Authentication failed for user!` | Wrong login/password (deliberately vague)        |
