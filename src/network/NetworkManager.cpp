@@ -428,6 +428,26 @@ void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> 
 {
     // CRITICAL-11 fix: responseString is a const-ref parameter; it may be destroyed before
     // async_write completes. Copy once into a shared_ptr to keep data alive until completion.
+    // Wire-contract guard (seam with the UE client): the client parses one
+    // '\n'-terminated JSON object per line with an 8KB cap. Anything bigger
+    // is dropped client-side, so flag it here at warn level with the event
+    // type instead of silently producing snapshot holes.
+    constexpr size_t kClientLineCapWarnBytes = 6 * 1024;
+    if (responseString.size() > kClientLineCapWarnBytes)
+    {
+        std::string eventType = "?";
+        const std::string key = "\"eventType\":\"";
+        const size_t pos = responseString.find(key);
+        if (pos != std::string::npos)
+        {
+            const size_t begin = pos + key.size();
+            const size_t end = responseString.find('"', begin);
+            if (end != std::string::npos)
+                eventType = responseString.substr(begin, end - begin);
+        }
+        log_->warn("Oversized packet for client wire ({} bytes, eventType={}): exceeds UE 8KB line cap — chunk the array payload",
+            responseString.size(), eventType);
+    }
     auto dataPtr = std::make_shared<const std::string>(responseString);
     enqueueWrite(std::move(clientSocket), std::move(dataPtr));
 }
