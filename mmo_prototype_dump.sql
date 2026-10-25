@@ -6960,7 +6960,7 @@ combat.max_resistance_cap	75	float	Maximum resistance % a target can have for an
 combat.dot_min_tick_ms	500	float	Minimum allowed tick interval for DoT/HoT effects (ms)	2026-03-05 18:29:09.000283+00
 combat.dot_max_ticks	20	float	Maximum number of ticks a single DoT/HoT effect can have	2026-03-05 18:29:09.000283+00
 combat.aoe_target_cap	10	float	Maximum number of targets hit by a single AoE skill cast	2026-03-05 18:49:40.6975+00
-economy.trade_range	5.0	float	Max distance (units) between two players for P2P trade to start.	2026-03-11 12:07:55.916948+00
+economy.trade_range	500.0	float	Max distance (world units; 100 units = 1 m, so 500 = 5 m) between two players for P2P trade to start.	2026-10-20 10:40:09.877204+00
 durability.death_penalty_pct	0.05	float	Fraction of durabilityMax lost on death for each equipped durable item (0–1).	2026-03-11 12:07:55.916948+00
 durability.weapon_loss_per_hit	1	int	Durability points weapon loses per successful attack.	2026-03-11 12:07:55.916948+00
 durability.armor_loss_per_hit	1	int	Durability points each armour piece loses when player receives a hit.	2026-03-11 12:07:55.916948+00

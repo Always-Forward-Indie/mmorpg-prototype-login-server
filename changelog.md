@@ -1,3 +1,24 @@
+v0.1.31
+25.10.2026
+================
+
+DB:
+
+**Migration 109 + dump update (trade distance units fix).**
+- `economy.trade_range` 5.0 -> 500.0: все дистанции на wire проверяются в
+  мировых единицах (100 ед. = 1 м), а значение было в «метрах» — любой
+  P2P-трейд отклонялся с `out_of_range` (нос-к-носу ~53u против лимита 5u).
+  500u = 5 м, консистентно с NPC-радиусом ~100 и aggro 500-800.
+  Пингуется `test_trade_request_realistic_range`.
+
+Net (backfill, committed 18.10, not in v0.1.30):
+
+**Warn on oversized client-bound JSON lines.**
+- Отправка > 6 КБ логируется с `eventType` (8KB client framing cap);
+  поведение не менялось, только наблюдаемость.
+
+---
+
 v0.1.30
 12.10.2026
 ================
