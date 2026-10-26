@@ -22,6 +22,11 @@ public:
     ~NetworkManager();
     void startAccept();
     void startIOEventLoop();
+    /// Ordered-shutdown hook (S16a, mirrors game/chunk): close the acceptor,
+    /// stop the io_context and join its threads. After this returns no
+    /// handler can push new events, so the queue can be drained race-free.
+    /// The destructor repeats the same steps (belt and braces).
+    void stopIO();
     void sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString);
     /// Reclaim idle per-socket write queues (owner-expired only). Called
     /// periodically (LoginServer cleanup branch).

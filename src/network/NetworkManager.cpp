@@ -128,16 +128,23 @@ void NetworkManager::startIOEventLoop()
     }
 }
 
-NetworkManager::~NetworkManager()
+void
+NetworkManager::stopIO()
 {
-    log_->warn("Network Manager destructor is called...");
-    acceptor_.close();
+    boost::system::error_code ec;
+    acceptor_.close(ec);
     io_context_.stop();
     for (auto &thread : threadPool_)
     {
         if (thread.joinable())
             thread.join();
     }
+}
+
+NetworkManager::~NetworkManager()
+{
+    log_->warn("Network Manager destructor is called...");
+    stopIO();
     // ASan-found UAF fix (same class as game/chunk): SocketWriteQueue holds
     // a strand bound to io_context_'s service, but writeQueues_ is declared
     // BEFORE io_context_ — clear here (threads joined, io alive) so strands

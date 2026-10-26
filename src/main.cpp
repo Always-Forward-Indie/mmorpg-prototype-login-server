@@ -72,6 +72,12 @@ int main()
         logger.info("Shutting down gracefully...");
         loginServer.stop();
         eventQueueLoginServer.stop();
+        // S16a ordered teardown (same ASan UAF class as game/chunk):
+        // stopIO() first so no handler can push new events, then drain
+        // leftovers (queued events own client sockets) while io_context
+        // is still alive. Destructors then run on empties.
+        networkManager.stopIO();
+        eventQueueLoginServer.drain();
 
         return 0;
     }
