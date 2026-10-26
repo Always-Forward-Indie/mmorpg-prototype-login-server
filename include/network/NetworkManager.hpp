@@ -35,6 +35,8 @@ private:
     void startReadingFromClient(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket);
     void handleClientData(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::array<char, max_length> &dataBuffer, size_t bytes_transferred);
     void processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message);
+    // S14: length-prefixed extraction for v2 sockets.
+    void extractV2Messages(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, std::string accumulatedData);
     /// SocketReaper: single cleanup path for dead sockets (eof / aborted /
     /// other). Previously three copy-pasted erase+close blocks that could drift;
     /// all read-teardown now funnels here: drop partial buffer, release the
@@ -82,7 +84,7 @@ private:
     Logger &logger_;
     std::shared_ptr<spdlog::logger> log_;
     JSONParser jsonParser_;
-    std::mutex socketBufferMutex_;
+    mutable std::mutex socketBufferMutex_;
     std::unordered_map<boost::asio::ip::tcp::socket *, std::string> socketBuffers_;
     std::mutex activeSocketsMutex_;
     std::unordered_set<boost::asio::ip::tcp::socket *> activeSockets_;

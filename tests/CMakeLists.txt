@@ -9,6 +9,7 @@ if(GTest_FOUND)
         test_threadpool.cpp
         test_config.cpp
         test_protocol_limits.cpp
+        test_wire_framing.cpp
         test_jsonparser_position.cpp
         test_client_data.cpp
         test_query_registry.cpp

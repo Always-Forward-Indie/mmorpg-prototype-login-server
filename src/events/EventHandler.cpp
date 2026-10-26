@@ -1,5 +1,6 @@
 #include "events/EventHandler.hpp"
 #include "events/Event.hpp"
+#include "utils/ProtocolLimits.hpp"
 #include <spdlog/logger.h>
 
 EventHandler::EventHandler(NetworkManager &networkManager,
@@ -129,6 +130,8 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
             }
 
             // Add the message to the response
+            // S14d: v2-only — every peer speaks length-prefixed frames.
+            const int agreedFraming = protocol::kFramingV2;
             response = builder
                            .setHeader("message", "Authentication success for user!")
                            .setHeader("hash", currentClientData->hash)
@@ -136,6 +139,7 @@ void EventHandler::handleAuthentificateClientEvent(const Event &event, ClientDat
                            .setHeader("clientId", currentClientData->clientId)
                            .setHeader("role", std::to_string(currentClientData->role))
                            .setHeader("eventType", "authentificationClient")
+                           .setBody("framing", agreedFraming)
                            .setBody("", "")
                            .build();
             // Prepare a response message

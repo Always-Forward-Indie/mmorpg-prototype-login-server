@@ -20,6 +20,17 @@ inline constexpr std::size_t kMaxMessageBytes = 8 * 1024;
 /// an `ERR_OVERSIZE` response and the connection stays alive.
 inline constexpr std::size_t kMaxAccumulatedBytes = 64 * 1024;
 
+/// Protocol v2 (S14, chunk docs/api/14-framing-v2-protocol.md): length-prefixed
+/// frames `[u32 LE length][UTF-8 JSON]`, no `\n` delimiter.
+inline constexpr std::size_t kMaxFrameBytes = 4 * 1024 * 1024;
+
+/// v2: max buffered per connection (a legit frame can be up to 4MB and
+/// arrives in 8KB TCP chunks — the v1 cap would kill it mid-stream).
+inline constexpr std::size_t kMaxAccumulatedBytesV2 = kMaxFrameBytes + 64 * 1024;
+
+/// v2 framing version offered/selected in joinGameClient `body.framing`.
+inline constexpr int kFramingV2 = 2;
+
 /// Read chunk size for `async_read_some`. Larger than before to reduce
 /// syscalls; framing is still enforced per-message above.
 inline constexpr std::size_t kReadChunkBytes = 8 * 1024;

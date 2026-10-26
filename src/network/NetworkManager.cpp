@@ -1,5 +1,6 @@
 #include "network/NetworkManager.hpp"
 #include "utils/TimestampUtils.hpp"
+#include "utils/WireFraming.hpp"
 #include <spdlog/logger.h>
 #include <sstream>
 
@@ -151,8 +152,11 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
                                       const std::array<char, max_length> &dataBuffer,
                                       size_t bytes_transferred)
 {
-    // Per-connection accumulated buffer (thread-safe via mutex)
+    // Per-connection accumulated buffer (thread-safe via mutex).
+    // S14d: v2-only transport. The length IS the boundary; partial frames
+    // wait for more TCP chunks (a split 4-byte prefix included).
     std::string accumulatedData;
+    bool overCap = false;
     {
         std::lock_guard<std::mutex> lock(socketBufferMutex_);
         auto it = socketBuffers_.find(clientSocket.get());
@@ -161,37 +165,64 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
             accumulatedData = std::move(it->second);
             it->second.clear();
         }
+        if (accumulatedData.size() + bytes_transferred > protocol::kMaxAccumulatedBytesV2)
+        {
+            socketBuffers_.erase(clientSocket.get());
+            overCap = true;
+        }
+    }
+    if (overCap)
+    {
+        logger_.logError("Framing overflow, disconnecting client");
+        boost::system::error_code ign;
+        clientSocket->close(ign);
+        return;
     }
 
-    // Append new data to the accumulated buffer
     accumulatedData.append(dataBuffer.data(), bytes_transferred);
+    extractV2Messages(clientSocket, std::move(accumulatedData));
+}
 
-    // Check for the delimiter in the accumulated data
-    std::string delimiter = "\n"; // Your chosen delimiter
-    size_t delimiterPos;
-    while ((delimiterPos = accumulatedData.find(delimiter)) != std::string::npos)
-    { // Assuming '\n' is the delimiter
-        // Extract one message up to the delimiter
-        std::string message = accumulatedData.substr(0, delimiterPos);
-
-        // debug-level: per-packet payload (very noisy with bots/swarm).
-        log_->debug("Received data from Client: " + message);
-
-        // Process the message
-        processMessage(clientSocket, message);
-
-        // Erase processed message and delimiter from the buffer
-        accumulatedData.erase(0, delimiterPos + 1); // +1 to remove the delimiter as well
+void NetworkManager::extractV2Messages(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket,
+                                       std::string accumulatedData)
+{
+    // S14d: v2-only transport. Length-prefixed extraction; L > 4MB is a
+    // DoS attempt: explicit ERR_OVERSIZE + reap.
+    size_t processed = 0;
+    constexpr size_t MAX_MESSAGES_PER_READ = 10;
+    while (accumulatedData.size() >= 4 && processed < MAX_MESSAGES_PER_READ)
+    {
+        const auto *b = reinterpret_cast<const uint8_t *>(accumulatedData.data());
+        const std::uint32_t n = static_cast<std::uint32_t>(b[0]) |
+                                (static_cast<std::uint32_t>(b[1]) << 8) |
+                                (static_cast<std::uint32_t>(b[2]) << 16) |
+                                (static_cast<std::uint32_t>(b[3]) << 24);
+        if (n > protocol::kMaxFrameBytes)
+        {
+            logger_.logError("v2 frame too large, disconnecting client: " + std::to_string(n) + " bytes");
+            nlohmann::json err;
+            err["header"]["eventType"] = "framing";
+            err["header"]["message"] = protocol::kErrOversize;
+            err["body"] = nlohmann::json::object();
+            sendResponse(clientSocket, generateResponseMessage("error", err));
+            reapSocket(clientSocket);
+            return;
+        }
+        if (accumulatedData.size() < 4 + n)
+        {
+            break; // partial frame: wait for more TCP chunks
+        }
+        processMessage(clientSocket, accumulatedData.substr(4, n));
+        accumulatedData.erase(0, 4 + n);
+        ++processed;
     }
 
-    // Store any remaining partial message back into the per-socket buffer
     if (!accumulatedData.empty())
     {
-        // DoS guard: a client that never sends '\n' must not grow memory unboundedly.
-        if (accumulatedData.size() > protocol::kMaxAccumulatedBytes)
+        if (accumulatedData.size() > protocol::kMaxAccumulatedBytesV2)
         {
             logger_.logError("Framing overflow (" + std::to_string(accumulatedData.size()) +
-                             " bytes without newline), dropping buffer.");
+                             " bytes without complete frame), dropping buffer.");
             nlohmann::json err;
             err["header"]["eventType"] = "framing";
             err["header"]["message"] = protocol::kErrOversize;
@@ -206,27 +237,8 @@ void NetworkManager::handleClientData(std::shared_ptr<boost::asio::ip::tcp::sock
 
 void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &message)
 {
-    // Framing: 8KB matches proto/mmo_proto.py. Oversize gets an explicit
-    // ERR_OVERSIZE (previously silent drop => client hung until timeout).
-    if (message.length() > protocol::kMaxMessageBytes)
-    {
-        logger_.logError("processMessage: message too large (" + std::to_string(message.length()) +
-                         " bytes), max is " + std::to_string(protocol::kMaxMessageBytes) + ". Rejecting.");
-        nlohmann::json err;
-        // Best-effort eventType so the client can correlate the error.
-        std::string eventType = "unknown";
-        try {
-            auto probe = nlohmann::json::parse(message.substr(0, 512), nullptr, false);
-            if (!probe.is_discarded() && probe.contains("header") && probe["header"].is_object() &&
-                probe["header"].contains("eventType") && probe["header"]["eventType"].is_string())
-                eventType = probe["header"]["eventType"].get<std::string>();
-        } catch (...) {}
-        err["header"]["eventType"] = eventType;
-        err["header"]["message"] = protocol::kErrOversize;
-        err["body"] = nlohmann::json::object();
-        sendResponse(clientSocket, generateResponseMessage("error", err));
-        return;
-    }
+    // S14d: v2-only. No per-message size cap here (frames up to 4MB are
+    // legitimate; the DoS guard lives in the framing layer above).
 
     // Single parse: the wire bytes are parsed once here and the json is
     // threaded through the extractors below (was 6-7 parses/message).
@@ -428,6 +440,24 @@ void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> 
 {
     // CRITICAL-11 fix: responseString is a const-ref parameter; it may be destroyed before
     // async_write completes. Copy once into a shared_ptr to keep data alive until completion.
+
+    // S14d: v2-only. Every response is a length-prefixed frame.
+    // framingError() payloads have no trailing newline; strip one defensively.
+    {
+        std::string logical = responseString;
+        if (!logical.empty() && logical.back() == '\n')
+            logical.pop_back();
+        std::string framed = wirev2::packFramedMessage(logical);
+        if (framed.empty())
+        {
+            log_->error("v2 frame over {} bytes, dropping instead of sending whole",
+                protocol::kMaxFrameBytes);
+            return;
+        }
+        auto dataPtr = std::make_shared<const std::string>(std::move(framed));
+        enqueueWrite(std::move(clientSocket), std::move(dataPtr));
+        return;
+    }
     // Wire-contract guard (seam with the UE client): the client parses one
     // '\n'-terminated JSON object per line with an 8KB cap. Anything bigger
     // is dropped client-side, so flag it here at warn level with the event
