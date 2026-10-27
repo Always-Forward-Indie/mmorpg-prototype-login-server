@@ -130,6 +130,21 @@ void LoginServer::mainEventLoop()
                 {
                     log_->warn("Write-queue GC failed: " + std::string(ex.what()));
                 }
+                // S17a: version-attempt distribution (accepted AND rejected).
+                // Silent when nothing attempted yet (fresh boot, no traffic).
+                // NOTE: root logger, not gameloop: LOG_LEVEL_GAMELOOP=warn
+                // would swallow this, but the distribution is operator
+                // telemetry — it must be visible at default levels.
+                try
+                {
+                    const std::string vs = networkManager_.versionStatsSnapshot();
+                    if (!vs.empty())
+                        logger_.log("clientVersions: " + vs);
+                }
+                catch (const std::exception &ex)
+                {
+                    log_->warn("versionStats snapshot failed: " + std::string(ex.what()));
+                }
                 // Pool health: silent when clean, warn on anomalies so DB
                 // pressure (timeouts) and drops (reconnects) get noticed.
                 if (pool_.acquireTimeouts() > 0 || pool_.reconnects() > 0)

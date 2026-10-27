@@ -13,6 +13,7 @@
 #include "utils/Config.hpp"
 #include "utils/JSONParser.hpp"
 #include "utils/ProtocolLimits.hpp"
+#include "utils/VersionStats.hpp"
 #include "events/EventQueue.hpp"
 
 class NetworkManager
@@ -33,6 +34,9 @@ public:
     void gcWriteQueues();
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message);
     std::string generateResponseMessage(const std::string &status, const nlohmann::json &message, const TimestampStruct &timestamps);
+    /// S17a: version-attempt distribution snapshot ("" when nothing seen).
+    /// Thread-safe; called from the LoginServer periodic branch.
+    std::string versionStatsSnapshot() const;
 
 private:
     static constexpr size_t max_length = protocol::kMaxMessageBytes; // 8KB, mirrors proto/mmo_proto.py
@@ -93,4 +97,7 @@ private:
     std::unordered_map<boost::asio::ip::tcp::socket *, std::string> socketBuffers_;
     std::mutex activeSocketsMutex_;
     std::unordered_set<boost::asio::ip::tcp::socket *> activeSockets_;
+    // S17a: version-attempt distribution ("who knocks"). Recorded in
+    // checkClientVersion for accepted AND rejected attempts.
+    VersionStats versionStats_;
 };

@@ -13,6 +13,7 @@ if(GTest_FOUND)
         test_jsonparser_position.cpp
         test_client_data.cpp
         test_query_registry.cpp
+        test_version_stats.cpp
         ../src/services/AccountManager.cpp
         ../src/data/ClientData.cpp
         ../src/events/Event.cpp

@@ -400,6 +400,8 @@ void NetworkManager::processMessage(std::shared_ptr<boost::asio::ip::tcp::socket
 bool NetworkManager::checkClientVersion(const std::string &clientVersion, const std::string &eventType,
                                          std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket)
 {
+    // S17a: count every attempt (accepted AND rejected) before validating.
+    versionStats_.record(clientVersion);
     const std::string &minVer = std::get<1>(configs_).minClientVersion;
     const std::string &maxVer = std::get<1>(configs_).maxClientVersion;
 
@@ -441,6 +443,11 @@ bool NetworkManager::checkClientVersion(const std::string &clientVersion, const 
     }
 
     return true;
+}
+
+std::string NetworkManager::versionStatsSnapshot() const
+{
+    return versionStats_.snapshot();
 }
 
 void NetworkManager::sendResponse(std::shared_ptr<boost::asio::ip::tcp::socket> clientSocket, const std::string &responseString)
