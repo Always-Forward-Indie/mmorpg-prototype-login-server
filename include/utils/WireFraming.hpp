@@ -7,41 +7,17 @@
 #include "utils/ProtocolLimits.hpp"
 
 /// Protocol v2 wire framing, login-server twin (S14).
-/// Mirrors chunk `wire::` framing helpers 1-в-1 (separate repo, no shared
+/// Mirrors chunk `wire::` framing helpers (separate repo, no shared
 /// include): `[u32 LE length][UTF-8 JSON]`, 4MB cap. See chunk-server
 /// docs/api/14-framing-v2-protocol.md for the full contract.
+///
+/// NOTE (cleanup): unlike game/chunk, login never had dual-read — the
+/// sniff helper and FramingMode enum were removed. Login is v2-only
+/// since S14d: a v1 line fails the length-prefix parse and is dropped
+/// by the frame layer (ERR_OVERSIZE/ERR_MALFORMED), never sniffed.
+/// Game keeps its own sniff for chunk server-to-server links.
 namespace wirev2
 {
-
-/// Sniffed transport mode of one connection. Decided once from the first
-/// bytes; never changes mid-session.
-enum class FramingMode
-{
-    NeedMore, ///< fewer than 5 bytes buffered — wait for more
-    V1,       ///< legacy '\n'-delimited JSON line
-    V2        ///< length-prefixed frame
-};
-
-/// Classify a fresh connection from its first buffered bytes.
-/// Needs >= 5 bytes (u32 length + first body byte '{'). A v1 line always
-/// starts with '{', whose 4-byte LE value exceeds any sane cap, so the two
-/// cases cannot collide.
-inline FramingMode sniffFraming(const uint8_t *data, std::size_t len)
-{
-    if (data == nullptr || len < 5)
-    {
-        return FramingMode::NeedMore;
-    }
-    const std::uint32_t claimed = static_cast<std::uint32_t>(data[0]) |
-                                  (static_cast<std::uint32_t>(data[1]) << 8) |
-                                  (static_cast<std::uint32_t>(data[2]) << 16) |
-                                  (static_cast<std::uint32_t>(data[3]) << 24);
-    if (claimed <= protocol::kMaxFrameBytes && data[4] == '{')
-    {
-        return FramingMode::V2;
-    }
-    return FramingMode::V1;
-}
 
 /// Pack one logical message for a v2 socket: [u32 LE length][bytes].
 /// No trailing delimiter. Empty on over-cap input (caller errors).
