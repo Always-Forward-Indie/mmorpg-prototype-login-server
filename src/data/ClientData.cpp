@@ -125,8 +125,8 @@ std::vector<int> ClientData::sweepExpiredSessions(long long nowMs, long long ttl
     std::lock_guard<std::mutex> lock(clientDataMutex_);
     for (auto it = clientDataMap_.begin(); it != clientDataMap_.end();)
     {
-        // 0 = legacy entry without timestamp: keep until explicit disconnect.
-        if (it->second.lastSeenMs != 0 && (nowMs - it->second.lastSeenMs) > ttlMs)
+        // All stored entries are timestamped on write; age alone decides.
+        if ((nowMs - it->second.lastSeenMs) > ttlMs)
         {
             removed.push_back(it->first);
             it = clientDataMap_.erase(it);
