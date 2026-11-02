@@ -198,6 +198,10 @@ int CharacterManager::createCharacter(pqxx::connection &conn, int accountId,
         if (classId > 0)
             transaction.exec_prepared("init_character_starter_items", newCharacterId, classId);
 
+        // --- Grant starter wallet (110_currency_wallet) -----------------------
+        if (classId > 0)
+            transaction.exec_prepared("init_character_starter_currencies", newCharacterId, classId);
+
         transaction.commit();
 
         log_->info("createCharacter: created id=" + std::to_string(newCharacterId) + " name=" + characterName + " class=" + characterClass);

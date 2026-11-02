@@ -57,6 +57,10 @@ const QueryDef kQueries[] = {
         // Params: $1=character_id, $2=class_id
     {"init_character_starter_items",
      R"QDEF(INSERT INTO player_inventory (character_id, item_id, quantity, slot_index, durability_current) SELECT $1::bigint, csi.item_id, csi.quantity, csi.slot_index,   COALESCE(csi.durability_current, i.durability_max) FROM class_starter_items csi JOIN items i ON i.id = csi.item_id WHERE csi.class_id = $2::int;)QDEF"},
+        // init_character_starter_currencies — wallet grants (110_currency_wallet, gold is ledger not item)
+        // Params: $1=character_id, $2=class_id
+    {"init_character_starter_currencies",
+     R"QDEF(INSERT INTO character_currencies (character_id, currency_id, amount) SELECT $1::bigint, csc.currency_id, csc.amount FROM class_starter_currencies csc WHERE csc.class_id = $2::int ON CONFLICT (character_id, currency_id) DO UPDATE SET amount = character_currencies.amount + EXCLUDED.amount;)QDEF"},
         // check_character_name_exists — uniqueness check (case-insensitive), excludes soft-deleted
     {"check_character_name_exists",
      R"QDEF(SELECT 1 FROM characters WHERE lower(name) = lower($1) AND deleted_at IS NULL LIMIT 1;)QDEF"},

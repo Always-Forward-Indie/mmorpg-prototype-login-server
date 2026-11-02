@@ -43,6 +43,7 @@ PLAYER_TABLES=(
     character_permanent_modifiers
     player_inventory player_quest player_active_effect
     player_flag player_skill_cooldown
+    character_currencies
     currency_transactions
     game_analytics gm_action_log
 )
