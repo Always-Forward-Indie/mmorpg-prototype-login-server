@@ -320,6 +320,26 @@ ALTER TABLE public.character_class ALTER COLUMN id ADD GENERATED ALWAYS AS IDENT
 
 
 --
+-- Name: character_currencies; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.character_currencies (
+    character_id bigint NOT NULL,
+    currency_id integer NOT NULL,
+    amount bigint DEFAULT 0 NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT character_currencies_amount_check CHECK ((amount >= 0))
+);
+
+
+--
+-- Name: TABLE character_currencies; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.character_currencies IS 'Кошелёк персонажа: одна строка на валюту. Единственный источник баланса.';
+
+
+--
 -- Name: character_current_state; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -984,7 +1004,7 @@ COMMENT ON COLUMN public.class_skill_tree.skill_point_cost IS 'Skill points cons
 -- Name: COLUMN class_skill_tree.gold_cost; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.class_skill_tree.gold_cost IS 'Gold (gold_coin quantity) required to learn this skill. 0 = no gold cost.';
+COMMENT ON COLUMN public.class_skill_tree.gold_cost IS 'Gold (wallet balance) required to learn this skill. 0 = no gold cost.';
 
 
 --
@@ -1096,6 +1116,18 @@ CREATE SEQUENCE public.class_spawn_zones_id_seq
 --
 
 ALTER SEQUENCE public.class_spawn_zones_id_seq OWNED BY public.class_spawn_zones.id;
+
+
+--
+-- Name: class_starter_currencies; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.class_starter_currencies (
+    class_id integer NOT NULL,
+    currency_id integer NOT NULL,
+    amount bigint DEFAULT 0 NOT NULL,
+    CONSTRAINT class_starter_currencies_amount_check CHECK ((amount >= 0))
+);
 
 
 --
@@ -1231,6 +1263,48 @@ COMMENT ON COLUMN public.class_stat_formula.exponent IS 'Степень крив
 
 
 --
+-- Name: currencies; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.currencies (
+    id integer NOT NULL,
+    slug text NOT NULL,
+    name text NOT NULL,
+    decimals integer DEFAULT 0 NOT NULL,
+    max_balance bigint DEFAULT 999999999 NOT NULL,
+    tradable_in_trade boolean DEFAULT true NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE currencies; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.currencies IS 'Каталог валют (кошелёк). Балансы — в character_currencies, не в player_inventory.';
+
+
+--
+-- Name: currencies_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.currencies_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: currencies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.currencies_id_seq OWNED BY public.currencies.id;
+
+
+--
 -- Name: currency_transactions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1240,7 +1314,9 @@ CREATE TABLE public.currency_transactions (
     amount bigint NOT NULL,
     reason_type character varying(50) NOT NULL,
     source_id bigint,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    currency_id integer,
+    fact_key text
 );
 
 
@@ -2820,6 +2896,50 @@ COMMENT ON COLUMN public.mob.patrol_radius IS 'Max distance mob can wander from 
 --
 
 COMMENT ON COLUMN public.mob.rare_of_mob_id IS 'Rare variant of another template: on respawn of the common family mob, roll rare_spawn_chance (percent) to spawn this template instead.';
+
+
+--
+-- Name: mob_currency_loot; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.mob_currency_loot (
+    id integer NOT NULL,
+    mob_id integer NOT NULL,
+    currency_id integer NOT NULL,
+    drop_chance numeric(5,2) DEFAULT 0.00 NOT NULL,
+    min_quantity smallint DEFAULT 1 NOT NULL,
+    max_quantity smallint DEFAULT 1 NOT NULL,
+    CONSTRAINT mob_currency_loot_check CHECK ((max_quantity >= min_quantity)),
+    CONSTRAINT mob_currency_loot_drop_chance_check CHECK (((drop_chance >= (0)::numeric) AND (drop_chance <= (1)::numeric))),
+    CONSTRAINT mob_currency_loot_min_quantity_check CHECK ((min_quantity >= 1))
+);
+
+
+--
+-- Name: TABLE mob_currency_loot; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.mob_currency_loot IS 'Валютный лут: автокредит в кошелёк при убийстве, без подбора с земли.';
+
+
+--
+-- Name: mob_currency_loot_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.mob_currency_loot_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: mob_currency_loot_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.mob_currency_loot_id_seq OWNED BY public.mob_currency_loot.id;
 
 
 --
@@ -6207,6 +6327,13 @@ ALTER TABLE ONLY public.class_starter_items ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
+-- Name: currencies id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currencies ALTER COLUMN id SET DEFAULT nextval('public.currencies_id_seq'::regclass);
+
+
+--
 -- Name: currency_transactions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -6281,6 +6408,13 @@ ALTER TABLE ONLY public.item_sets ALTER COLUMN id SET DEFAULT nextval('public.it
 --
 
 ALTER TABLE ONLY public.item_use_effects ALTER COLUMN id SET DEFAULT nextval('public.item_use_effects_id_seq'::regclass);
+
+
+--
+-- Name: mob_currency_loot id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob_currency_loot ALTER COLUMN id SET DEFAULT nextval('public.mob_currency_loot_id_seq'::regclass);
 
 
 --
@@ -6559,6 +6693,16 @@ COPY public.class_spawn_zones (id, class_id, zone_id, min_x, max_x, min_y, max_y
 
 
 --
+-- Data for Name: class_starter_currencies; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.class_starter_currencies (class_id, currency_id, amount) FROM stdin;
+1	1	20
+2	1	20
+\.
+
+
+--
 -- Data for Name: class_starter_items; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -6631,6 +6775,15 @@ COPY public.class_stat_formula (class_id, attribute_id, base_value, multiplier, 
 1	37	0.00	0.0000	1.0000
 2	36	0.00	0.0000	1.0000
 2	37	0.00	0.0000	1.0000
+\.
+
+
+--
+-- Data for Name: currencies; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.currencies (id, slug, name, decimals, max_balance, tradable_in_trade, created_at) FROM stdin;
+1	gold	Gold	0	999999999	t	2026-11-02 12:02:19.411433+00
 \.
 
 
@@ -6960,7 +7113,6 @@ combat.max_resistance_cap	75	float	Maximum resistance % a target can have for an
 combat.dot_min_tick_ms	500	float	Minimum allowed tick interval for DoT/HoT effects (ms)	2026-03-05 18:29:09.000283+00
 combat.dot_max_ticks	20	float	Maximum number of ticks a single DoT/HoT effect can have	2026-03-05 18:29:09.000283+00
 combat.aoe_target_cap	10	float	Maximum number of targets hit by a single AoE skill cast	2026-03-05 18:49:40.6975+00
-economy.trade_range	500.0	float	Max distance (world units; 100 units = 1 m, so 500 = 5 m) between two players for P2P trade to start.	2026-10-20 10:40:09.877204+00
 durability.death_penalty_pct	0.05	float	Fraction of durabilityMax lost on death for each equipped durable item (0–1).	2026-03-11 12:07:55.916948+00
 durability.weapon_loss_per_hit	1	int	Durability points weapon loses per successful attack.	2026-03-11 12:07:55.916948+00
 durability.armor_loss_per_hit	1	int	Durability points each armour piece loses when player receives a hit.	2026-03-11 12:07:55.916948+00
@@ -6993,6 +7145,7 @@ bestiary.tier1_kills	1	int	Kills to unlock tier 1: name, type, HP range, biome	2
 bestiary.tier2_kills	5	int	Kills to unlock tier 2: weaknesses and resistances	2026-03-15 07:40:02.83585+00
 bestiary.tier3_kills	15	int	Kills to unlock tier 3: common loot table	2026-03-15 07:40:02.83585+00
 economy.vendor_buy_markup_pct	0.05	float	Global markup on items bought FROM vendor (0–1). 0 = base vendorPriceBuy.	2026-10-02 14:44:23.845719+00
+economy.trade_range	500.0	float	Max distance (world units; 100 units = 1 m, so 500 = 5 m) between two players for P2P trade to start.	2026-10-20 10:40:09.877204+00
 bestiary.tier4_kills	30	int	Kills to unlock tier 4: uncommon loot table	2026-03-15 07:40:02.83585+00
 bestiary.tier5_kills	75	int	Kills to unlock tier 5: rare loot table	2026-03-15 07:40:02.83585+00
 bestiary.tier6_kills	150	int	Kills to unlock tier 6: very rare loot (approximate rate shown)	2026-03-15 07:40:02.83585+00
@@ -7199,7 +7352,6 @@ COPY public.item_use_effects (id, item_id, effect_slug, attribute_slug, value, i
 
 COPY public.items (id, name, slug, description, is_quest_item, item_type, weight, rarity_id, stack_max, is_container, is_durable, is_tradable, durability_max, vendor_price_buy, vendor_price_sell, equip_slot, level_requirement, is_equippable, is_harvest, is_usable, is_two_handed, mastery_slug) FROM stdin;
 2	Старый дубовый щит	old_oak_shield	Старый дубовый щит, повидавший немало битв, но всё ещё крепкий.	f	2	3	2	64	f	t	t	120	120	36	7	3	t	f	f	f	\N
-16	Gold Coin	gold_coin	Universal currency of the realm. Used as payment for goods and services.	f	8	0.01	1	9999999	f	f	t	100	1	1	\N	0	f	f	f	f	\N
 18	Tome of Shield Bash	tome_shield_bash	A worn training manual describing the technique of Shield Bash.	f	10	0.3	2	1	f	f	t	100	500	150	\N	5	f	f	t	f	\N
 20	Tome of Iron Skin	tome_iron_skin	Teachings of hardening the body through relentless training.	f	10	0.3	2	1	f	f	t	100	400	120	\N	5	f	f	t	f	\N
 21	Tome of Constitution Mastery	tome_constitution_mastery	A guide to unlocking the body's true enduring potential.	f	10	0.3	2	1	f	f	t	100	800	240	\N	8	f	f	t	f	\N
@@ -7306,6 +7458,16 @@ COPY public.mob (id, name, race_id, level, spawn_health, spawn_mana, is_aggressi
 
 
 --
+-- Data for Name: mob_currency_loot; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.mob_currency_loot (id, mob_id, currency_id, drop_chance, min_quantity, max_quantity) FROM stdin;
+1	5	1	0.20	1	2
+2	10	1	1.00	2	5
+\.
+
+
+--
 -- Data for Name: mob_loot_info; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -7330,7 +7492,6 @@ COPY public.mob_loot_info (id, mob_id, item_id, drop_chance, is_harvest_only, mi
 57	5	71	0.10	f	1	1	common
 58	5	66	0.12	f	1	1	common
 59	5	64	0.04	f	1	1	rare
-60	5	16	0.20	f	1	2	common
 61	5	63	0.60	t	1	1	common
 62	6	70	0.12	f	1	1	common
 63	6	68	0.07	f	1	1	common
@@ -7372,7 +7533,6 @@ COPY public.mob_loot_info (id, mob_id, item_id, drop_chance, is_harvest_only, mi
 99	9	58	0.60	t	1	2	common
 100	9	59	0.40	t	1	2	common
 101	9	75	0.50	t	1	2	common
-102	10	16	1.00	f	2	5	common
 103	10	73	0.22	f	1	1	uncommon
 104	10	74	0.14	f	1	1	rare
 105	10	65	0.40	t	1	1	uncommon
@@ -8269,7 +8429,7 @@ COPY public.target_type (id, slug) FROM stdin;
 COPY public.timed_champion_templates (id, slug, zone_id, mob_template_id, interval_hours, window_minutes, next_spawn_at, last_killed_at, announcement_key) FROM stdin;
 4	awakened_golem	6	12	6	45	1790955867	\N	champion.awakened_golem
 3	ancient_bear	7	11	4	30	1790955867	\N	champion.ancient_bear
-9001	dev_timed_fox	9001	4	1	5	1791759498	2026-10-11 19:47:18.584396+00	champion.dev_timed_fox
+9001	dev_timed_fox	9001	4	1	5	1793288995	2026-10-29 14:49:55.527414+00	champion.dev_timed_fox
 \.
 
 
@@ -8435,35 +8595,35 @@ SELECT pg_catalog.setval('public.character_class_id_seq', 2, true);
 -- Name: character_emotes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_emotes_id_seq', 5089, true);
+SELECT pg_catalog.setval('public.character_emotes_id_seq', 7155, true);
 
 
 --
 -- Name: character_equipment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_equipment_id_seq', 99, true);
+SELECT pg_catalog.setval('public.character_equipment_id_seq', 144, true);
 
 
 --
 -- Name: character_position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_position_id_seq', 603, true);
+SELECT pg_catalog.setval('public.character_position_id_seq', 827, true);
 
 
 --
 -- Name: character_skills_id_seq1; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.character_skills_id_seq1', 655, true);
+SELECT pg_catalog.setval('public.character_skills_id_seq1', 887, true);
 
 
 --
 -- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.characters_id_seq', 603, true);
+SELECT pg_catalog.setval('public.characters_id_seq', 827, true);
 
 
 --
@@ -8488,10 +8648,17 @@ SELECT pg_catalog.setval('public.class_starter_items_id_seq', 2, true);
 
 
 --
+-- Name: currencies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.currencies_id_seq', 1, true);
+
+
+--
 -- Name: currency_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.currency_transactions_id_seq', 170, true);
+SELECT pg_catalog.setval('public.currency_transactions_id_seq', 318, true);
 
 
 --
@@ -8540,14 +8707,14 @@ SELECT pg_catalog.setval('public.factions_id_seq', 5, true);
 -- Name: game_analytics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.game_analytics_id_seq', 9143, true);
+SELECT pg_catalog.setval('public.game_analytics_id_seq', 12558, true);
 
 
 --
 -- Name: gm_action_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.gm_action_log_id_seq', 4052, true);
+SELECT pg_catalog.setval('public.gm_action_log_id_seq', 7573, true);
 
 
 --
@@ -8590,6 +8757,13 @@ SELECT pg_catalog.setval('public.item_use_effects_id_seq', 17, true);
 --
 
 SELECT pg_catalog.setval('public.items_id_seq', 77, true);
+
+
+--
+-- Name: mob_currency_loot_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.mob_currency_loot_id_seq', 2, true);
 
 
 --
@@ -8694,14 +8868,14 @@ SELECT pg_catalog.setval('public.passive_skill_modifiers_id_seq', 5, true);
 -- Name: player_active_effect_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_active_effect_id_seq', 9050, true);
+SELECT pg_catalog.setval('public.player_active_effect_id_seq', 11954, true);
 
 
 --
 -- Name: player_inventory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.player_inventory_id_seq', 351, true);
+SELECT pg_catalog.setval('public.player_inventory_id_seq', 765, true);
 
 
 --
@@ -8862,21 +9036,21 @@ SELECT pg_catalog.setval('public.title_definitions_id_seq', 12, true);
 -- Name: user_bans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_bans_id_seq', 9, true);
+SELECT pg_catalog.setval('public.user_bans_id_seq', 15, true);
 
 
 --
 -- Name: user_sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.user_sessions_id_seq', 8890, true);
+SELECT pg_catalog.setval('public.user_sessions_id_seq', 10968, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 4199, true);
+SELECT pg_catalog.setval('public.users_id_seq', 4407, true);
 
 
 --
@@ -8944,6 +9118,14 @@ ALTER TABLE ONLY public.character_bestiary
 
 ALTER TABLE ONLY public.character_class
     ADD CONSTRAINT character_class_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: character_currencies character_currencies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_currencies
+    ADD CONSTRAINT character_currencies_pkey PRIMARY KEY (character_id, currency_id);
 
 
 --
@@ -9067,6 +9249,14 @@ ALTER TABLE ONLY public.class_spawn_zones
 
 
 --
+-- Name: class_starter_currencies class_starter_currencies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.class_starter_currencies
+    ADD CONSTRAINT class_starter_currencies_pkey PRIMARY KEY (class_id, currency_id);
+
+
+--
 -- Name: class_starter_items class_starter_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -9080,6 +9270,30 @@ ALTER TABLE ONLY public.class_starter_items
 
 ALTER TABLE ONLY public.class_stat_formula
     ADD CONSTRAINT class_stat_formula_pkey PRIMARY KEY (class_id, attribute_id);
+
+
+--
+-- Name: currencies currencies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currencies
+    ADD CONSTRAINT currencies_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: currencies currencies_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currencies
+    ADD CONSTRAINT currencies_slug_key UNIQUE (slug);
+
+
+--
+-- Name: currency_transactions currency_transactions_fact_key_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currency_transactions
+    ADD CONSTRAINT currency_transactions_fact_key_key UNIQUE (fact_key);
 
 
 --
@@ -9288,6 +9502,22 @@ ALTER TABLE ONLY public.items
 
 ALTER TABLE ONLY public.mastery_definitions
     ADD CONSTRAINT mastery_definitions_pkey PRIMARY KEY (slug);
+
+
+--
+-- Name: mob_currency_loot mob_currency_loot_mob_id_currency_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob_currency_loot
+    ADD CONSTRAINT mob_currency_loot_mob_id_currency_id_key UNIQUE (mob_id, currency_id);
+
+
+--
+-- Name: mob_currency_loot mob_currency_loot_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob_currency_loot
+    ADD CONSTRAINT mob_currency_loot_pkey PRIMARY KEY (id);
 
 
 --
@@ -10815,6 +11045,22 @@ ALTER TABLE ONLY public.character_bestiary
 
 
 --
+-- Name: character_currencies character_currencies_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_currencies
+    ADD CONSTRAINT character_currencies_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: character_currencies character_currencies_currency_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.character_currencies
+    ADD CONSTRAINT character_currencies_currency_id_fkey FOREIGN KEY (currency_id) REFERENCES public.currencies(id) ON DELETE CASCADE;
+
+
+--
 -- Name: character_emotes character_emotes_character_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11039,6 +11285,14 @@ ALTER TABLE ONLY public.class_spawn_zones
 
 
 --
+-- Name: class_starter_currencies class_starter_currencies_currency_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.class_starter_currencies
+    ADD CONSTRAINT class_starter_currencies_currency_id_fkey FOREIGN KEY (currency_id) REFERENCES public.currencies(id) ON DELETE CASCADE;
+
+
+--
 -- Name: class_starter_items class_starter_items_class_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11076,6 +11330,14 @@ ALTER TABLE ONLY public.class_stat_formula
 
 ALTER TABLE ONLY public.currency_transactions
     ADD CONSTRAINT currency_transactions_character_id_fkey FOREIGN KEY (character_id) REFERENCES public.characters(id) ON DELETE CASCADE;
+
+
+--
+-- Name: currency_transactions currency_transactions_currency_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.currency_transactions
+    ADD CONSTRAINT currency_transactions_currency_id_fkey FOREIGN KEY (currency_id) REFERENCES public.currencies(id) ON DELETE SET NULL;
 
 
 --
@@ -11260,6 +11522,14 @@ ALTER TABLE ONLY public.items
 
 ALTER TABLE ONLY public.items
     ADD CONSTRAINT items_rarity_id_fkey FOREIGN KEY (rarity_id) REFERENCES public.items_rarity(id);
+
+
+--
+-- Name: mob_currency_loot mob_currency_loot_currency_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mob_currency_loot
+    ADD CONSTRAINT mob_currency_loot_currency_id_fkey FOREIGN KEY (currency_id) REFERENCES public.currencies(id) ON DELETE CASCADE;
 
 
 --
